@@ -42,7 +42,7 @@ export class LoginComponent {
 
   loginFailed = false
 
-  credential = new FormGroup({
+  credential:FormGroup = new FormGroup({
     username: new FormControl(''),
     password: new FormControl(''),
   })
