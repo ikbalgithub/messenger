@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { State,User,Credential } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 
@@ -41,6 +42,7 @@ export class LoginComponent {
   request = inject(RequestService)
 
   loginFailed = false
+  errorMessage = 'something went wrong. try again later'
 
   credential:FormGroup = new FormGroup({
     username: new FormControl(''),
@@ -50,11 +52,19 @@ export class LoginComponent {
   loginState = this.request.createInitialState<User[]>()
 
   loginRequest = this.request.post<Credential,User[]>({
-    failedCb:e => console.log(e.message),
+    failedCb:e => this.onLoginFailed(e),
     cb:this.onLoggedIn.bind(this),
     state:this.loginState,
     path:'user/login'
   })
+
+  onLoginFailed(e:HttpErrorResponse){
+    this.loginFailed = true
+
+    setTimeout(() => {
+      this.loginFailed = false
+    },2000)
+  }
 
   onLoggedIn([result]:User[]){
     if(result){

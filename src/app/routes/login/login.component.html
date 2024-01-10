@@ -1,6 +1,6 @@
 <div class="fullscreen bg-slate-200 flex flex-col gap-3 center">
-	<div [@loginFailed]="loginFailed ? 'fadeIn' : 'fadeOut'" class="hidden opacity-0 bg-red rounded p-2 bg-red-900 w-3/5 sm:w-2/5 lg:w-1/5">
-     <p class="text-white text-center p-3">User not found</p>
+	<div *ngIf="loginFailed" class="bg-red rounded p-2 bg-red-900 w-3/5 sm:w-2/5 lg:w-1/5">
+     <p class="text-white text-center p-3">{{errorMessage}}</p>
   </div>
 
   <div class="bg-white px-8 py-8 rounded-md flex flex-col gap-3 shadow-xl w-3/5 sm:w-2/5 lg:w-1/5">
