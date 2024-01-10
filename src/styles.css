@@ -1,0 +1,18 @@
+/* You can add global styles to this file, and also import other style files */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .fullscreen {
+    @apply absolute;
+    @apply h-screen;
+    @apply w-full;
+  }
+
+  .center{
+    @apply justify-center;
+    @apply items-center;
+  }
+}
