@@ -1,12 +1,11 @@
 import { Store } from '@ngrx/store'
 import { Router } from '@angular/router'
 import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Component,inject,WritableSignal,signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component,inject } from '@angular/core';
 import { login } from '../../ngrx/actions/auth.actions'
 import { set } from '../../ngrx/actions/user.actions' 
 import { CommonModule } from '@angular/common';
-import { State,User,Profile,Credential,Request } from '../../../index.d'
+import { State,User,Credential } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
@@ -43,7 +42,7 @@ export class LoginComponent {
 
   loginFailed = false
 
-  credential:FormGroup = new FormGroup({
+  credential = new FormGroup({
     username: new FormControl(''),
     password: new FormControl(''),
   })
@@ -70,9 +69,5 @@ export class LoginComponent {
         this.loginFailed = false
       },2000)
     }
-  }
-
-  toHome(){
-    this.router.navigate([''])
   }
 }

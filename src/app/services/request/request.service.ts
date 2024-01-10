@@ -1,7 +1,7 @@
 import { throwError } from 'rxjs'
 import { timeoutWith } from 'rxjs/operators'
 import { Request } from '../../../index.d'
-import { Injectable,WritableSignal,signal,inject } from '@angular/core';
+import { Injectable,signal,inject } from '@angular/core';
 import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({

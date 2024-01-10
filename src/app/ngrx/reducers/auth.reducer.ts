@@ -2,7 +2,7 @@ import { createReducer,on } from '@ngrx/store';
 import { Auth,State } from '../../../index.d'
 import { login,logout } from '../actions/auth.actions';
 
-var state:State = JSON.parse(localStorage.getItem("ngrx") as string)
+var state = JSON.parse(localStorage.getItem("ngrx") as string)
 
 
 export const authReducer = createReducer<Auth>(
