@@ -1,17 +1,13 @@
 import { Store } from '@ngrx/store'
 import { Router } from '@angular/router'
 import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Component,inject } from '@angular/core';
-import { login } from '../../ngrx/actions/auth.actions'
-import { set } from '../../ngrx/actions/user.actions' 
+import { Component,inject,computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { State,User,Credential } from '../../../index.d'
+import { State,Authenticated,Credential } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
+import { AuthService } from '../../services/auth/auth.service'
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { HttpErrorResponse } from '@angular/common/http';
-
-
-
 
 @Component({
   selector: 'app-login',
@@ -23,14 +19,14 @@ import { HttpErrorResponse } from '@angular/common/http';
   animations: [
     trigger('loginFailed', [
       state('fadeIn', style({
-        display:'block',
+        position:'relative',
         opacity:1
       })),
-      state('fadeOut', style({
-        display:'none',
+      state('fadeOut',style({
+        position:'absolute',
         opacity:0
       })),
-      transition('fadeIn <=> fadeOut', [
+      transition('fadeOut <=> fadeIn', [
         animate('2s')
       ]),
     ])
@@ -40,44 +36,57 @@ export class LoginComponent {
   router = inject(Router)
   store = inject(Store<State>)
   request = inject(RequestService)
-
-  loginFailed = false
-  errorMessage = 'something went wrong. try again later'
+  authSvc = inject(AuthService)
 
   credential:FormGroup = new FormGroup({
     username: new FormControl(''),
     password: new FormControl(''),
   })
 
-  loginState = this.request.createInitialState<User[]>()
+  loginState = this.request.createInitialState<Authenticated[]>()
 
-  loginRequest = this.request.post<Credential,User[]>({
+  loginRequest = this.request.post<Credential,Authenticated[]>({
     failedCb:e => this.onLoginFailed(e),
-    cb:this.onLoggedIn.bind(this),
+    cb:this.onLoginSuccess.bind(this),
     state:this.loginState,
     path:'user/login'
   })
 
+  /*
+   * set boolean not found to true if user not found
+   */
+
+  notFound = computed<boolean>(() => {
+    if(this.loginState().result && (this.loginState().result as Authenticated[]).length < 1){
+      return true
+    }
+    else{
+      return false
+    }
+  })
+
+  /*
+   * reset login state to make error message dissapear
+   */
+
   onLoginFailed(e:HttpErrorResponse){
-    this.loginFailed = true
+    console.log(e)
+
 
     setTimeout(() => {
-      this.loginFailed = false
+      this.loginState.update(current => {
+        return {
+          running:false
+        }
+     })
     },2000)
   }
 
-  onLoggedIn([result]:User[]){
-    if(result){
-      this.store.dispatch(set(result))
-      this.store.dispatch(login())
-      this.router.navigate([''])
-    }
-    else{
-      this.loginFailed = true
+  /*
+   * when usename and password is valid
+   */
 
-      setTimeout(() => {
-        this.loginFailed = false
-      },2000)
-    }
+  onLoginSuccess([result]:Authenticated[]){
+    if(result) this.authSvc.next(result)
   }
 }

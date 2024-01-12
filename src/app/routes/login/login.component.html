@@ -1,20 +1,23 @@
 <div class="fullscreen bg-slate-200 flex flex-col gap-3 center">
-	<div *ngIf="loginFailed" class="bg-red rounded p-2 bg-red-900 w-3/5 sm:w-2/5 lg:w-1/5">
-     <p class="text-white text-center p-3">{{errorMessage}}</p>
+	<div [@loginFailed]="loginState().error || notFound()  ? 'fadeIn' : 'fadeOut'"  class="bg-red rounded p-2 bg-red-900 w-3/5 sm:w-2/5 lg:w-1/4">
+     <p class="text-white text-center p-3 font-medium">
+       something went wrong or user not found
+     </p>
   </div>
 
-  <div class="bg-white px-8 py-8 rounded-md flex flex-col gap-3 shadow-xl w-3/5 sm:w-2/5 lg:w-1/5">
+  <div class="z-10 bg-white px-4 py-8 rounded-md flex flex-col gap-3 shadow-xl w-3/5 sm:w-2/5 lg:w-1/4">
     <div class="flex justify-center">
-      <div class="w-16 aspect-square bg-gray-900 rounded-full">
-        <!-- login icon -->
-      </div>
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxV6-92RcVDo2igSLh8yfBliP0wl3hSrONEA&usqp=CAU"
+        class="w-20 aspect-square rounded-full" 
+      />
     </div>
     <div class="flex justify-center">
       <h1 class="font-semi-bold text-2xl">
         Login
       </h1>
     </div>
-    <form class="flex flex-col gap-3" [formGroup]="credential" (submit)="loginRequest(credential.value)">
+    <form class="flex flex-col gap-4" [formGroup]="credential" (submit)="loginRequest(credential.value)">
       <input 
         type="text"
         placeholder="username"

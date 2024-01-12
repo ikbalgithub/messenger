@@ -8,9 +8,9 @@ import { CanActivateFn,Router,ActivatedRouteSnapshot,RouterStateSnapshot } from 
 export const authGuard = (route:ActivatedRouteSnapshot,state:RouterStateSnapshot):boolean => {
   const router= inject(Router)
   const store = inject(Store<State>)
-  const auth = toSignal(store.select('auth'))()
+  const authentication = toSignal(store.select('authentication'))()
 
-  var loggedIn = auth.loggedIn ?? false
+  var loggedIn = authentication.loggedIn ?? false
   var onLoginPage = state.url === '/login'
   var onHomePage = state.url === '/'
   var onMessagePage = state.url === '/message'

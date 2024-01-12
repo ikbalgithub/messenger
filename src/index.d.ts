@@ -6,22 +6,24 @@ import { WritableSignal } from '@angular/core';
 export interface User {
   _id:string|null,
   profile:Profile|null,
-  authorization:string|null
 }
 
-export interface Auth{
+export interface Authenticated{
+  _id:string,
+  profile:Profile,
+  authorization:string
+}
+
+export interface Authentication{
   loggedIn:boolean
 }
 
 export interface State {
-  auth:Auth,
+  authentication:Authentication,
+  authorization:string,
   user:User
 }
 
-export interface Storage{
-  auth:Reducer<Auth>,
-  user:Reducer<User>
-}
 
 export interface Profile{
   surname:string,
@@ -32,10 +34,6 @@ export interface Profile{
 export interface Credential {
   username:string,
   password:string
-}
-
-export interface RecentlyMessage{
-  
 }
 
 export namespace Message{

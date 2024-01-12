@@ -4,12 +4,9 @@ import { Request } from '../../../index.d'
 import { Injectable,signal,inject } from '@angular/core';
 import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class RequestService {
+@Injectable({providedIn:'root'}) export class RequestService {
 
-  server = "http://192.168.43.225:3000"
+  server = "http://192.168.113.225:3000"
 
   httpClient = inject(HttpClient)
  
@@ -24,8 +21,6 @@ export class RequestService {
     var recursive = (this.post<Body,Result>).bind(this)
 
     var retryFunction = () => { /* run retry ... */ }
-
-    var timeout = new Error("error timeout.........")
     
     var error = (response:HttpErrorResponse) => {
       if(config.failedCb) config.failedCb(
@@ -74,7 +69,7 @@ export class RequestService {
       .pipe(
         timeoutWith(
           10000,throwError(
-            timeout
+            new Error("timeout")
           )
         )
       )
@@ -91,8 +86,6 @@ export class RequestService {
     var recursive = (this.get<Result>).bind(this)
 
     var retryFunction= () => { /* run retry ... */ }
-
-    var timeout = new Error("error timeout....... ")
 
     var error = (response:HttpErrorResponse) => {
       if(config.failedCb) config.failedCb(
@@ -138,7 +131,7 @@ export class RequestService {
       .pipe(
         timeoutWith(
           10000,throwError(
-            timeout
+            new Error("timeout")
           )
         )
       )

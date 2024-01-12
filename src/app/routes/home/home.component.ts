@@ -20,11 +20,12 @@ export class HomeComponent implements OnInit{
   router = inject(Router)
   store = inject(Store<State>)
   requestSvc = inject(RequestService)
-  user = toSignal(this.store.select('user'))()
   recentlyMessages = signal<Message.Last[]>([])
+  user = toSignal(this.store.select('user'))()
 
   
-  authorization:string|HttpHeaders = `Bearer ${this.user.authorization}` as string
+  authorization:string|HttpHeaders = toSignal(this.store.select('authorization'))()
+
   
   fetchRecentlyMessagesState = this.requestSvc.createInitialState<Message.Last[]>()
   
@@ -35,7 +36,10 @@ export class HomeComponent implements OnInit{
   })
 
   ngOnInit(){
+    this.authorization = `Bearer ${this.authorization}`
+
     this.authorization = this.authorization as string
+
     this.authorization = new HttpHeaders({
       authorization:this.authorization
     })
