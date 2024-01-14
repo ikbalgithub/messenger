@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component,inject } from '@angular/core';
+import { ActivatedRoute,Router,Params } from '@angular/router'
 
 @Component({
   selector: 'app-message',
@@ -7,5 +8,6 @@ import { Component } from '@angular/core';
   styleUrl: './message.component.css'
 })
 export class MessageComponent {
-
+  route = inject(ActivatedRoute)
+  _id = this.route.snapshot.params['_id']
 }

@@ -6,14 +6,28 @@ import { Component,OnInit,inject,Signal,signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { State,Message,Request } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
+import { LastMessageComponent } from '../../components/last-message/last-message.component'
+import { ProfilePipe } from '../../pipes/profile/profile.pipe'
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
+import { AvatarModule } from 'primeng/avatar';
 
 
 @Component({
   selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrl: './home.component.css',
+  standalone: true,
+  imports: [
+    AvatarModule,
+    CommonModule,
+    LastMessageComponent,
+    ProfilePipe,
+    ButtonModule,
+    ProgressSpinnerModule,
+    ToStringPipe
+  ],
 })
 export class HomeComponent implements OnInit{
   
@@ -26,7 +40,6 @@ export class HomeComponent implements OnInit{
   
   authorization:string|HttpHeaders = toSignal(this.store.select('authorization'))()
 
-  
   fetchRecentlyMessagesState = this.requestSvc.createInitialState<Message.Last[]>()
   
   fetchRecentlyMessagesFn = this.requestSvc.get<Message.Last[]>({

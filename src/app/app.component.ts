@@ -21,23 +21,15 @@ export class AppComponent {
   authorization = toSignal(this.store.select('authorization'))
 
   syncWithLocalStorage = effect(() => {
-    console.log(this.authorization())
-
     var jsonState = JSON.stringify({
       authentication:this.authentication(),
       authorization:this.authorization(),
       user:this.user()
     })
 
-    this.sync(
+    localStorage.setItem(
+      "ngrx",
       jsonState
     )
   })
-
-  sync(ngrxJsonString:string){
-    localStorage.setItem(
-      "ngrx",
-      ngrxJsonString
-    )
-  }
 }

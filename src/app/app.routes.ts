@@ -17,7 +17,7 @@ export const routes: Routes = [
     canActivate:[authGuard]
   },
   {
-    path:'message',
+    path:'message/:_id',
     component:MessageComponent,
     canActivate:[authGuard]
   },

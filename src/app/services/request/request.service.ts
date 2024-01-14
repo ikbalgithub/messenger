@@ -1,14 +1,17 @@
 import { throwError } from 'rxjs'
 import { timeoutWith } from 'rxjs/operators'
 import { Request } from '../../../index.d'
+import { CommonService } from '../common/common.service'
 import { Injectable,signal,inject } from '@angular/core';
 import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({providedIn:'root'}) export class RequestService {
 
-  server = "http://192.168.113.225:3000"
+  server = "http://192.168.43.225:3000"
 
   httpClient = inject(HttpClient)
+
+  common = inject(CommonService)
  
   createInitialState<Result>():Request.State<Result>{
     return signal<Request.RequestState<Result>>({
@@ -60,7 +63,8 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
 
       this.httpClient.post<Result>(
-        this.createPath(
+        this.common.createPath(
+          this.server,
           config.path
         ),
         body,
@@ -85,7 +89,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
     var recursive = (this.get<Result>).bind(this)
 
-    var retryFunction= () => { /* run retry ... */ }
+    var retryFunction = () => { /* run retry */ }
 
     var error = (response:HttpErrorResponse) => {
       if(config.failedCb) config.failedCb(
@@ -125,7 +129,10 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
       
       this.httpClient.get<Result>(
-        this.createPath(path),
+        this.common.createPath(
+          this.server,
+          path
+        ),
         options
       )
       .pipe(
@@ -141,10 +148,5 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       }) 
 
     }
-  }
-
-
-  createPath(path:string|undefined):string {
-    return `${this.server}/${path}`
   }
 }

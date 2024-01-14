@@ -70,9 +70,6 @@ export class LoginComponent {
    */
 
   onLoginFailed(e:HttpErrorResponse){
-    console.log(e)
-
-
     setTimeout(() => {
       this.loginState.update(current => {
         return {

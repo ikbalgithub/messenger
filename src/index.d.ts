@@ -29,6 +29,7 @@ export interface Profile{
   surname:string,
   profileImage:string,
   firstName:string,
+  usersRef?:string
 }
 
 export interface Credential {
@@ -45,12 +46,8 @@ export namespace Message{
     unreadCounter:number
     value:string,
     groupId:string,
-    sender:Profile & {
-      usersRef:string
-    },
-    accept:Profile & {
-      usersRef:string
-    }
+    sender:Profile,
+    accept:Profile,
   }
 }
 
@@ -62,7 +59,7 @@ export namespace Request{
   type Post<Body> = (body:Body,options?:any) => void
 
   type State<T> = WritableSignal<RequestState<T>>
-
+  
   interface RequestConfig<Result>{
     cb?:(result:Result) => void,
     failedCb?:(err:HttpErrorResponse)=>void,

@@ -1,36 +1,44 @@
-<div class="fullscreen bg-slate-200 flex flex-col">
-  <div class="bg-blue-900 flex flex-row">
+<div class="fullscreen bg-slate-300 flex flex-col overflow-x-auto">
+  <div class="bg-blue-900 flex flex-row w-full fixed">
     <div class="flex flex-row flex-1 p-3 gap-3 items-center">
-      <img
-        [src]="user.profile?.profileImage"
-        class="h-14 aspect-square rounded-full"
+      <p-avatar 
+        pBadge
+        value="1"
+        [image]="user.profile.profileImage" 
+        size="xlarge" 
+        shape="circle"
+        altx="profile image"
       />
       <p class="text-white font-medium">
         {{user.profile?.firstName}}
       </p>
     </div>
-    <div class="flex flex-col justify-center px-5">
-      <svg height="24" width="24" viewBox="0 0 512 512">
-        <path 
-          fill="#f4f6fb" 
-          d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
-        />
-      </svg>
-    </div>
   </div>
-  <!-- sebelum berhasil atau gagal, tampilkan process fetch -->
-  <!-- kemudian cek apakah fetch berhasil atau gagal -->
-  @defer (when fetchRecentlyMessagesState().result || fetchRecentlyMessagesState().error){
-    @if(fetchRecentlyMessagesState().result){
-      {{ recentlyMessages() | json}}
-    }
+  <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().error || fetchRecentlyMessagesState().running ? 'center':''}}">
+    <p-progressSpinner *ngIf="fetchRecentlyMessagesState().running; else messages"/>
 
-    @if(fetchRecentlyMessagesState().error){
-      <button (click)="retry()">retry</button>
-    }
-  }
-  @placeholder{
-    ...loading
-  }
+    <ng-template #messages>
+      @if(fetchRecentlyMessagesState().result){
+        @for(message of recentlyMessages(); track message){
+          <app-last-message
+            [profile]="message | profile:user._id"
+            [unread]="message.sender.usersRef === user._id"
+            [unreadCounter]="message.unreadCounter | toString"
+            [value]="message.value"
+          />
+        }
+      }
+      @else{
+        error
+      }
+    </ng-template>
+
+    <ng-template #error>
+      <p (click)="retry()">failed. click to retry!</p>
+    </ng-template>
+
+  </div>
 </div>
+
+
 
