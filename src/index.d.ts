@@ -49,6 +49,18 @@ export namespace Message{
     sender:Profile,
     accept:Profile,
   }
+
+  type All = {
+    _id:string,
+    sender:string,
+    sendAt:number,
+    value:string,
+    groupId:string,
+    accept:string,
+    read:boolean,
+    contentType:string,
+    description:string,
+  }[]
 }
 
 

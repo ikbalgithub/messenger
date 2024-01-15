@@ -12,6 +12,7 @@ import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { AvatarModule } from 'primeng/avatar';
+import { CommonService } from '../../services/common/common.service'
 
 
 @Component({
@@ -34,6 +35,8 @@ export class HomeComponent implements OnInit{
   router = inject(Router)
   store = inject(Store<State>)
   requestSvc = inject(RequestService)
+  commonSvc = inject(CommonService)
+
   recentlyMessages = signal<Message.Last[]>([])
   user = toSignal(this.store.select('user'))()
 
@@ -45,21 +48,45 @@ export class HomeComponent implements OnInit{
   fetchRecentlyMessagesFn = this.requestSvc.get<Message.Last[]>({
     state:this.fetchRecentlyMessagesState,
     cb:r => this.recentlyMessages.set(r),
-    failedCb: e => console.log(e)
+    failedCb: e => this.onFailed()
   })
 
   ngOnInit(){
-    this.authorization = `Bearer ${this.authorization}`
-
-    this.authorization = this.authorization as string
-
-    this.authorization = new HttpHeaders({
-      authorization:this.authorization
-    })
+    this.authorization = this.commonSvc.createHeaders(
+      this.authorization
+    )
 
     this.fetchRecentlyMessagesFn('message/recently',{
       headers:this.authorization
     })
+  }
+
+  onFailed(){
+    this.recentlyMessages.set(
+      [
+        {
+          sendAt:1705252055177,
+          read:true,
+          contentType:'',
+          description:'',
+          unreadCounter:0,
+          value:'halo',
+          groupId:'x',
+          sender:{
+            surname:'Huljannah',
+            firstName:'Mifta',
+            profileImage:'x',
+            usersRef:'x'
+          },
+          accept:{
+            surname:'Huljannah',
+            firstName:'Mifta',
+            profileImage:'x',
+            usersRef:'x'
+          }
+        }
+      ]
+    )
   }
 
   retry(){

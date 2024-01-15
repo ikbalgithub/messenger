@@ -19,4 +19,10 @@
     @apply items-center;
     @apply justify-center;
   }
+
+  .btn-back{
+    @apply hover:cursor-pointer;
+    @apply active:outline outline-2 outline-white;
+    @apply rounded;
+  }
 }

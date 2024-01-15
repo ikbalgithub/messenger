@@ -1,20 +1,17 @@
 <div class="fullscreen bg-slate-300 flex flex-col overflow-x-auto">
   <div class="bg-blue-900 flex flex-row w-full fixed">
     <div class="flex flex-row flex-1 p-3 gap-3 items-center">
-      <p-avatar 
-        pBadge
-        value="1"
+      <p-avatar
         [image]="user.profile.profileImage" 
         size="xlarge" 
         shape="circle"
-        altx="profile image"
       />
       <p class="text-white font-medium">
         {{user.profile?.firstName}}
       </p>
     </div>
   </div>
-  <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().error || fetchRecentlyMessagesState().running ? 'center':''}}">
+  <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().running ? 'center':''}}">
     <p-progressSpinner *ngIf="fetchRecentlyMessagesState().running; else messages"/>
 
     <ng-template #messages>
