@@ -11,7 +11,7 @@ export class CommonService {
   }
 
   createHeaders(token:string|HttpHeaders):HttpHeaders{
-    var authorization =  `Bearer ${token}`
+    var authorization = `Bearer ${token}`
 
     return new HttpHeaders({
       authorization

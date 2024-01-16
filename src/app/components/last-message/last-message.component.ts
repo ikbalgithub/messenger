@@ -20,4 +20,11 @@ export class LastMessageComponent {
   @Input() value!:string
   @Input() unread!:boolean
   @Input() unreadCounter!:string
+  @Input() groupId!:string
+
+  count(counter:string):number{
+    return parseInt(
+      counter
+    )
+  }
 }

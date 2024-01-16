@@ -11,7 +11,7 @@
       </p>
     </div>
   </div>
-  <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().running ? 'center':''}}">
+  <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().running || fetchRecentlyMessagesState().error ? 'center':''}}">
     <p-progressSpinner *ngIf="fetchRecentlyMessagesState().running; else messages"/>
 
     <ng-template #messages>
@@ -21,6 +21,7 @@
             [profile]="message | profile:user._id"
             [unread]="message.sender.usersRef === user._id"
             [unreadCounter]="message.unreadCounter | toString"
+            [groupId]="message.groupId"
             [value]="message.value"
           />
         }

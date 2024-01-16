@@ -21,9 +21,11 @@
     "@ngrx/signals": "^17.0.1",
     "@ngrx/store": "^17.0.1",
     "@ngrx/store-devtools": "^17.0.1",
+    "mongoose": "^8.0.4",
     "primeicons": "^6.0.1",
     "primeng": "^17.3.2",
     "rxjs": "~7.8.0",
+    "socket.io-client": "^4.7.4",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.2"
   },

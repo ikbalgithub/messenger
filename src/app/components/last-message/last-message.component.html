@@ -1,4 +1,4 @@
-<a routerLink="/message/{{profile.usersRef}}" [state]="{profile}">
+<a routerLink="/message/{{profile.usersRef}}" [state]="{profile,groupId}">
   <div class="bg-white shadow-lg rounded p-3 flex flex-row">
     <div class="flex flex-row items-center gap-3 flex-1">
       <p-avatar
@@ -14,8 +14,8 @@
             {{profile.firstName}}
           </p> 
           <p-badge
-            *ngIf="unread"
-            value="1"
+            *ngIf="unread && count(unreadCounter) > 0"
+            [value]="unreadCounter"
           />
         </div>
         <p>

@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store'
 import { HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common';
-import { Component,OnInit,inject,Signal,signal } from '@angular/core';
+import { Component,OnInit,inject,Signal,signal,effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { State,Message,Request } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'

@@ -1,5 +1,5 @@
 import { ActionReducer,Reducer,Action,ReducerTypes,ActionCreator,TypedAction,FunctionWithParametersType,ActionCreatorProps } from '@ngrx/store';
-import { HttpErrorResponse,HttpEvent } from '@angular/common/http';
+import { HttpErrorResponse,HttpEvent,HttpHeaders } from '@angular/common/http';
 import { WritableSignal } from '@angular/core';
 
 
@@ -37,6 +37,8 @@ export interface Credential {
   password:string
 }
 
+export type Authorization = string | HttpHeaders
+
 export namespace Message{
   interface Last{
     sendAt:number,
@@ -60,7 +62,15 @@ export namespace Message{
     read:boolean,
     contentType:string,
     description:string,
+    sent?:boolean
   }[]
+
+  type New = {
+    _id:string,
+    value:string,
+    accept:string,
+    groupId:string
+  }
 }
 
 

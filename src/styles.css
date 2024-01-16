@@ -11,7 +11,8 @@
 @layer utilties{
   .fullscreen{
     @apply absolute;
-    @apply h-screen;
+    @apply min-h-screen;
+    @apply max-h-fit;
     @apply w-full;
   }
 
