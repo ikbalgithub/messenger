@@ -19,7 +19,7 @@
         @for(message of recentlyMessages(); track message){
           <app-last-message
             [profile]="message | profile:user._id"
-            [unread]="message.sender.usersRef === user._id"
+            [unread]="message.sender.usersRef != user._id"
             [unreadCounter]="message.unreadCounter | toString"
             [groupId]="message.groupId"
             [value]="message.value"

@@ -65,11 +65,18 @@ export namespace Message{
     sent?:boolean
   }[]
 
+  export type One = All[number]
+
   type New = {
     _id:string,
     value:string,
     accept:string,
-    groupId:string
+    groupId:string,
+    sendAt:number
+  }
+
+  type Update = {
+    _id:string
   }
 }
 
@@ -79,6 +86,8 @@ export namespace Request{
   type Get = (path:string,options?:any) => void
 
   type Post<Body> = (body:Body,options?:any) => void
+
+  type Put<Body> = (body:Body,options?:any) => void
 
   type State<T> = WritableSignal<RequestState<T>>
   

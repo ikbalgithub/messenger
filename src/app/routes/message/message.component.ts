@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store'
 import { Types } from 'mongoose';
 import { io } from 'socket.io-client'
-import { Component,OnInit,inject,signal,effect } from '@angular/core';
+import { Component,OnInit,OnDestroy,inject,signal,effect } from '@angular/core';
 import { Profile } from '../../../index.d'
 import { ActivatedRoute,Router,Params } from '@angular/router'
 import { AvatarModule } from 'primeng/avatar';
@@ -33,15 +33,28 @@ import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule
   ]
 })
-export class MessageComponent implements OnInit {
+export class MessageComponent implements OnInit,OnDestroy {
+
+  /**
+   * Socket connection and event handler
+   */
 
   socket = io(
     '192.168.43.225:3000'
   )
+  .on(
+    'newMessage',
+    this.onNewMessage.bind(this)
+  )
+  .on(
+    'updated',
+    this.onUpdated.bind(this)
+  )
   
   /**
-   * Inject components dependency
+   * Dependency injection
    */
+
   route    = inject(ActivatedRoute)
   location = inject(Location)
   request  = inject(RequestService)
@@ -49,18 +62,21 @@ export class MessageComponent implements OnInit {
   common   = inject(CommonService)
 
   /**
-   * component state (route params,store route state & signal)
+   * active user, route state,params & authorization
    */
+
   user = toSignal(this.store.select('user'))()
   pageState:PageState = window.history.state
   _id = this.route.snapshot.params['_id']
-  messages = signal<Message.All>([])
+  authorization:Authorization = toSignal(
+    this.store.select('authorization')
+  )()
 
   /**
-   * authorization string
+   * fetch all message result
    */
   
-  authorization:Authorization = toSignal(this.store.select('authorization'))()
+  messages = signal<Message.All>([])
   
   /**
    * new message form
@@ -82,6 +98,7 @@ export class MessageComponent implements OnInit {
 
   fetchAllMessageState = this.request.createInitialState<Message.All>()
   sendMessageState = this.request.createInitialState<Message.New>()
+  updateOnReadState = this.request.createInitialState<Message.Update>()
 
   sendNewMessage = this.request.post<Message.New,any>({
     cb:r => this.onSuccessSend(r._id),
@@ -94,6 +111,13 @@ export class MessageComponent implements OnInit {
     cb:r => this.onSuccessFetch(r),
     state:this.fetchAllMessageState,
     failedCb: e => console.log(e),
+  })
+
+  updateOnReadFn = this.request.put<Message.Update,any>({
+    cb:r => console.log(r),
+    failedCb:r => console.log(r),
+    state:this.updateOnReadState,
+    path:'message'
   })
 
   /**
@@ -109,9 +133,13 @@ export class MessageComponent implements OnInit {
       headers:this.authorization
     })
   }
+
+  ngOnDestroy(){
+    this.socket.disconnect()
+  }
   
   /**
-   * class method
+   * is valid current message input
    */
 
   isValid(message:string):boolean{
@@ -121,35 +149,47 @@ export class MessageComponent implements OnInit {
     ) 
   }
 
+  /**
+   * - add new message to message list
+   * - trigger send message http function
+   */
+
   send(){
     var now = Date.now()
-    var _id = (new Types.ObjectId()).toString()
-   
+    var _id = new Types.ObjectId()
+
+    var newMessage:Message.One = {
+      ...this.newMessage.value,
+      sender:this.user._id,
+      _id:_id.toString(),
+      sendAt:now,
+      sent:false,
+      read:false,
+      contentType:'',
+      description:'',
+    }
+
+    var sendObject:Message.New = {
+      ...this.newMessage.value,
+      _id:_id.toString(),
+      sendAt:now
+    }
+
     this.messages.update(current => {
-      return  [
-        ...current,{
-          ...this.newMessage.value,
-          _id:_id,
-          sender:this.user._id,
-          contentType:'',
-          description:'',
-          sendAt:now,
-          sent:false
-        }
+      return [
+         ...current,
+         newMessage
       ]
     })
-    
-    this.sendNewMessage(
-      {
-        ...this.newMessage.value,
-        _id:_id,
-        sendAt:now
-      },
-      {
-        headers:this.authorization
-      }
-    )
+
+    this.sendNewMessage(sendObject,{
+      headers:this.authorization
+    })
   }
+
+  /**
+   * update message status on sent
+   */
 
   onSuccessSend(_id:string){
     var _messages = this.messages()
@@ -167,6 +207,19 @@ export class MessageComponent implements OnInit {
   }
 
   onSuccessFetch(messages:Message.All){
+    var unread = messages.filter(
+      x => 
+        x.read === false &&
+        x.sender === this._id
+    )
+
+    unread.map((unreadMessage) => {
+      var {_id} = unreadMessage
+      this.updateOnReadFn({
+        _id
+      })
+    })
+
     var _messages = messages.map(x => {
        return {
         ...x,
@@ -176,6 +229,39 @@ export class MessageComponent implements OnInit {
 
     this.messages.set(
        _messages
+    )
+  }
+  
+  onNewMessage(message:any){
+    if(message.sender !== this.user._id){
+      this.updateOnReadFn({_id:message._id})
+      this.messages.update((current) => {
+        return [
+          ...current,{
+            ...message,
+            send:true,
+            read:true
+          }
+        ]
+      })
+    }
+  }
+
+  onUpdated(_id:string){
+    var _messages = this.messages()
+    var [filter] = _messages.filter(x => {
+      return _id === x._id
+    })
+
+    var index = _messages.indexOf(filter)
+
+    _messages[index] = {
+      ...filter,
+      read:true
+    }
+
+    this.messages.set(
+      _messages
     )
   }
 }

@@ -1,8 +1,9 @@
 import { Store } from '@ngrx/store'
+import { io } from 'socket.io-client'
 import { HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common';
-import { Component,OnInit,inject,Signal,signal,effect } from '@angular/core';
+import { Component,OnInit,OnDestroy,inject,Signal,signal,effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { State,Message,Request } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
@@ -30,7 +31,16 @@ import { CommonService } from '../../services/common/common.service'
     ToStringPipe
   ],
 })
-export class HomeComponent implements OnInit{
+export class HomeComponent implements OnInit,OnDestroy{
+
+
+  socket = io(
+    "192.168.43.225:3000"
+  )
+  .on(
+    'newMessage',
+    this.onNewMessage.bind(this)
+  )
   
   router = inject(Router)
   store = inject(Store<State>)
@@ -86,6 +96,18 @@ export class HomeComponent implements OnInit{
           }
         }
       ]
+    )
+  }
+
+  ngOnDestroy(){
+    this.socket.disconnect()
+  }
+
+  onNewMessage(newMessage:any){
+    var [filter] = this.recentlyMessages().filter(
+      message => 
+        message.sender === newMessage.sender ||
+        message.accept === newMessage.accept
     )
   }
 

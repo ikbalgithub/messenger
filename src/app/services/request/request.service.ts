@@ -85,6 +85,72 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
     }
   }
 
+  put<Body,Result>(config:Request.RequestConfig<Result>):Request.Put<Body>{
+    
+    var recursive = (this.put<Body,Result>).bind(this)
+
+    var retryFunction = () => { /* run retry ... */ }
+    
+    var error = (response:HttpErrorResponse) => {
+      if(config.failedCb) config.failedCb(
+        response
+      )
+      
+      config.state.set({
+        running:false,
+        error:response,
+        retryFunction
+      })
+    }
+
+    var next = (response:HttpEvent<Result>) => {
+      var result = response as Result
+
+      if(config.cb) config.cb(
+        result
+      )
+
+      config.state.set({
+        running:false,
+        result
+      })
+    }
+
+
+    return (body:Body,options?:any):void => {
+      config.state.set({running:true})
+
+      retryFunction = () => recursive(
+        config
+      )
+      (
+        body,
+        options
+      )
+
+      this.httpClient.put<Result>(
+        this.common.createPath(
+          this.server,
+          config.path
+        ),
+        body,
+        options
+      )
+      .pipe(
+        timeoutWith(
+          10000,throwError(
+            new Error("timeout")
+          )
+        )
+      )
+      .subscribe({
+        error,
+        next
+      }) 
+      
+    }
+  }
+
   get<Result>(config:Request.RequestConfig<Result>):Request.Get{
 
     var recursive = (this.get<Result>).bind(this)
