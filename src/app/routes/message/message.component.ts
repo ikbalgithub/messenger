@@ -232,7 +232,7 @@ export class MessageComponent implements OnInit,OnDestroy {
     )
   }
   
-  onNewMessage(message:any){
+  onNewMessage(message:Message.One){
     if(message.sender !== this.user._id){
       this.updateOnReadFn({_id:message._id})
       this.messages.update((current) => {

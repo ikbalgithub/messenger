@@ -12,6 +12,7 @@ import { userReducer } from './ngrx/reducers/user.reducer'
 
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideServiceWorker } from '@angular/service-worker';
 
 
 
@@ -26,10 +27,22 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(),
     provideRouter(routes),
-    provideStore({...storage}),
-    provideStoreDevtools({ 
-      maxAge: 25, 
-      logOnly: !isDevMode() 
+    provideStore({ ...storage }),
+    provideStoreDevtools({
+        maxAge: 25,
+        logOnly: !isDevMode()
+    }),
+    provideServiceWorker('ngsw-worker.js', {
+        enabled: !isDevMode(),
+        registrationStrategy: 'registerWhenStable:30000'
+    }),
+    provideServiceWorker('ngsw-worker.js', {
+        enabled: !isDevMode(),
+        registrationStrategy: 'registerWhenStable:30000'
+    }),
+    provideServiceWorker('ngsw-worker.js', {
+        enabled: !isDevMode(),
+        registrationStrategy: 'registerWhenStable:30000'
     })
 ]
 };

@@ -103,12 +103,57 @@ export class HomeComponent implements OnInit,OnDestroy{
     this.socket.disconnect()
   }
 
-  onNewMessage(newMessage:any){
-    var [filter] = this.recentlyMessages().filter(
-      message => 
-        message.sender === newMessage.sender ||
-        message.accept === newMessage.accept
-    )
+  onNewMessage(newMessage:Message.One){
+    var _recentlyMessages = this.recentlyMessages()
+    var [filter] = _recentlyMessages.filter(message => {
+      return (
+        message.sender.usersRef
+        === newMessage.sender
+      ) || (
+        message.accept.usersRef
+        === newMessage.sender
+      )
+    })
+    
+
+    if(filter){
+      if(filter.sender.usersRef === String(newMessage.sender)){
+        var counter = filter.unreadCounter + 1
+        var index = _recentlyMessages.indexOf(
+          filter
+        )
+
+        _recentlyMessages[index] = {
+          ...newMessage,
+          sender:filter.sender,
+          accept:filter.accept,
+          unreadCounter:counter
+        }
+
+        this.recentlyMessages.set(
+          _recentlyMessages
+        )
+      }
+      if(filter.sender.usersRef === String(newMessage.accept)){
+        var counter = filter.unreadCounter + 1
+        var index = _recentlyMessages.indexOf(
+          filter
+        )
+        _recentlyMessages[index] = {
+          ...newMessage,
+          sender:filter.accept,
+          accept:filter.sender,
+          unreadCounter:1
+        }
+
+        this.recentlyMessages.set(
+          _recentlyMessages
+        )
+      }
+    }
+    else{
+      alert(`can't match`)
+    }
   }
 
   retry(){
