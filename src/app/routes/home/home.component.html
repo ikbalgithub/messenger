@@ -1,5 +1,5 @@
-<div class="fullscreen bg-slate-300 flex flex-col overflow-x-auto">
-  <div class="bg-blue-900 flex flex-row w-full fixed">
+<div class="fullscreen bg-slate-300 flex flex-col">
+  <div class="bg-blue-900 flex flex-row w-full fixed shadow-inner">
     <div class="flex flex-row flex-1 p-3 gap-3 items-center">
       <p-avatar
         [image]="user.profile.profileImage" 
@@ -18,8 +18,8 @@
       @if(fetchRecentlyMessagesState().result){
         @for(message of recentlyMessages(); track message){
           <app-last-message
-            [profile]="message | profile:user._id"
-            [unread]="message.sender.usersRef != user._id"
+            [profile]="message | profile:user._id:'home'"
+            [unread]="message.sender.usersRef !== user._id"
             [unreadCounter]="message.unreadCounter | toString"
             [groupId]="message.groupId"
             [value]="message.value"
@@ -34,6 +34,14 @@
     <ng-template #error>
       <p (click)="retry()">failed. click to retry!</p>
     </ng-template>
+
+    <p-button 
+      icon="pi pi-search" 
+      [rounded]="true" 
+      class="fixed bottom-7 right-5"
+      (click)="router.navigate(['search'])"
+    />
+
 
   </div>
 </div>

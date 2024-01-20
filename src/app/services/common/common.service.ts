@@ -1,5 +1,6 @@
 import { Injectable,inject } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
+import { Types } from 'mongoose';
 
 
 @Injectable({
@@ -16,5 +17,9 @@ export class CommonService {
     return new HttpHeaders({
       authorization
     })
+  }
+
+  getNewId():string{
+    return new Types.ObjectId().toString()
   }
 }

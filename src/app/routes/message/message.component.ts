@@ -39,8 +39,9 @@ export class MessageComponent implements OnInit,OnDestroy {
    * Socket connection and event handler
    */
 
+
   socket = io(
-    '192.168.43.225:3000'
+    'http://192.168.43.225:3000'
   )
   .on(
     'newMessage',
@@ -55,6 +56,7 @@ export class MessageComponent implements OnInit,OnDestroy {
    * Dependency injection
    */
 
+  router   = inject(Router)
   route    = inject(ActivatedRoute)
   location = inject(Location)
   request  = inject(RequestService)
@@ -97,10 +99,10 @@ export class MessageComponent implements OnInit,OnDestroy {
    */
 
   fetchAllMessageState = this.request.createInitialState<Message.All>()
-  sendMessageState = this.request.createInitialState<Message.New>()
-  updateOnReadState = this.request.createInitialState<Message.Update>()
+  sendMessageState = this.request.createInitialState<Message.One>()
+  updateOnReadState = this.request.createInitialState<Message.One>()
 
-  sendNewMessage = this.request.post<Message.New,any>({
+  sendNewMessage = this.request.post<Message.New,Message.One>({
     cb:r => this.onSuccessSend(r._id),
     failedCb:r => console.log(r),
     state:this.sendMessageState,
@@ -113,7 +115,7 @@ export class MessageComponent implements OnInit,OnDestroy {
     failedCb: e => console.log(e),
   })
 
-  updateOnReadFn = this.request.put<Message.Update,any>({
+  updateOnReadFn = this.request.put<Message.Update,Message.One>({
     cb:r => console.log(r),
     failedCb:r => console.log(r),
     state:this.updateOnReadState,

@@ -9,12 +9,11 @@ import { State,Message,Request } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { LastMessageComponent } from '../../components/last-message/last-message.component'
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
-import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { CommonService } from '../../services/common/common.service'
-
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-home',
@@ -28,18 +27,20 @@ import { CommonService } from '../../services/common/common.service'
     ProfilePipe,
     ButtonModule,
     ProgressSpinnerModule,
-    ToStringPipe
+    ToStringPipe,
   ],
 })
 export class HomeComponent implements OnInit,OnDestroy{
-
-
   socket = io(
-    "192.168.43.225:3000"
+    "http://192.168.43.225:3000"
   )
   .on(
     'newMessage',
     this.onNewMessage.bind(this)
+  )
+  .on(
+    'message',
+    this.onMessage.bind(this)
   )
   
   router = inject(Router)
@@ -49,7 +50,6 @@ export class HomeComponent implements OnInit,OnDestroy{
 
   recentlyMessages = signal<Message.Last[]>([])
   user = toSignal(this.store.select('user'))()
-
   
   authorization:string|HttpHeaders = toSignal(this.store.select('authorization'))()
 
@@ -135,7 +135,6 @@ export class HomeComponent implements OnInit,OnDestroy{
         )
       }
       if(filter.sender.usersRef === String(newMessage.accept)){
-        var counter = filter.unreadCounter + 1
         var index = _recentlyMessages.indexOf(
           filter
         )
@@ -152,7 +151,26 @@ export class HomeComponent implements OnInit,OnDestroy{
       }
     }
     else{
-      alert(`can't match`)
+      console.log('not on list')
+    }
+  }
+
+  onMessage(newMessage:Message.Populated){
+    if(this.recentlyMessages().filter(e => e._id === newMessage._id).length < 1){
+      this.recentlyMessages.update((current) => {
+        var withCounter = {
+          ...newMessage,
+          unreadCounter:1
+        }
+
+        return [
+          withCounter,
+          ...current
+        ]
+      })
+    }
+    else{
+      console.log('has been on list')
     }
   }
 

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Message } from '../../../index.d'
+import { Message,Search } from '../../../index.d'
 
 @Pipe({
   name: 'profile',
@@ -7,13 +7,23 @@ import { Message } from '../../../index.d'
 })
 export class ProfilePipe implements PipeTransform {
 
-  transform(value:Message.Last,args:string):any {
-    if(value.sender.usersRef === args){
-      return value.accept
+  transform(value:Message.Last|Search.Result,_id:string,pages:string):any {
+    if(pages === 'home'){
+      var v = value as Message.Last
+
+      if(v.sender.usersRef === _id){
+        return v.accept
+      }
+      else{
+        return v.sender
+      }
     }
     else{
-      return value.sender
+      var {message,...profile} = value as Search.Result
+
+      return profile
     }
+    
   }
 
 }

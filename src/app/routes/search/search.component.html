@@ -1,0 +1,37 @@
+<div class="fullscreen bg-slate-200 flex flex-col">
+  <div class="bg-slate-200 border-2 border-green-900 p-3 fixed shadow-inner w-full">
+    <span class="p-input-icon-right p-input-icon-left w-full">
+      <i class="pi pi-arrow-left" (click)="location.back()"></i>
+      <i class="{{searchState().running ? 'pi pi-spin pi-spinner':'pi pi-search'}}"></i>
+      <input 
+        type="text" 
+        pInputText 
+        class="flex-1 w-full" 
+        [(ngModel)]="query" 
+        (ngModelChange)="onChange($event)"
+        placeholder="who are you looking for?"
+      />
+    </span>
+  </div>
+  <div class="border-2 mt-[78px] border-yellow-900 flex flex-col flex-1 gap-3 p-3 shadow-inner  {{searchState().running || searchState().error ? 'center':''}}">
+    <p-progressSpinner *ngIf="searchState().running; else result"/>
+
+     <ng-template #result>
+        @if(searchState().result){
+          @for(x of searchState().result; track x){
+            <app-last-message
+              [profile]="x | profile:'':'search'"
+              [unread]="x.message && x?.message?.sender == x.usersRef ? true : false"
+              [unreadCounter]="x.message ? (x.message.unreadCounter | toString) : '0'"
+              [groupId]="x.message?.groupId ?? common.getNewId()"
+              [value]="x.message?.value ?? ''"
+            />
+          }
+        }
+        @else{
+          error
+        }
+    </ng-template>
+  </div>
+</div>
+

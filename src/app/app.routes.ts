@@ -3,6 +3,7 @@ import { HomeComponent } from './routes/home/home.component'
 import { LoginComponent } from './routes/login/login.component'
 import { ErrorComponent } from './routes/error/error.component'
 import { MessageComponent } from './routes/message/message.component'
+import { SearchComponent } from './routes/search/search.component'
 import { authGuard } from './guards/auth/auth.guard'
 
 export const routes: Routes = [
@@ -20,6 +21,10 @@ export const routes: Routes = [
     path:'message/:_id',
     component:MessageComponent,
     canActivate:[authGuard]
+  },
+  {
+    path:'search',
+    component:SearchComponent
   },
   {
     path:"**",

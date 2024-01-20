@@ -29,7 +29,8 @@ export interface Profile{
   surname:string,
   profileImage:string,
   firstName:string,
-  usersRef?:string
+  usersRef?:string,
+  _id?:string,
 }
 
 export interface Credential {
@@ -41,6 +42,7 @@ export type Authorization = string | HttpHeaders
 
 export namespace Message{
   interface Last{
+    _id?:string,
     sendAt:number,
     read:boolean,
     contentType:string,
@@ -67,6 +69,11 @@ export namespace Message{
 
   export type One = All[number]
 
+  export type Populated = One & {
+    sender:Profile,
+    accept:Profile
+  }
+
   type New = {
     _id:string,
     value:string,
@@ -77,6 +84,12 @@ export namespace Message{
 
   type Update = {
     _id:string
+  }
+}
+
+export namespace Search{
+  type Result = Profile & {
+    message?:Message.Last
   }
 }
 
