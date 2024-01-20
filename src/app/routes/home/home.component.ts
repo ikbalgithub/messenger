@@ -32,7 +32,7 @@ import { ButtonModule } from 'primeng/button';
 })
 export class HomeComponent implements OnInit,OnDestroy{
   socket = io(
-    "http://192.168.43.225:3000"
+    "http://192.168.56.225:3000"
   )
   .on(
     'newMessage',
@@ -116,8 +116,9 @@ export class HomeComponent implements OnInit,OnDestroy{
     })
     
 
-    if(filter){
+    if(filter && newMessage.accept === this.user._id){
       if(filter.sender.usersRef === String(newMessage.sender)){
+
         var counter = filter.unreadCounter + 1
         var index = _recentlyMessages.indexOf(
           filter
@@ -157,17 +158,21 @@ export class HomeComponent implements OnInit,OnDestroy{
 
   onMessage(newMessage:Message.Populated){
     if(this.recentlyMessages().filter(e => e._id === newMessage._id).length < 1){
-      this.recentlyMessages.update((current) => {
-        var withCounter = {
-          ...newMessage,
-          unreadCounter:1
-        }
+      if(newMessage.accept.usersRef === this.user._id){
+        this.recentlyMessages.update((current) => {
+          var withCounter = {
+            ...newMessage,
+            unreadCounter:1
+          }
 
-        return [
-          withCounter,
-          ...current
-        ]
-      })
+          return [
+            withCounter,
+            ...current
+          ]
+        })
+      }
+
+     
     }
     else{
       console.log('has been on list')

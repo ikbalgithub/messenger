@@ -15,7 +15,6 @@ import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { Types } from 'mongoose';
 
-
 @Component({
   selector: 'app-search',
   standalone: true,
@@ -57,11 +56,4 @@ export class SearchComponent {
       }
     ) 
   }
-
-  isUnread(x:any):boolean{
-    console.log({x})
-
-    return false
-  }
-
 }

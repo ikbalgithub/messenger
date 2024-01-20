@@ -25,14 +25,17 @@
             <div class="flex flex-row justify-end">
               <div class="p-3 flex flex-row gap-1 items-center rounded bg-green-500">
                 <div>
-                  <p [attr.data-sendTime]="message.sendAt">{{message.value}}</p>
+                  <p>{{message.value}}</p>
                 </div>
-                <div>
-                  <i class="pi pi-check text-[1rem]" *ngIf="!message.sent"></i>
+                <div *ngIf="!message.sent">
+                  <i class="pi pi-check text-[1rem]" ></i>
                 </div>
-                <div>
-                  <i class="pi pi-check text-[1rem] text-white" *ngIf="message.sent"></i>
-                  <i class="pi pi-check text-[1rem] text-white" *ngIf="message.read"></i>
+                <div *ngIf="message.sent && !message.read">
+                  <i class="pi pi-check text-white text-[1rem]" ></i>
+                </div>
+                <div *ngIf="message.sent && message.read">
+                  <i class="pi pi-check text-[1rem] text-white"></i>
+                  <i class="pi pi-check text-[1rem] text-white"></i>
                 </div>
               </div>
             </div>

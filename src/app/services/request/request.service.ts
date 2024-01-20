@@ -7,7 +7,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({providedIn:'root'}) export class RequestService {
 
-  server     = "http://192.168.43.225:3000"
+  server     = "http://192.168.56.225:3000"
 
   httpClient = inject(HttpClient)
 
@@ -72,7 +72,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
       .pipe(
         timeoutWith(
-          10000,throwError(
+          30000,throwError(
             new Error("timeout")
           )
         )
@@ -138,7 +138,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
       .pipe(
         timeoutWith(
-          10000,throwError(
+          30000,throwError(
             new Error("timeout")
           )
         )
@@ -203,7 +203,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
       .pipe(
         timeoutWith(
-          10000,throwError(
+          30000,throwError(
             new Error("timeout")
           )
         )

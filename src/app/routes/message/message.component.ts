@@ -41,7 +41,7 @@ export class MessageComponent implements OnInit,OnDestroy {
 
 
   socket = io(
-    'http://192.168.43.225:3000'
+    'http://192.168.56.225:3000'
   )
   .on(
     'newMessage',
@@ -235,13 +235,13 @@ export class MessageComponent implements OnInit,OnDestroy {
   }
   
   onNewMessage(message:Message.One){
-    if(message.sender !== this.user._id){
+    if(message.accept === this.user._id && message.sender === this._id){
       this.updateOnReadFn({_id:message._id})
       this.messages.update((current) => {
         return [
           ...current,{
             ...message,
-            send:true,
+            sent:true,
             read:true
           }
         ]
