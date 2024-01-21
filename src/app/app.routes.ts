@@ -4,6 +4,8 @@ import { LoginComponent } from './routes/login/login.component'
 import { ErrorComponent } from './routes/error/error.component'
 import { MessageComponent } from './routes/message/message.component'
 import { SearchComponent } from './routes/search/search.component'
+import { RegisterComponent } from './routes/register/register.component'
+import { OauthComponent } from './routes/oauth/oauth.component'
 import { authGuard } from './guards/auth/auth.guard'
 
 export const routes: Routes = [
@@ -25,6 +27,14 @@ export const routes: Routes = [
   {
     path:'search',
     component:SearchComponent
+  },
+  {
+    path:'register',
+    component:RegisterComponent
+  },
+  {
+    path:'oauth',
+    component:OauthComponent
   },
   {
     path:"**",

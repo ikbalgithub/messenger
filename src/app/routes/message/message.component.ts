@@ -41,7 +41,7 @@ export class MessageComponent implements OnInit,OnDestroy {
 
 
   socket = io(
-    'http://192.168.56.225:3000'
+    'http://192.168.43.225:3000'
   )
   .on(
     'newMessage',
