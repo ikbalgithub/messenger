@@ -39,6 +39,7 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(){
     this.oauthCh.onmessage = e => {
+      console.log(e)
       this.authService.next(
         e.data
       )
