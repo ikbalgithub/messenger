@@ -2,11 +2,12 @@ import { Component,OnInit,inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router'
 import { RequestService } from '../../services/request/request.service'
 import { Authenticated } from '../../../index.d'
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-oauth',
   standalone: true,
-  imports: [],
+  imports: [ProgressSpinnerModule],
   templateUrl: './oauth.component.html',
   styleUrl: './oauth.component.css'
 })
