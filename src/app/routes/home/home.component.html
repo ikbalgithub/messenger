@@ -6,9 +6,15 @@
         size="xlarge" 
         shape="circle"
       />
-      <p class="text-white font-medium">
-        {{user.profile?.firstName}}
-      </p>
+      <div class="flex flex-row gap-2">
+        <p class="text-white font-medium">
+          {{user.profile?.firstName}}
+        </p>
+
+        <p class="text-slate-300" *ngIf="!connected">
+          (disconnected)
+        </p>
+      </div>
     </div>
   </div>
   <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().running || fetchRecentlyMessagesState().error ? 'center':''}}">
@@ -27,7 +33,9 @@
         }
       }
       @else{
-        error
+        <ng-container 
+          *ngTemplateOutlet="error"
+        />
       }
     </ng-template>
 

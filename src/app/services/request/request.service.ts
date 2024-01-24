@@ -7,7 +7,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({providedIn:'root'}) export class RequestService {
 
-  server     = "https://api-production-4f73.up.railway.app"
+  server     = import.meta.env.NG_APP_SERVER
 
   httpClient = inject(HttpClient)
 

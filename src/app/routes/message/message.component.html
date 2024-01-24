@@ -48,7 +48,9 @@
         }
       }
       @else{
-        error
+        <ng-container 
+          *ngTemplateOutlet="error"
+        />
       } 
    </ng-template>
   
@@ -63,7 +65,7 @@
     </ng-template>
 
     <ng-template #error>
-      error
+      <button (click)="retry()">click to retry</button>
     </ng-template>
   </div>
   <form (submit)="send()" class="fixed bottom-0 bg-slate-200 w-full p-3 shadow-inner" [formGroup]="newMessage">

@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "start:network":"ng serve --host 0.0.0.0",
+    "start:network": "ng serve --host 0.0.0.0",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -23,6 +23,9 @@
     "@ngrx/signals": "^17.0.1",
     "@ngrx/store": "^17.0.1",
     "@ngrx/store-devtools": "^17.0.1",
+    "@ngx-env/builder": "^17.1.1",
+    "@types/node": "^20.11.5",
+    "dotenv": "^16.3.2",
     "mongoose": "^8.0.4",
     "primeicons": "^6.0.1",
     "primeng": "^17.3.2",
@@ -32,11 +35,14 @@
     "zone.js": "~0.14.2"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^17.0.0",
+    "@angular-builders/dev-server": "^7.3.1",
     "@angular-devkit/build-angular": "^17.0.9",
     "@angular/cli": "^17.0.9",
     "@angular/compiler-cli": "^17.0.0",
     "@types/jasmine": "~5.1.0",
     "autoprefixer": "^10.4.16",
+    "dotenv-webpack": "^8.0.1",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

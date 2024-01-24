@@ -41,7 +41,7 @@ export class MessageComponent implements OnInit,OnDestroy {
 
 
   socket = io(
-    'https://api-production-4f73.up.railway.app'
+    import.meta.env.NG_APP_SERVER
   )
   .on(
     'newMessage',
@@ -265,6 +265,10 @@ export class MessageComponent implements OnInit,OnDestroy {
     this.messages.set(
       _messages
     )
+  }
+
+  retry(){
+    (this.fetchAllMessageState().retryFunction as Function)()
   }
 }
 
