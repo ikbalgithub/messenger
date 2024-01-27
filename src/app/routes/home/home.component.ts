@@ -2,6 +2,7 @@ import { Store } from '@ngrx/store'
 import { io } from 'socket.io-client'
 import { HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router'
+import { getToken } from "firebase/messaging";
 import { CommonModule } from '@angular/common';
 import { Component,OnInit,OnDestroy,inject,Signal,signal,effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -13,6 +14,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { CommonService } from '../../services/common/common.service'
+import { FirebaseService } from '../../services/firebase/firebase.service'
 import { ButtonModule } from 'primeng/button';
 
 @Component({
@@ -56,9 +58,12 @@ export class HomeComponent implements OnInit,OnDestroy{
   store = inject(Store<State>)
   requestSvc = inject(RequestService)
   commonSvc = inject(CommonService)
+  firebaseSvc = inject(FirebaseService)
 
   recentlyMessages = signal<Message.Last[]>([])
   user = toSignal(this.store.select('user'))()
+
+  vapidKey = "BDzXQnX_MM53PtjiHWGsZjJDp5G0Feyr30xMAhtaekR-OdfQXQKFDbAINqjtMx5bCcUBBZ0fIeuF6eiAqbOhOiw"
   
   authorization:string|HttpHeaders = toSignal(this.store.select('authorization'))()
 

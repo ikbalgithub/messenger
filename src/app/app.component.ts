@@ -1,16 +1,16 @@
 import { Store } from '@ngrx/store'
-import { effect,Signal,EffectRef } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
-import { Component,HostListener,inject } from '@angular/core';
+import { Component,signal,computed,effect,HostListener,inject } from '@angular/core';
 import { State,Profile, } from '../index.d'
+import { CommonModule } from '@angular/common'
 
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet,CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

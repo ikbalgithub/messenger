@@ -4,6 +4,8 @@ import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth/auth.service'
 import { RequestService } from '../../services/request/request.service'
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { GoogleAuthProvider,getAuth,signInWithPopup,fetchSignInMethodsForEmail } from "firebase/auth";
+import { FirebaseService } from '../../services/firebase/firebase.service'
 
 @Component({
   selector: 'app-register',
@@ -16,33 +18,50 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     ProgressSpinnerModule
   ]
 })
-export class RegisterComponent implements OnInit {
-  request = inject(RequestService)
+export class RegisterComponent implements OnInit{
   authService = inject(AuthService)
-
-  oauthCh: BroadcastChannel = new BroadcastChannel('oauth')
+  requestService = inject(RequestService)
+  firebaseService = inject(FirebaseService)
   
-  loginGoogleState = this.request.createInitialState<string>()
-  loginGoogleFn = this.request.get<string>({
-    state:this.loginGoogleState,
-    cb:r => window.open(r),
-    failedCb:e=> console.log(e)
-  })
+  info = "https://www.googleapis.com/auth/userinfo"
+ 
+  provider = new GoogleAuthProvider()
+  isUserExist = this.requestService.createInitialState<any>()
 
-  loginWithGoogle(){
-    this.loginGoogleFn(
-      'oauth',{
-        responseType:'text'
-      }
-    )
+  findOrCreate = this.requestService.post<any,any>({
+    cb:r => this.authService.next(r),
+    failedCb:e => console.log(e),
+    state:this.isUserExist,
+    path:'oauth'
+  })
+  
+
+  async loginWithGoogle(){
+    try{
+      var {user} = await signInWithPopup(
+        getAuth(),
+        this.provider
+      )
+
+      this.findOrCreate({
+        profile:{
+          firstName:user?.displayName?.split(" ")[0],
+          surname:user?.displayName?.split(" ")[1],
+          profileImage:user.photoURL,
+        }, 
+        uid:user.uid
+      })
+    }
+    catch(e){
+      console.log(e)
+    }
   }
 
   ngOnInit(){
-    this.oauthCh.onmessage = e => {
-      console.log(e)
-      this.authService.next(
-        e.data
+    ['.email','.profile'].forEach(s => {
+      this.provider.addScope(
+        `${this.info}${s}`
       )
-    }
+    })
   }
 }
