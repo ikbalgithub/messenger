@@ -1,5 +1,5 @@
 <div class="fullscreen bg-slate-200 flex flex-col gap-3 center">
-  <div *ngIf="signUpWithGoogleMessage()" class="bg-red-900 lg:w-1/4 md:w-2/4 w-3/4 p-3 rounded text-center text-white">
+  <div *ngIf="signUpWithGoogleMessage()" class="bg-red-900 lg:w-1/4 md:w-2/4 w-4/5 p-3 rounded text-center text-white">
     {{signUpWithGoogleMessage()}}
   </div>
   <div class="flex flex-col items-center lg:w-1/4 md:w-2/4 w-3/4 bg-white shadow-2xl rounded rounded-md p-6 gap-5">
@@ -21,7 +21,7 @@
   </div>
 </div>
 
-<p-dialog header="Sign up" [(visible)]="withEmail" [modal]="true" [style]="{ width: '50vw' }">
+<p-dialog header="Sign up" [(visible)]="withEmail" [modal]="true" class="bg-red-900 lg:w-1/4 md:w-2/4 w-4/5">
   <form class="flex flex-col gap-3" [formGroup]="authInfo">
     <div class="flex flex-col gap-1">
       <label for="email" class="font-bold">Email</label>
