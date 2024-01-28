@@ -8,6 +8,8 @@ import { RequestService } from '../../services/request/request.service'
 import { AuthService } from '../../services/auth/auth.service'
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FirebaseService } from '../../services/firebase/firebase.service'
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 @Component({
   selector: 'app-login',
@@ -37,6 +39,7 @@ export class LoginComponent {
   store = inject(Store<State>)
   request = inject(RequestService)
   authSvc = inject(AuthService)
+  firebase = inject(FirebaseService)
 
   credential:FormGroup = new FormGroup({
     username: new FormControl(''),
@@ -85,5 +88,20 @@ export class LoginComponent {
 
   onLoginSuccess([result]:Authenticated[]){
     if(result) this.authSvc.next(result)
+  }
+
+  async login(){
+    try{
+      var result = await signInWithEmailAndPassword(
+        getAuth(), 
+        this.credential.value.username, 
+        this.credential.value.password
+      )
+
+      console.log(result)
+    }
+    catch(e:any){
+      console.log(e.message)
+    }
   }
 }

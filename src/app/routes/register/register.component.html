@@ -1,25 +1,45 @@
-<div class="fullscreen bg-slate-200 flex flex-col center">
-  <div class="flex flex-col items-center bg-white shadow-2xl rounded rounded-md p-6 gap-5">
+<div class="fullscreen bg-slate-200 flex flex-col gap-3 center">
+  <div *ngIf="signUpWithGoogleMessage()" class="bg-red-900 lg:w-1/4 md:w-2/4 w-3/4 p-3 rounded text-center text-white">
+    {{signUpWithGoogleMessage()}}
+  </div>
+  <div class="flex flex-col items-center lg:w-1/4 md:w-2/4 w-3/4 bg-white shadow-2xl rounded rounded-md p-6 gap-5">
     <div class="w-full flex flex-col items-center">
       <h1 class="font-bold text-xl">Sign-up</h1>
       <span class="text-gray-600">Create your account right now!</span>
     </div>
     <div class="w-full flex flex-col gap-3">
-      <div class="relative flex flex-row items-center active:bg-black active:text-white">
-        <i class="pi pi-google text-xl absolute left-3"></i>
-        <button (click)="loginWithGoogle()" class="outline outline-2 outline-black w-full p-3 rounded-md">
-          <span>Continue with google</span>
-        </button>
-      </div>
-      <div class="relative flex flex-row items-center active:bg-black active:text-white">
-        <i class="pi pi-envelope text-xl absolute left-3"></i>
-        <button class="outline outline-2 outline-black w-full p-3 rounded-md">
-          <span>Continue with email</span>
-        </button>
-      </div>
+      <button [disabled]="signUpWithGoogleMessage()" (click)="signUpWithGoogle()" class="flex flex-row items-center outline outline-2 outline-black w-full p-3 rounded-md">
+        <i class="pi pi-google text-xl"></i>
+        <span class="flex-1">Continue with google</span>
+      </button>
+      <button class="flex flex-row items-center outline outline-2 outline-black w-full p-3 rounded-md">
+        <i class="pi pi-facebook text-xl"></i>
+        <span class="flex-1">Continue with facebook</span>
+      </button>
     </div>
+    <p (click)="withEmail=true" class="text-slate-500 font-bold cursor-pointer">Continue with email</p>
   </div>
 </div>
+
+<p-dialog header="Sign up" [(visible)]="withEmail" [modal]="true" [style]="{ width: '50vw' }">
+  <form class="flex flex-col gap-3" [formGroup]="authInfo">
+    <div class="flex flex-col gap-1">
+      <label for="email" class="font-bold">Email</label>
+      <input class="{{successSignUpWithEmail() ? 'bg-slate-200' : ''}}" [disabled]="successSignUpWithEmail()" formControlName="email" pInputText id="email">
+    </div>
+    <div class="flex flex-col gap-1">
+      <label for="password" class="font-bold">Password</label>
+      <input class="{{successSignUpWithEmail() ? 'bg-slate-200' : ''}}" [disabled]="successSignUpWithEmail()" formControlName="password" pInputText id="password" />
+    </div>
+    <p *ngIf="successSignUpWithEmail()">
+      an email verification has been sent. open it and verify your account
+    </p>
+    <p class="text-red-900">{{signUpWithEmailErrorMessage()}}</p>
+  </form>
+  <ng-template pTemplate="footer">
+    <p-button [disabled]="successSignUpWithEmail()" (click)="signUpWithEmail()" label="Next" pAutoFocus [autofocus]="true"></p-button>
+  </ng-template>
+</p-dialog>
 
 <div *ngIf="isUserExist().running" class="fullscreen flex flex-col center bg-black opacity-50">
   <p-progressSpinner/>

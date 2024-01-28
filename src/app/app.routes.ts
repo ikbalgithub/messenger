@@ -5,6 +5,7 @@ import { ErrorComponent } from './routes/error/error.component'
 import { MessageComponent } from './routes/message/message.component'
 import { SearchComponent } from './routes/search/search.component'
 import { RegisterComponent } from './routes/register/register.component'
+import { VerificationComponent } from './routes/verification/verification.component'
 import { authGuard } from './guards/auth/auth.guard'
 
 export const routes: Routes = [
@@ -30,6 +31,10 @@ export const routes: Routes = [
   {
     path:'register',
     component:RegisterComponent
+  },
+  {
+    path:'verification',
+    component:VerificationComponent
   },
   {
     path:"**",

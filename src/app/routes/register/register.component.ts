@@ -1,11 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component,inject,OnInit } from '@angular/core';
-import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { Component,inject,OnInit,signal,effect } from '@angular/core';
 import { AuthService } from '../../services/auth/auth.service'
 import { RequestService } from '../../services/request/request.service'
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { GoogleAuthProvider,getAuth,signInWithPopup,fetchSignInMethodsForEmail } from "firebase/auth";
+import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms'
+import { GoogleAuthProvider,getAuth,signInWithPopup,createUserWithEmailAndPassword,sendEmailVerification } from "firebase/auth";
 import { FirebaseService } from '../../services/firebase/firebase.service'
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { Router } from '@angular/router'
+
 
 @Component({
   selector: 'app-register',
@@ -15,28 +20,54 @@ import { FirebaseService } from '../../services/firebase/firebase.service'
   imports: [
     ButtonModule,
     CommonModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    InputTextModule,
+    DialogModule,
+    ButtonModule,
   ]
 })
 export class RegisterComponent implements OnInit{
+  router = inject(Router)
   authService = inject(AuthService)
   requestService = inject(RequestService)
   firebaseService = inject(FirebaseService)
+
+  messages = [{ severity: 'error', summary: 'Failed', detail: 'failed'}]
+
+  authInfo:FormGroup = new FormGroup({
+    email: new FormControl(''),
+    password: new FormControl(''),
+  })
+
+  withEmail = false
   
   info = "https://www.googleapis.com/auth/userinfo"
+  signUpWithEmailErrorMessage = signal<string>('')
+  signUpWithGoogleMessage = signal<null|string>(null)
+  successSignUpWithEmail = signal<boolean>(false)
+
+  setErrorNull = effect(() => {
+    let message = this.signUpWithGoogleMessage()
+    setTimeout(() => {
+       this.signUpWithGoogleMessage.set(null)
+    },3000)
+  })
+
  
   provider = new GoogleAuthProvider()
   isUserExist = this.requestService.createInitialState<any>()
 
   findOrCreate = this.requestService.post<any,any>({
+    failedCb:e => this.signUpWithGoogleMessage.set(
+      e.message
+    ),
     cb:r => this.authService.next(r),
-    failedCb:e => console.log(e),
     state:this.isUserExist,
     path:'oauth'
   })
   
 
-  async loginWithGoogle(){
+  async signUpWithGoogle(){
     try{
       var {user} = await signInWithPopup(
         getAuth(),
@@ -52,8 +83,35 @@ export class RegisterComponent implements OnInit{
         uid:user.uid
       })
     }
-    catch(e){
-      console.log(e)
+    catch(e:any){
+      this.signUpWithGoogleMessage.update(
+        current => e.message
+          .match(/\((.*?)\)/)[1]
+            .split('/')[1]
+              .replace(/-/g, ' ')
+      )
+    }
+  }
+
+  async signUpWithEmail(){
+    try{
+      var result = await createUserWithEmailAndPassword(
+        getAuth(),
+        this.authInfo.value.email,
+        this.authInfo.value.password
+      )
+
+      this.successSignUpWithEmail.set(true)
+
+      //sendEmailVerification(result.user)
+    }
+    catch(e:any){
+      this.signUpWithEmailErrorMessage.set(
+        e.message
+          .match(/\((.*?)\)/)[1]
+            .split('/')[1]
+              .replace(/-/g, ' ')
+      )
     }
   }
 
