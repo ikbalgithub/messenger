@@ -24,6 +24,7 @@ import { Router } from '@angular/router'
     InputTextModule,
     DialogModule,
     ButtonModule,
+    ReactiveFormsModule
   ]
 })
 export class RegisterComponent implements OnInit{
