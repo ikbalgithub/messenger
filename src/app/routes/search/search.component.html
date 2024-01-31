@@ -13,7 +13,7 @@
       />
     </span>
   </div>
-  <div class="border-2 mt-[78px] border-yellow-900 flex flex-col flex-1 gap-3 p-3 shadow-inner  {{searchState().running || searchState().error ? 'center':''}}">
+  <div class="border-2 mt-[78px] border-yellow-900 flex flex-col flex-1 gap-3 p-3 shadow-inner  {{(searchState().running || searchState().error) || searchState().result && searchState().result.length < 1 ? 'center':''}}">
     <p-progressSpinner *ngIf="searchState().running; else result"/>
 
      <ng-template #result>
@@ -26,6 +26,9 @@
               [groupId]="x.message?.groupId ?? common.getNewId()"
               [value]="x.message?.value ?? ''"
             />
+          }
+          @empty{
+            no result
           }
         }
         @else{

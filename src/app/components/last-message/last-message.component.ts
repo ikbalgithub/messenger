@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { RouterLink } from '@angular/router'
 import { Component,Input } from '@angular/core';
-import { Profile } from '../../../index.d'
+import { Common } from '../../../index.d'
 import { ChipModule } from 'primeng/chip';
 import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { AvatarModule } from 'primeng/avatar';
@@ -16,7 +16,7 @@ import { AvatarGroupModule } from 'primeng/avatargroup';
   styleUrl: './last-message.component.css'
 })
 export class LastMessageComponent {
-  @Input() profile!:Profile
+  @Input() profile!:Common.Profile
   @Input() value!:string
   @Input() unread!:boolean
   @Input() unreadCounter!:string

@@ -25,11 +25,11 @@
   <form class="flex flex-col gap-3" [formGroup]="authInfo">
     <div class="flex flex-col gap-1">
       <label for="email" class="font-bold">Email</label>
-      <input class="{{successSignUpWithEmail() ? 'bg-slate-200' : ''}}" [disabled]="successSignUpWithEmail()" formControlName="email" pInputText id="email">
+      <input type="email" class="{{successSignUpWithEmail() ? 'bg-slate-200' : ''}}" formControlName="email" pInputText id="email">
     </div>
     <div class="flex flex-col gap-1">
       <label for="password" class="font-bold">Password</label>
-      <input class="{{successSignUpWithEmail() ? 'bg-slate-200' : ''}}" [disabled]="successSignUpWithEmail()" formControlName="password" pInputText id="password" />
+      <input class="{{successSignUpWithEmail() ? 'bg-slate-200' : ''}}" formControlName="password" pInputText id="password" />
     </div>
     <p *ngIf="successSignUpWithEmail()">
       an email verification has been sent. open it and verify your account

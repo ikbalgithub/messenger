@@ -1,43 +1,7 @@
 import { ActionReducer,Reducer,Action,ReducerTypes,ActionCreator,TypedAction,FunctionWithParametersType,ActionCreatorProps } from '@ngrx/store';
 import { HttpErrorResponse,HttpEvent,HttpHeaders } from '@angular/common/http';
 import { WritableSignal } from '@angular/core';
-
-
-export interface User {
-  _id:string|null,
-  profile:Profile|null,
-}
-
-export interface Authenticated{
-  _id:string,
-  profile:Profile,
-  authorization:string
-}
-
-export interface Authentication{
-  loggedIn:boolean
-}
-
-export interface State {
-  authentication:Authentication,
-  authorization:string,
-  user:User
-}
-
-
-export interface Profile{
-  surname:string,
-  profileImage:string,
-  firstName:string,
-  usersRef?:string,
-  _id?:string,
-}
-
-export interface Credential {
-  username:string,
-  password:string
-}
-
+ 
 export type Authorization = string | HttpHeaders
 
 export namespace Message{
@@ -93,6 +57,39 @@ export namespace Search{
   }
 }
 
+
+export namespace Common{
+  interface Profile{
+    surname:string,
+    profileImage:string,
+    firstName:string,
+    usersRef?:string,
+    _id?:string,
+  }
+
+  export interface Authenticated{
+    _id:string,
+    profile:Profile,
+    authorization:string
+  }
+}
+
+export namespace Ngrx{
+  export interface User {
+    _id:string|null,
+    profile:Common.Profile|null,
+  }
+
+  export interface Authentication{
+    loggedIn:boolean
+  }
+
+  export interface State {
+    authentication:Authentication,
+    authorization:string,
+    user:User
+  }
+}
 
 export namespace Request{
 

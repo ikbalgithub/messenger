@@ -6,7 +6,7 @@ import { getToken } from "firebase/messaging";
 import { CommonModule } from '@angular/common';
 import { Component,OnInit,OnDestroy,inject,Signal,signal,effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { State,Message,Request } from '../../../index.d'
+import { Ngrx,Message,Request } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { LastMessageComponent } from '../../components/last-message/last-message.component'
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
@@ -55,9 +55,9 @@ export class HomeComponent implements OnInit,OnDestroy{
   
   connected = false
   router = inject(Router)
-  store = inject(Store<State>)
+  store = inject(Store<Ngrx.State>)
   requestSvc = inject(RequestService)
-  commonSvc = inject(CommonService)
+  commonService = inject(CommonService)
   firebaseSvc = inject(FirebaseService)
 
   recentlyMessages = signal<Message.Last[]>([])
@@ -65,7 +65,7 @@ export class HomeComponent implements OnInit,OnDestroy{
 
   vapidKey = "BDzXQnX_MM53PtjiHWGsZjJDp5G0Feyr30xMAhtaekR-OdfQXQKFDbAINqjtMx5bCcUBBZ0fIeuF6eiAqbOhOiw"
   
-  authorization:string|HttpHeaders = toSignal(this.store.select('authorization'))()
+  authorization:string = toSignal(this.store.select('authorization'))()
 
   fetchRecentlyMessagesState = this.requestSvc.createInitialState<Message.Last[]>()
   
@@ -76,9 +76,9 @@ export class HomeComponent implements OnInit,OnDestroy{
   })
 
   ngOnInit(){
-    this.authorization = this.commonSvc.createHeaders(
-      this.authorization
-    )
+    var headers = this.commonService.createHeaders({
+      authorization:this.commonService.authorizationHeader
+    })
 
     this.fetchRecentlyMessagesFn('message/recently',{
       headers:this.authorization

@@ -1,12 +1,11 @@
 import { Store } from '@ngrx/store'
 import { Router } from '@angular/router'
+import { Ngrx } from '../../../index.d'
 import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Component,inject,computed } from '@angular/core';
+import { Component,inject,effect,OnInit,signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { State,Authenticated,Credential } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { AuthService } from '../../services/auth/auth.service'
-import { trigger, state, style, transition, animate } from '@angular/animations';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -18,90 +17,75 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
   styleUrl: './login.component.css',
   providers:[RequestService],
   imports:[CommonModule,ReactiveFormsModule],
-  animations: [
-    trigger('loginFailed', [
-      state('fadeIn', style({
-        position:'relative',
-        opacity:1
-      })),
-      state('fadeOut',style({
-        position:'absolute',
-        opacity:0
-      })),
-      transition('fadeOut <=> fadeIn', [
-        animate('2s')
-      ]),
-    ])
-  ]
 })
 export class LoginComponent {
   router = inject(Router)
-  store = inject(Store<State>)
+  store = inject(Store<Ngrx.State>)
   request = inject(RequestService)
   authSvc = inject(AuthService)
   firebase = inject(FirebaseService)
+  auth = getAuth()
 
-  credential:FormGroup = new FormGroup({
-    username: new FormControl(''),
-    password: new FormControl(''),
+  credential = new FormGroup({
+    email: new FormControl<string>(''),
+    password: new FormControl<string>(''),
   })
 
-  loginState = this.request.createInitialState<Authenticated[]>()
+  loginState = this.request.createInitialState<any>()
+  errorMessage = signal<null|string>(null)
 
-  loginRequest = this.request.post<Credential,Authenticated[]>({
-    failedCb:e => this.onLoginFailed(e),
-    cb:this.onLoginSuccess.bind(this),
+  findOrCreate = this.request.post<any,any>({
+    failedCb:e => this.errorMessage.update(
+      current => e.message
+    ),
+    cb:r => this.authSvc.next(r),
     state:this.loginState,
-    path:'user/login'
+    path:'oauth',
   })
 
-  /*
-   * set boolean not found to true if user not found
-   */
-
-  notFound = computed<boolean>(() => {
-    if(this.loginState().result && (this.loginState().result as Authenticated[]).length < 1){
-      return true
-    }
-    else{
-      return false
-    }
-  })
-
-  /*
-   * reset login state to make error message dissapear
-   */
-
-  onLoginFailed(e:HttpErrorResponse){
+  setErrorNull = effect(() => {
+    let message = this.errorMessage()
     setTimeout(() => {
-      this.loginState.update(current => {
-        return {
-          running:false
-        }
-     })
-    },2000)
-  }
+       this.errorMessage.set(null)
+    },3000)
+  })
 
-  /*
-   * when usename and password is valid
-   */
 
-  onLoginSuccess([result]:Authenticated[]){
-    if(result) this.authSvc.next(result)
-  }
-
-  async login(){
+  async login(credential = this.credential as FormGroup){
     try{
       var result = await signInWithEmailAndPassword(
-        getAuth(), 
-        this.credential.value.username, 
-        this.credential.value.password
+        this.auth, 
+        credential.value.email, 
+        credential.value.password
       )
 
-      console.log(result)
+      if(result.user.emailVerified){
+        this.findOrCreate({
+          uid:result.user.uid,
+          profile:{
+            firstName:'User',
+            surname:`${Date.now()}`,
+            profileImage:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgt6wCXkcc2T3ZYH_hSWtwyBudcZLq-rBMBQ&usqp=CAU'
+          }
+        })
+      }
+      else{
+        this.errorMessage.update(
+          c => `your account hasn't been verificated yet`
+        )
+      }
     }
     catch(e:any){
-      console.log(e.message)
+      this.errorMessage.update(
+        c => e.message
+          .match(/\((.*?)\)/)[1]
+            .split('/')[1]
+              .replace(/-/g, ' ')
+      )
     }
+  }
+
+  ngOnInit(){
+    
   }
 }

@@ -1,3 +1,4 @@
+import { User } from "firebase/auth"
 import { CommonModule } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
 import { Component,inject,OnInit,signal,effect } from '@angular/core';
@@ -32,6 +33,8 @@ export class RegisterComponent implements OnInit{
   authService = inject(AuthService)
   requestService = inject(RequestService)
   firebaseService = inject(FirebaseService)
+  auth = getAuth()
+
 
   messages = [{ severity: 'error', summary: 'Failed', detail: 'failed'}]
 
@@ -71,7 +74,7 @@ export class RegisterComponent implements OnInit{
   async signUpWithGoogle(){
     try{
       var {user} = await signInWithPopup(
-        getAuth(),
+        this.auth,
         this.provider
       )
 
@@ -97,14 +100,16 @@ export class RegisterComponent implements OnInit{
   async signUpWithEmail(){
     try{
       var result = await createUserWithEmailAndPassword(
-        getAuth(),
+        this.auth,
         this.authInfo.value.email,
         this.authInfo.value.password
       )
 
       this.successSignUpWithEmail.set(true)
+      this.authInfo.get("email")?.disable()
+      this.authInfo.get("password")?.disable()
 
-      //sendEmailVerification(result.user)
+      sendEmailVerification(result.user)
     }
     catch(e:any){
       this.signUpWithEmailErrorMessage.set(

@@ -4,7 +4,7 @@ import { Component,inject,signal,effect } from '@angular/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { Location,CommonModule } from '@angular/common';
 import { Router } from '@angular/router'
-import { State,Authorization,Search } from '../../../index.d'
+import { Ngrx,Authorization,Search } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -35,7 +35,7 @@ export class SearchComponent {
   query = ''
   location = inject(Location)
   request = inject(RequestService)
-  store = inject(Store<State>)
+  store = inject(Store<Ngrx.State>)
   common = inject(CommonService)
     
   user = toSignal(this.store.select('user'))()

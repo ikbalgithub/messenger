@@ -2,13 +2,15 @@
   <div class="bg-blue-900 flex flex-row w-full fixed shadow-inner">
     <div class="flex flex-row flex-1 p-3 gap-3 items-center">
       <p-avatar
+        (click)="router.navigate(['profile'])"
+        class="cursor-pointer"
         [image]="user.profile.profileImage" 
         size="xlarge" 
         shape="circle"
       />
       <div class="flex flex-row gap-2">
         <p class="text-white font-medium">
-          {{user.profile?.firstName}}
+          {{user.profile?.firstName}} {{user.profile?.surname}}
         </p>
 
         <p class="text-slate-300" *ngIf="!connected">
@@ -17,7 +19,7 @@
       </div>
     </div>
   </div>
-  <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().running || fetchRecentlyMessagesState().error ? 'center':''}}">
+  <div class="mt-[94px] border-2 border-black flex flex-col {{recentlyMessages().length < 1 ? 'center':''}} flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().running || fetchRecentlyMessagesState().error ? 'center':''}}">
     <p-progressSpinner *ngIf="fetchRecentlyMessagesState().running; else messages"/>
 
     <ng-template #messages>
@@ -30,6 +32,9 @@
             [groupId]="message.groupId"
             [value]="message.value"
           />
+        }
+        @empty{
+          No recently message
         }
       }
       @else{
