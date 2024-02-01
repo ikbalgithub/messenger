@@ -1,12 +1,11 @@
 import { Store } from '@ngrx/store'
 import { Router } from '@angular/router'
+import { Ngrx,Common } from '../../../index.d'
 import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Component,inject,computed } from '@angular/core';
+import { Component,inject,effect,OnInit,signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { State,Authenticated,Credential } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { AuthService } from '../../services/auth/auth.service'
-import { trigger, state, style, transition, animate } from '@angular/animations';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -16,92 +15,75 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
   standalone: true,
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  providers:[RequestService],
   imports:[CommonModule,ReactiveFormsModule],
-  animations: [
-    trigger('loginFailed', [
-      state('fadeIn', style({
-        position:'relative',
-        opacity:1
-      })),
-      state('fadeOut',style({
-        position:'absolute',
-        opacity:0
-      })),
-      transition('fadeOut <=> fadeIn', [
-        animate('2s')
-      ]),
-    ])
-  ]
 })
 export class LoginComponent {
   router = inject(Router)
-  store = inject(Store<State>)
-  request = inject(RequestService)
-  authSvc = inject(AuthService)
-  firebase = inject(FirebaseService)
+  requestService = inject(RequestService)
+  authService = inject(AuthService)
+  firebaseService = inject(FirebaseService)
+  auth = getAuth()
 
-  credential:FormGroup = new FormGroup({
-    username: new FormControl(''),
-    password: new FormControl(''),
+  errorMessage = signal<null|string>(null)
+  placeholder = import.meta.env.NG_APP_PLACEHOLDER
+
+  credential = new FormGroup({
+    email: new FormControl<string>(''),
+    password: new FormControl<string>(''),
   })
 
-  loginState = this.request.createInitialState<Authenticated[]>()
+  loginState = this.requestService.createInitialState<Common.Authenticated>()
 
-  loginRequest = this.request.post<Credential,Authenticated[]>({
-    failedCb:e => this.onLoginFailed(e),
-    cb:this.onLoginSuccess.bind(this),
+  findOrCreate = this.requestService.post<Common.Oauth,Common.Authenticated>({
     state:this.loginState,
-    path:'user/login'
+    path:'oauth',
+    cb:r => this.authService.next(r),
+    failedCb:e => this.errorMessage.update(
+      current => e.message
+    ),
   })
 
-  /*
-   * set boolean not found to true if user not found
-   */
-
-  notFound = computed<boolean>(() => {
-    if(this.loginState().result && (this.loginState().result as Authenticated[]).length < 1){
-      return true
-    }
-    else{
-      return false
-    }
+  setErrorNull = effect(() => {
+    var message = this.errorMessage()
+    setTimeout(() => this.errorMessage.set(null),3000)
   })
 
-  /*
-   * reset login state to make error message dissapear
-   */
 
-  onLoginFailed(e:HttpErrorResponse){
-    setTimeout(() => {
-      this.loginState.update(current => {
-        return {
-          running:false
-        }
-     })
-    },2000)
-  }
-
-  /*
-   * when usename and password is valid
-   */
-
-  onLoginSuccess([result]:Authenticated[]){
-    if(result) this.authSvc.next(result)
-  }
-
-  async login(){
+  async login(credential = this.credential as FormGroup){
     try{
       var result = await signInWithEmailAndPassword(
-        getAuth(), 
-        this.credential.value.username, 
-        this.credential.value.password
+        this.auth, 
+        credential.value.email, 
+        credential.value.password
       )
 
-      console.log(result)
+      var profile = {
+        firstName:'User',
+        surname:`${Date.now()}`,
+        profileImage:this.placeholder
+      }
+
+      var newUser = {
+        uid:result.user.uid,
+        profile:profile
+      }
+
+      if(result.user.emailVerified){
+        this.findOrCreate(newUser)
+      }
+      else{
+        this.errorMessage.update(
+          c => `your account hasn't been verificated yet`
+        )
+      }
     }
     catch(e:any){
-      console.log(e.message)
+      this.errorMessage.update(
+        c => e.message
+          .match(/\((.*?)\)/)[1]
+            .split('/')[1]
+              .replace(/-/g, ' ')
+      )
     }
   }
 }

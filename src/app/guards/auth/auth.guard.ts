@@ -1,5 +1,5 @@
 import { inject,Signal } from '@angular/core';
-import { State } from '../../../index.d'
+import { Ngrx } from '../../../index.d'
 import { Store } from '@ngrx/store'
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CanActivateFn,Router,ActivatedRouteSnapshot,RouterStateSnapshot } from '@angular/router';
@@ -7,7 +7,7 @@ import { CanActivateFn,Router,ActivatedRouteSnapshot,RouterStateSnapshot } from 
 
 export const authGuard = (route:ActivatedRouteSnapshot,state:RouterStateSnapshot):boolean => {
   const router= inject(Router)
-  const store = inject(Store<State>)
+  const store = inject(Store<Ngrx.State>)
   const authentication = toSignal(store.select('authentication'))()
 
   var loggedIn = authentication.loggedIn ?? false

@@ -1,44 +1,8 @@
 import { ActionReducer,Reducer,Action,ReducerTypes,ActionCreator,TypedAction,FunctionWithParametersType,ActionCreatorProps } from '@ngrx/store';
 import { HttpErrorResponse,HttpEvent,HttpHeaders } from '@angular/common/http';
 import { WritableSignal } from '@angular/core';
-
-
-export interface User {
-  _id:string|null,
-  profile:Profile|null,
-}
-
-export interface Authenticated{
-  _id:string,
-  profile:Profile,
-  authorization:string
-}
-
-export interface Authentication{
-  loggedIn:boolean
-}
-
-export interface State {
-  authentication:Authentication,
-  authorization:string,
-  user:User
-}
-
-
-export interface Profile{
-  surname:string,
-  profileImage:string,
-  firstName:string,
-  usersRef?:string,
-  _id?:string,
-}
-
-export interface Credential {
-  username:string,
-  password:string
-}
-
-export type Authorization = string | HttpHeaders
+ 
+// export type Authorization = string | HttpHeaders
 
 export namespace Message{
   interface Last{
@@ -50,8 +14,8 @@ export namespace Message{
     unreadCounter:number
     value:string,
     groupId:string,
-    sender:Profile,
-    accept:Profile,
+    sender:Common.Profile,
+    accept:Common.Profile,
   }
 
   type All = {
@@ -70,8 +34,8 @@ export namespace Message{
   export type One = All[number]
 
   export type Populated = One & {
-    sender:Profile,
-    accept:Profile
+    sender:Common.Profile,
+    accept:Common.Profile
   }
 
   type New = {
@@ -88,11 +52,49 @@ export namespace Message{
 }
 
 export namespace Search{
-  type Result = Profile & {
+  type Result = Common.Profile & {
     message?:Message.Last
   }
 }
 
+
+export namespace Common{
+  interface Profile{
+    surname:string,
+    profileImage:string,
+    firstName:string,
+    usersRef?:string,
+    _id?:string,
+  }
+
+  interface Authenticated{
+    _id:string,
+    profile:Profile,
+    authorization:string
+  }
+
+  interface Oauth{
+    uid:string,
+    profile:Omit<Profile,"_id|usersRef">
+  }
+}
+
+export namespace Ngrx{
+  export interface User {
+    _id:string|null,
+    profile:Common.Profile|null,
+  }
+
+  export interface Authentication{
+    loggedIn:boolean
+  }
+
+  export interface State {
+    authentication:Authentication,
+    authorization:string,
+    user:User
+  }
+}
 
 export namespace Request{
 
@@ -112,10 +114,16 @@ export namespace Request{
   }
 
   export interface RequestState<Result>{
-    retryFunction?:() => void,
     running:boolean,
-    error?:HttpErrorResponse,
-    result?:Result
+    isError:boolean,
+    result:Result,
+    message?:string,
+    retryFunction?:Function
+    
+    // retryFunction?:() => void,
+    // running:boolean,
+    // error?:HttpErrorResponse,
+    // result?:Result
   }
 
 }

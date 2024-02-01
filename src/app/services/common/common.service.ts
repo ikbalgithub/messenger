@@ -1,13 +1,17 @@
 import { Injectable,inject } from '@angular/core';
+import { Ngrx } from '../../../index.d'
 import { HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute,Router,Params } from '@angular/router'
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Types } from 'mongoose';
+import { Store } from '@ngrx/store'
+
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class CommonService {
+export class CommonService{
   route = inject(ActivatedRoute)
   snapshot = this.route.snapshot
 
@@ -15,19 +19,15 @@ export class CommonService {
     return `${server}/${path}`
   }
 
-  createHeaders(token:string|HttpHeaders):HttpHeaders{
-    var authorization = `Bearer ${token}`
-
-    return new HttpHeaders({
-      authorization
-    })
-  }
-
-  getNewId():string{
-    return new Types.ObjectId().toString()
-  }
-
   getParameterByName(name:string):string|null{
     return this.snapshot.queryParamMap.get(name)
   }
+
+  test():string{
+    return 'x'
+  }
+}
+
+interface Test{
+  test:() => string
 }

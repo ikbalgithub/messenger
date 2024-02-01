@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from "firebase/app";
-import { getMessaging } from "firebase/messaging";
+import { getStorage } from "firebase/storage";
 
 
 @Injectable({
@@ -16,4 +16,6 @@ export class FirebaseService {
     appId:import.meta.env.NG_APP_FIREBASE_APP_ID,
     measurementId:import.meta.env.NG_APP_FIREBASE_MEASUREMENT_ID
   })
+
+  storage = getStorage(this.app)
 }

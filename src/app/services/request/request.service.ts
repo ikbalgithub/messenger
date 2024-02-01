@@ -15,7 +15,9 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
  
   createInitialState<Result>():Request.State<Result>{
     return signal<Request.RequestState<Result>>({
-      running:false
+      isError:false,
+      running:false,
+      result:[] as Result
     })
   }
 
@@ -26,15 +28,25 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
     var retryFunction = () => { /* run retry ... */ }
     
     var error = (response:HttpErrorResponse) => {
+      var message = response.message
+
       if(config.failedCb) config.failedCb(
         response
       )
-      
+
       config.state.set({
         running:false,
-        error:response,
-        retryFunction
+        isError:true,
+        message,
+        retryFunction,
+        result:[] as Result
       })
+      
+      // config.state.set({
+      //   running:false,
+      //   error:response,
+      //   retryFunction
+      // })
     }
 
     var next = (response:HttpEvent<Result>) => {
@@ -46,13 +58,23 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
       config.state.set({
         running:false,
+        isError:false,
         result
       })
+
+      // config.state.set({
+      //   running:false,
+      //   result
+      // })
     }
 
 
     return (body:Body,options?:any):void => {
-      config.state.set({running:true})
+      config.state.set({
+        running:true,
+        isError:false,
+        result:[] as Result
+      })
 
       retryFunction = () => recursive(
         config
@@ -92,15 +114,24 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
     var retryFunction = () => { /* run retry ... */ }
     
     var error = (response:HttpErrorResponse) => {
+      var message = response.message
       if(config.failedCb) config.failedCb(
         response
       )
-      
+
       config.state.set({
         running:false,
-        error:response,
-        retryFunction
+        isError:true,
+        message,
+        retryFunction,
+        result:[] as Result
       })
+      
+      // config.state.set({
+      //   running:false,
+      //   error:response,
+      //   retryFunction
+      // })
     }
 
     var next = (response:HttpEvent<Result>) => {
@@ -112,13 +143,24 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
       config.state.set({
         running:false,
+        isError:false,
         result
       })
+
+      // config.state.set({
+      //   running:false,
+      //   result
+      // })
     }
 
 
     return (body:Body,options?:any):void => {
-      config.state.set({running:true})
+      config.state.set({
+        running:true,
+        isError:false,
+        result:[] as Result
+      })
+
 
       retryFunction = () => recursive(
         config
@@ -158,15 +200,24 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
     var retryFunction = () => { /* run retry */ }
 
     var error = (response:HttpErrorResponse) => {
+      var message = response.message
       if(config.failedCb) config.failedCb(
         response
       )
       
       config.state.set({
         running:false,
-        error:response,
-        retryFunction
+        isError:true,
+        message,
+        retryFunction,
+        result:[] as Result
       })
+
+      // config.state.set({
+      //   running:false,
+      //   error:response,
+      //   retryFunction
+      // })
     }
 
     var next = (response:HttpEvent<Result>) => {
@@ -178,13 +229,24 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
       config.state.set({
         running:false,
+        isError:false,
         result
       })
+
+      // config.state.set({
+      //   running:false,
+      //   result
+      // })
     }
 
     return (path:string,options?:any):void => {
 
-      config.state.set({running:true})
+      config.state.set({
+        running:true,
+        isError:false,
+        result:[] as Result
+      })
+
 
       retryFunction = () => recursive(
         config

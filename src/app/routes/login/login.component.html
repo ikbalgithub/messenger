@@ -1,7 +1,7 @@
 <div class="fullscreen bg-slate-200 flex flex-col gap-3 center">
-	<div [@loginFailed]="loginState().error || notFound()  ? 'fadeIn' : 'fadeOut'"  class="bg-red rounded p-2 bg-red-900 w-3/5 sm:w-2/5 lg:w-1/4">
+	<div class="bg-red rounded p-2 bg-red-900 w-3/5 sm:w-2/5 lg:w-1/4" *ngIf="errorMessage()">
      <p class="text-white text-center p-3 font-medium">
-       something went wrong or user not found
+       {{errorMessage()}}
      </p>
   </div>
 
@@ -17,11 +17,11 @@
         Login
       </h1>
     </div>
-    <form class="flex flex-col gap-4" [formGroup]="credential" (submit)="loginRequest(credential.value)">
+    <form class="flex flex-col gap-4" [formGroup]="credential">
       <input 
-        type="text"
+        type="email"
         placeholder="username"
-        formControlName="username"
+        formControlName="email"
         class="p-2 border-2 border-black rounded"
       />
       <input 
@@ -31,15 +31,7 @@
         class="p-2 border-2 border-black rounded"
       />
       <button (click)="login()"  class='bg-black rounded text-white p-2'>
-      	@if(loginState().running){
-          Loading...
-        }
-        @else{
-          Login Now!
-        }
-      </button>
-      <button (click)="router.navigate(['register'])" type="submit" class='bg-red-900 rounded text-white p-2'>
-        Register
+      	Login
       </button>
     </form>
 	</div>
