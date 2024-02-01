@@ -41,6 +41,6 @@
   </ng-template>
 </p-dialog>
 
-<div *ngIf="!isUserExist().running" class="fullscreen flex flex-col center bg-black opacity-50">
+<div *ngIf="isUserExist().running" class="fullscreen flex flex-col center bg-black opacity-50">
   <p-progressSpinner/>
 </div>
