@@ -203,7 +203,7 @@ export class HomeComponent implements OnInit{
 
 
   fetchMessageState = this.requestService.createInitialState<Message.Last[]>()
-  
+
   fetchMessage = this.requestService.get<Message.Last[]>({
     state:this.fetchMessageState,
     cb:r => this.recentlyMessages.set(r),

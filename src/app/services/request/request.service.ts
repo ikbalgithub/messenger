@@ -16,7 +16,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
   createInitialState<Result>():Request.State<Result>{
     return signal<Request.RequestState<Result>>({
       isError:false,
-      done:false,
+      running:false,
       result:[] as Result
     })
   }
@@ -35,7 +35,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
 
       config.state.set({
-        done:true,
+        running:false,
         isError:true,
         message,
         retryFunction,
@@ -57,7 +57,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
 
       config.state.set({
-        done:true,
+        running:false,
         isError:false,
         result
       })
@@ -71,7 +71,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
     return (body:Body,options?:any):void => {
       config.state.set({
-        done:false,
+        running:true,
         isError:false,
         result:[] as Result
       })
@@ -120,7 +120,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
 
       config.state.set({
-        done:true,
+        running:false,
         isError:true,
         message,
         retryFunction,
@@ -142,7 +142,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
 
       config.state.set({
-        done:true,
+        running:false,
         isError:false,
         result
       })
@@ -156,7 +156,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
     return (body:Body,options?:any):void => {
       config.state.set({
-        done:false,
+        running:true,
         isError:false,
         result:[] as Result
       })
@@ -206,7 +206,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
       
       config.state.set({
-        done:true,
+        running:false,
         isError:true,
         message,
         retryFunction,
@@ -228,7 +228,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
       )
 
       config.state.set({
-        done:true,
+        running:false,
         isError:false,
         result
       })
@@ -242,7 +242,7 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
     return (path:string,options?:any):void => {
 
       config.state.set({
-        done:false,
+        running:true,
         isError:false,
         result:[] as Result
       })

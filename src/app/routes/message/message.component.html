@@ -15,8 +15,8 @@
       </p>
     </div>
   </div>
-  <div class="{{!fetchAllMessageState().done || fetchAllMessageState().isError ? 'center':''}} flex-1 overflox-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex-1 flex flex-col">
-    <p-progressSpinner *ngIf="!fetchAllMessageState().done; else result"/>
+  <div class="flex-1 overflox-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex-1 flex flex-col">
+    <p-progressSpinner *ngIf="fetchAllMessageState().running; else result"/>
 
     <ng-template #result>
       @if(!fetchAllMessageState().isError){

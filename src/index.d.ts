@@ -114,7 +114,7 @@ export namespace Request{
   }
 
   export interface RequestState<Result>{
-    done:boolean,
+    running:boolean,
     isError:boolean,
     result:Result,
     message?:string,
