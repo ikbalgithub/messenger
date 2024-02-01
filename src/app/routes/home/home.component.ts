@@ -49,7 +49,7 @@ export class HomeComponent implements OnInit{
   recentlyMessages = signal<Message.Last[]>([])
  
   onNewMessage = this.socketService.socket.on('newMessage',(newMessage:Message.One) =>{
-    var result = this.fetchMessageState().result as Message.Last[]
+    var result = this.fetchState().result as Message.Last[]
     var JSONMessages = result.map(m => JSON.stringify(m))
     var [filter] = result.filter((message,index) => {
       return (
@@ -75,7 +75,7 @@ export class HomeComponent implements OnInit{
           unreadCounter:counter
         }
 
-        this.fetchMessageState.update(current => {
+        this.fetchState.update(current => {
           return {
             ...current,
             result
@@ -95,7 +95,7 @@ export class HomeComponent implements OnInit{
           unreadCounter:1
         }
 
-        this.fetchMessageState.update(current => {
+        this.fetchState.update(current => {
           return {
             ...current,
             result
@@ -157,10 +157,10 @@ export class HomeComponent implements OnInit{
   })
 
   onMessage = this.socketService.socket.on('message',(newMessage:Message.Populated) => {
-    var messages = this.fetchMessageState().result as Message.Last[]
+    var messages = this.fetchState().result as Message.Last[]
     if(messages.filter(e => e._id === newMessage._id)?.length < 1){
       if(newMessage.accept.usersRef === this.user._id){
-        this.fetchMessageState.update((current) => {
+        this.fetchState.update((current) => {
           var withCounter = {
             ...newMessage,
             unreadCounter:1
@@ -202,10 +202,10 @@ export class HomeComponent implements OnInit{
   })
 
 
-  fetchMessageState = this.requestService.createInitialState<Message.Last[]>()
+  fetchState = this.requestService.createInitialState<Message.Last[]>()
 
   fetchMessage = this.requestService.get<Message.Last[]>({
-    state:this.fetchMessageState,
+    state:this.fetchState,
     cb:r => this.recentlyMessages.set(r),
     failedCb: e => console.log(e)
   })
@@ -222,6 +222,6 @@ export class HomeComponent implements OnInit{
   }
 
   retry(){
-    (this.fetchMessageState().retryFunction as Function)()
+    (this.fetchState().retryFunction as Function)()
   }
 }

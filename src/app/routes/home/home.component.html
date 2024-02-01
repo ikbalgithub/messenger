@@ -19,12 +19,14 @@
       </div>
     </div>
   </div>
-  <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3">
-    <p-progressSpinner *ngIf="!fetchMessageState().running; else messages"/>
+  <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchState.isError ? 'center':''}}">
+    <div *ngIf="fetchState().running; else messages" class="flex-1 flex flex-col center">
+      <p-progressSpinner/>
+    </div>
 
     <ng-template #messages>
-      @if(!fetchMessageState().isError){
-        @for(message of fetchMessageState().result; track message){
+      @if(!fetchState().isError){
+        @for(message of fetchState().result; track message){
           <app-last-message
             [profile]="message | profile:user._id:'home'"
             [unread]="message.sender.usersRef !== user._id"
@@ -32,9 +34,6 @@
             [groupId]="message.groupId"
             [value]="message.value"
           />
-        }
-        @empty{
-          No recently message
         }
       }
       @else{
