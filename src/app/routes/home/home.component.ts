@@ -15,6 +15,8 @@ import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { CommonService } from '../../services/common/common.service'
 import { FirebaseService } from '../../services/firebase/firebase.service'
+import { StoreService } from '../../services/store/store.service'
+import { SocketService } from '../../services/socket/socket.service'
 import { ButtonModule } from 'primeng/button';
 
 @Component({
@@ -32,93 +34,77 @@ import { ButtonModule } from 'primeng/button';
     ToStringPipe,
   ],
 })
-export class HomeComponent implements OnInit,OnDestroy{
-  socket = io(
-    import.meta.env.NG_APP_SERVER
-  )
-  .on(
-    'newMessage',
-    this.onNewMessage.bind(this)
-  )
-  .on(
-    'message',
-    this.onMessage.bind(this)
-  )
-  .on(
-    'connect',() => {
-      this.connected = true
-    }
-  )
-  .on('disconnect',() => {
-    this.connected = false
-  })
-  
-  connected = false
+export class HomeComponent implements OnInit{
   router = inject(Router)
-  store = inject(Store<Ngrx.State>)
-  requestSvc = inject(RequestService)
+  storeService = inject(StoreService)
+  requestService = inject(RequestService)
   commonService = inject(CommonService)
-  firebaseSvc = inject(FirebaseService)
+  socketService = inject(SocketService)
+  store = inject(Store<Ngrx.State>)
+
+  user = this.storeService.user
+  authorization = this.storeService.authorization
+  u = toSignal(this.store.select('user'))
 
   recentlyMessages = signal<Message.Last[]>([])
-  user = toSignal(this.store.select('user'))()
-
-  vapidKey = "BDzXQnX_MM53PtjiHWGsZjJDp5G0Feyr30xMAhtaekR-OdfQXQKFDbAINqjtMx5bCcUBBZ0fIeuF6eiAqbOhOiw"
-  
-  authorization:string = toSignal(this.store.select('authorization'))()
-
-  fetchRecentlyMessagesState = this.requestSvc.createInitialState<Message.Last[]>()
-  
-  fetchRecentlyMessagesFn = this.requestSvc.get<Message.Last[]>({
-    state:this.fetchRecentlyMessagesState,
-    cb:r => this.recentlyMessages.set(r),
-    failedCb: e => this.onFailed()
-  })
-
-  ngOnInit(){
-    var headers = this.commonService.createHeaders({
-      authorization:this.commonService.authorizationHeader
+ 
+  onNewMessage = this.socketService.socket.on('newMessage',(newMessage:Message.One) =>{
+    var result = this.fetchMessageState().result as Message.Last[]
+    var JSONMessages = result.map(m => JSON.stringify(m))
+    var [filter] = result.filter((message,index) => {
+      return (
+        message.sender.usersRef
+        === newMessage.sender
+      ) || (
+        message.accept.usersRef
+        === newMessage.sender
+      )
     })
 
-    this.fetchRecentlyMessagesFn('message/recently',{
-      headers:this.authorization
-    })
-  }
+    if(filter && newMessage.accept === this.user._id){
+      if(filter.sender.usersRef === String(newMessage.sender)){
+        var counter = filter.unreadCounter + 1
+        var index = JSONMessages.indexOf(
+          JSON.stringify(filter)
+        )
 
-  onFailed(){
-    this.recentlyMessages.set(
-      [
-        {
-          sendAt:1705252055177,
-          read:true,
-          contentType:'',
-          description:'',
-          unreadCounter:0,
-          value:'halo',
-          groupId:'x',
-          sender:{
-            surname:'Huljannah',
-            firstName:'Mifta',
-            profileImage:'x',
-            usersRef:'x'
-          },
-          accept:{
-            surname:'Huljannah',
-            firstName:'Mifta',
-            profileImage:'x',
-            usersRef:'x'
-          }
+        result[index] = {
+          ...newMessage,
+          sender:filter.sender,
+          accept:filter.sender,
+          unreadCounter:counter
         }
-      ]
-    )
-  }
 
-  ngOnDestroy(){
-    this.socket.disconnect()
-  }
+        this.fetchMessageState.update(current => {
+          return {
+            ...current,
+            result
+          }
+        })
+      }
 
-  onNewMessage(newMessage:Message.One){
-    var _recentlyMessages = this.recentlyMessages()
+      if(filter.sender.usersRef === String(newMessage.accept)){
+        var index = JSONMessages.indexOf(
+          JSON.stringify(filter)
+        )
+
+        result[index] = {
+          ...newMessage,
+          sender:filter.accept,
+          accept:filter.sender,
+          unreadCounter:1
+        }
+
+        this.fetchMessageState.update(current => {
+          return {
+            ...current,
+            result
+          }
+        })
+      }
+    }
+
+    /*var _recentlyMessages = this.recentlyMessages()
     var [filter] = _recentlyMessages.filter(message => {
       return (
         message.sender.usersRef
@@ -167,10 +153,33 @@ export class HomeComponent implements OnInit,OnDestroy{
     }
     else{
       console.log('not on list')
-    }
-  }
+    }*/
+  })
 
-  onMessage(newMessage:Message.Populated){
+  onMessage = this.socketService.socket.on('message',(newMessage:Message.Populated) => {
+    var messages = this.fetchMessageState().result as Message.Last[]
+    if(messages.filter(e => e._id === newMessage._id)?.length < 1){
+      if(newMessage.accept.usersRef === this.user._id){
+        this.fetchMessageState.update((current) => {
+          var withCounter = {
+            ...newMessage,
+            unreadCounter:1
+          }
+
+          var result = [
+            withCounter,
+            ...messages,
+          ]
+
+          return {
+            ...current,
+            result
+          }
+        })
+      }
+    }
+
+    /*
     if(this.recentlyMessages().filter(e => e._id === newMessage._id).length < 1){
       if(newMessage.accept.usersRef === this.user._id){
         this.recentlyMessages.update((current) => {
@@ -185,15 +194,34 @@ export class HomeComponent implements OnInit,OnDestroy{
           ]
         })
       }
-
-     
     }
     else{
       console.log('has been on list')
     }
+    */
+  })
+
+
+  fetchMessageState = this.requestService.createInitialState<Message.Last[]>()
+  
+  fetchMessage = this.requestService.get<Message.Last[]>({
+    state:this.fetchMessageState,
+    cb:r => this.recentlyMessages.set(r),
+    failedCb: e => console.log(e)
+  })
+
+  ngOnInit(){
+    var path = `message/recently`
+    var headers = new HttpHeaders({
+      authorization:this.authorization
+    })
+
+    this.fetchMessage(
+      path,{headers}
+    )
   }
 
   retry(){
-    (this.fetchRecentlyMessagesState().retryFunction as Function)()
+    (this.fetchMessageState().retryFunction as Function)()
   }
 }

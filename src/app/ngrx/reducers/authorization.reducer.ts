@@ -7,6 +7,6 @@ export const authorizationReducer = createReducer<string>(
   state?.authorization ?? '',
 
   on(setAuthorization,(state:string,{authorization}) => {
-    return authorization
+    return `Bearer ${authorization}`
   })
 );

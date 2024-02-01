@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store'
 import { Router } from '@angular/router'
-import { Ngrx } from '../../../index.d'
+import { Ngrx,Common } from '../../../index.d'
 import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Component,inject,effect,OnInit,signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -15,39 +15,37 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
   standalone: true,
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  providers:[RequestService],
   imports:[CommonModule,ReactiveFormsModule],
 })
 export class LoginComponent {
   router = inject(Router)
-  store = inject(Store<Ngrx.State>)
-  request = inject(RequestService)
-  authSvc = inject(AuthService)
-  firebase = inject(FirebaseService)
+  requestService = inject(RequestService)
+  authService = inject(AuthService)
+  firebaseService = inject(FirebaseService)
   auth = getAuth()
+
+  errorMessage = signal<null|string>(null)
+  placeholder = import.meta.env.NG_APP_PLACEHOLDER
 
   credential = new FormGroup({
     email: new FormControl<string>(''),
     password: new FormControl<string>(''),
   })
 
-  loginState = this.request.createInitialState<any>()
-  errorMessage = signal<null|string>(null)
+  loginState = this.requestService.createInitialState<Common.Authenticated>()
 
-  findOrCreate = this.request.post<any,any>({
+  findOrCreate = this.requestService.post<Common.Oauth,Common.Authenticated>({
+    state:this.loginState,
+    path:'oauth',
+    cb:r => this.authService.next(r),
     failedCb:e => this.errorMessage.update(
       current => e.message
     ),
-    cb:r => this.authSvc.next(r),
-    state:this.loginState,
-    path:'oauth',
   })
 
   setErrorNull = effect(() => {
-    let message = this.errorMessage()
-    setTimeout(() => {
-       this.errorMessage.set(null)
-    },3000)
+    var message = this.errorMessage()
+    setTimeout(() => this.errorMessage.set(null),3000)
   })
 
 
@@ -59,15 +57,19 @@ export class LoginComponent {
         credential.value.password
       )
 
+      var profile = {
+        firstName:'User',
+        surname:`${Date.now()}`,
+        profileImage:this.placeholder
+      }
+
+      var newUser = {
+        uid:result.user.uid,
+        profile:profile
+      }
+
       if(result.user.emailVerified){
-        this.findOrCreate({
-          uid:result.user.uid,
-          profile:{
-            firstName:'User',
-            surname:`${Date.now()}`,
-            profileImage:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgt6wCXkcc2T3ZYH_hSWtwyBudcZLq-rBMBQ&usqp=CAU'
-          }
-        })
+        this.findOrCreate(newUser)
       }
       else{
         this.errorMessage.update(
@@ -83,9 +85,5 @@ export class LoginComponent {
               .replace(/-/g, ' ')
       )
     }
-  }
-
-  ngOnInit(){
-    
   }
 }

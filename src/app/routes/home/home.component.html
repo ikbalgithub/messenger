@@ -4,27 +4,27 @@
       <p-avatar
         (click)="router.navigate(['profile'])"
         class="cursor-pointer"
-        [image]="user.profile.profileImage" 
+        [image]="u().profile.profileImage" 
         size="xlarge" 
         shape="circle"
       />
       <div class="flex flex-row gap-2">
         <p class="text-white font-medium">
-          {{user.profile?.firstName}} {{user.profile?.surname}}
+          {{u().profile?.firstName}} {{u().profile?.surname}}
         </p>
 
-        <p class="text-slate-300" *ngIf="!connected">
+        <p class="text-slate-300" *ngIf="!socketService.connected">
           (disconnected...)
         </p>
       </div>
     </div>
   </div>
-  <div class="mt-[94px] border-2 border-black flex flex-col {{recentlyMessages().length < 1 ? 'center':''}} flex-1 gap-3 p-3 {{fetchRecentlyMessagesState().running || fetchRecentlyMessagesState().error ? 'center':''}}">
-    <p-progressSpinner *ngIf="fetchRecentlyMessagesState().running; else messages"/>
+  <div class="mt-[94px] border-2 border-black flex flex-col {{fetchMessageState()?.result?.length < 1 ? 'center':''}} flex-1 gap-3 p-3 {{fetchMessageState().running || fetchMessageState().error ? 'center':''}}">
+    <p-progressSpinner *ngIf="fetchMessageState().running; else messages"/>
 
     <ng-template #messages>
-      @if(fetchRecentlyMessagesState().result){
-        @for(message of recentlyMessages(); track message){
+      @if(fetchMessageState().result){
+        @for(message of fetchMessageState().result; track message){
           <app-last-message
             [profile]="message | profile:user._id:'home'"
             [unread]="message.sender.usersRef !== user._id"

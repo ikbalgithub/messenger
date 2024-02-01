@@ -21,9 +21,8 @@
           @for(x of searchState().result; track x){
             <app-last-message
               [profile]="x | profile:'':'search'"
-              [unread]="x.message && x?.message?.sender == x.usersRef ? true : false"
               [unreadCounter]="x.message ? (x.message.unreadCounter | toString) : '0'"
-              [groupId]="x.message?.groupId ?? common.getNewId()"
+              [groupId]="x?.message?.groupId ?? _alternativeId"
               [value]="x.message?.value ?? ''"
             />
           }

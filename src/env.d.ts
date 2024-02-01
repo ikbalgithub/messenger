@@ -12,4 +12,5 @@ interface ImportMetaEnv {
   readonly NG_APP_FIREBASE_MESSAGING_SENDER_ID:string;
   readonly NG_APP_FIREBASE_APP_ID:string;
   readonly NG_APP_FIREBASE_MEASUREMENT_ID:string;
+  readonly NG_APP_PLACEHOLDER:string;
 }

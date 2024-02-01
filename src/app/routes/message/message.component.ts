@@ -7,7 +7,7 @@ import { ActivatedRoute,Router,Params } from '@angular/router'
 import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule,Location } from '@angular/common';
-import { Message,Ngrx,Authorization } from '../../../index.d'
+import { Message,Ngrx } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { CommonService } from '../../services/common/common.service'
 import { HttpHeaders } from '@angular/common/http';
@@ -69,7 +69,7 @@ export class MessageComponent implements OnInit,OnDestroy {
   user = toSignal(this.store.select('user'))()
   pageState:PageState = window.history.state
   _id = this.route.snapshot.params['_id']
-  authorization:Authorization = toSignal(
+  authorization = toSignal(
     this.store.select('authorization')
   )()
 
@@ -126,12 +126,12 @@ export class MessageComponent implements OnInit,OnDestroy {
    */
 
   ngOnInit(){
-    this.authorization = this.common.createHeaders(
-      this.authorization
-    )
+    var headers = new HttpHeaders({
+      authorization:this.authorization
+    })
 
     this.fetchAllMessageFn(`message/all/${this._id}`,{
-      headers:this.authorization
+      headers
     })
   }
 
@@ -183,9 +183,14 @@ export class MessageComponent implements OnInit,OnDestroy {
       ]
     })
 
-    this.sendNewMessage(sendObject,{
-      headers:this.authorization
+    var headers = new HttpHeaders({
+      authorization:this.authorization
     })
+
+    this.sendNewMessage(
+      sendObject,
+      {headers}
+    )
   }
 
   /**

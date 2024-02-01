@@ -2,7 +2,7 @@ import { ActionReducer,Reducer,Action,ReducerTypes,ActionCreator,TypedAction,Fun
 import { HttpErrorResponse,HttpEvent,HttpHeaders } from '@angular/common/http';
 import { WritableSignal } from '@angular/core';
  
-export type Authorization = string | HttpHeaders
+// export type Authorization = string | HttpHeaders
 
 export namespace Message{
   interface Last{
@@ -14,8 +14,8 @@ export namespace Message{
     unreadCounter:number
     value:string,
     groupId:string,
-    sender:Profile,
-    accept:Profile,
+    sender:Common.Profile,
+    accept:Common.Profile,
   }
 
   type All = {
@@ -34,8 +34,8 @@ export namespace Message{
   export type One = All[number]
 
   export type Populated = One & {
-    sender:Profile,
-    accept:Profile
+    sender:Common.Profile,
+    accept:Common.Profile
   }
 
   type New = {
@@ -52,7 +52,7 @@ export namespace Message{
 }
 
 export namespace Search{
-  type Result = Profile & {
+  type Result = Common.Profile & {
     message?:Message.Last
   }
 }
@@ -67,10 +67,15 @@ export namespace Common{
     _id?:string,
   }
 
-  export interface Authenticated{
+  interface Authenticated{
     _id:string,
     profile:Profile,
     authorization:string
+  }
+
+  interface Oauth{
+    uid:string,
+    profile:Omit<Profile,"_id|usersRef">
   }
 }
 
