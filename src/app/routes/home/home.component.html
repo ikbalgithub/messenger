@@ -19,11 +19,11 @@
       </div>
     </div>
   </div>
-  <div class="mt-[94px] border-2 border-black flex flex-col {{fetchMessageState().result.length < 1 ? 'center':''}} flex-1 gap-3 p-3 {{fetchMessageState().running || fetchMessageState().error ? 'center':''}}">
-    <p-progressSpinner *ngIf="fetchMessageState().running; else messages"/>
+  <div class="mt-[94px] border-2 border-black flex flex-col {{fetchMessageState().result.length < 1 ? 'center':''}} flex-1 gap-3 p-3 {{!fetchMessageState().done || fetchMessageState().isError ? 'center':''}}">
+    <p-progressSpinner *ngIf="!fetchMessageState().done; else messages"/>
 
     <ng-template #messages>
-      @if(fetchMessageState().result){
+      @if(!fetchMessageState().isError){
         @for(message of fetchMessageState().result; track message){
           <app-last-message
             [profile]="message | profile:user._id:'home'"

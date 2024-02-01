@@ -114,10 +114,16 @@ export namespace Request{
   }
 
   export interface RequestState<Result>{
-    retryFunction?:() => void,
-    running:boolean,
-    error?:HttpErrorResponse,
-    result?:Result
+    done:boolean,
+    isError:boolean,
+    result:Result,
+    message?:string,
+    retryFunction?:Function
+    
+    // retryFunction?:() => void,
+    // running:boolean,
+    // error?:HttpErrorResponse,
+    // result?:Result
   }
 
 }

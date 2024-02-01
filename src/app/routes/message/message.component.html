@@ -15,11 +15,11 @@
       </p>
     </div>
   </div>
-  <div class=" {{fetchAllMessageState().running || fetchAllMessageState().error ? 'center':''}} flex-1 overflox-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex-1 flex flex-col">
-    <p-progressSpinner *ngIf="fetchAllMessageState().running; else result"/>
+  <div class="{{!fetchAllMessageState().done || fetchAllMessageState().isError ? 'center':''}} flex-1 overflox-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex-1 flex flex-col">
+    <p-progressSpinner *ngIf="!fetchAllMessageState().done; else result"/>
 
     <ng-template #result>
-      @if(fetchAllMessageState().result){
+      @if(!fetchAllMessageState().isError){
         @for(message of messages(); track message){
           @if(message.sender === user._id){
             <div class="flex flex-row justify-end">
