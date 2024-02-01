@@ -35,13 +35,14 @@ export class ProfileComponent {
   
   user = this.storeService.user
   authorization = this.storeService.authorization
-  uploadRef = `profileImages/${this.user._Id}`
+  uploadRef = `profileImages/${this.user._id}`
   _ref = ref(this.firebaseService.storage,this.uploadRef)
     
   formsUpdate : FormGroup = new FormGroup({
     profileImage:new FormControl(this.user.profile.profileImage),
     firstName:new FormControl(this.user.profile.firstName),
     surname:new FormControl(this.user.profile.surname),
+    _id:new FormControl(this.user.profile?._id)
   })
 
   updateState = this.request.createInitialState<any>()
