@@ -35,6 +35,7 @@ import { ButtonModule } from 'primeng/button';
   ],
 })
 export class HomeComponent implements OnInit{
+  connected = false
   router = inject(Router)
   storeService = inject(StoreService)
   requestService = inject(RequestService)
@@ -61,7 +62,7 @@ export class HomeComponent implements OnInit{
       )
     })
 
-    if(filter && newMessage.accept === this.user._id){
+    if(filter){
       if(filter.sender.usersRef === String(newMessage.sender)){
         var counter = filter.unreadCounter + 1
         var index = JSONMessages.indexOf(
@@ -103,63 +104,12 @@ export class HomeComponent implements OnInit{
         })
       }
     }
-
-    /*var _recentlyMessages = this.recentlyMessages()
-    var [filter] = _recentlyMessages.filter(message => {
-      return (
-        message.sender.usersRef
-        === newMessage.sender
-      ) || (
-        message.accept.usersRef
-        === newMessage.sender
-      )
-    })
-    
-
-    if(filter && newMessage.accept === this.user._id){
-      if(filter.sender.usersRef === String(newMessage.sender)){
-
-        var counter = filter.unreadCounter + 1
-        var index = _recentlyMessages.indexOf(
-          filter
-        )
-
-        _recentlyMessages[index] = {
-          ...newMessage,
-          sender:filter.sender,
-          accept:filter.accept,
-          unreadCounter:counter
-        }
-
-        this.recentlyMessages.set(
-          _recentlyMessages
-        )
-      }
-      if(filter.sender.usersRef === String(newMessage.accept)){
-        var index = _recentlyMessages.indexOf(
-          filter
-        )
-        _recentlyMessages[index] = {
-          ...newMessage,
-          sender:filter.accept,
-          accept:filter.sender,
-          unreadCounter:1
-        }
-
-        this.recentlyMessages.set(
-          _recentlyMessages
-        )
-      }
-    }
-    else{
-      console.log('not on list')
-    }*/
   })
 
   onMessage = this.socketService.socket.on('message',(newMessage:Message.Populated) => {
     var messages = this.fetchState().result as Message.Last[]
     if(messages.filter(e => e._id === newMessage._id)?.length < 1){
-      if(newMessage.accept.usersRef === this.user._id){
+      //if(newMessage.accept.usersRef === this.user._id){
         this.fetchState.update((current) => {
           var withCounter = {
             ...newMessage,
@@ -176,29 +126,21 @@ export class HomeComponent implements OnInit{
             result
           }
         })
-      }
+      //}
     }
+  })
 
-    /*
-    if(this.recentlyMessages().filter(e => e._id === newMessage._id).length < 1){
-      if(newMessage.accept.usersRef === this.user._id){
-        this.recentlyMessages.update((current) => {
-          var withCounter = {
-            ...newMessage,
-            unreadCounter:1
-          }
+  onConnected = this.socketService.socket.on('connect',() => {
+    this.connected = true
 
-          return [
-            withCounter,
-            ...current
-          ]
-        })
-      }
-    }
-    else{
-      console.log('has been on list')
-    }
-    */
+    this.socketService.socket.emit(
+      'join',
+      this.user._id
+    )
+  })
+
+  onDisconnect = this.socketService.socket.on('disconnected',() => {
+    this.connected = false
   })
 
 

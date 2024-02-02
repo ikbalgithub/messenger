@@ -34,26 +34,6 @@ import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
 })
 export class MessageComponent implements OnInit,OnDestroy {
 
-  /**
-   * Socket connection and event handler
-   */
-
-
-  socket = io(
-    import.meta.env.NG_APP_SERVER
-  )
-  .on(
-    'newMessage',
-    this.onNewMessage.bind(this)
-  )
-  .on(
-    'updated',
-    this.onUpdated.bind(this)
-  )
-  
-  /**
-   * Dependency injection
-   */
 
   router   = inject(Router)
   route    = inject(ActivatedRoute)
@@ -61,10 +41,8 @@ export class MessageComponent implements OnInit,OnDestroy {
   request  = inject(RequestService)
   store    = inject(Store<Ngrx.State>)
   common   = inject(CommonService)
-
-  /**
-   * active user, route state,params & authorization
-   */
+  
+  socket = io(import.meta.env.NG_APP_SERVER)
 
   user = toSignal(this.store.select('user'))()
   pageState:PageState = window.history.state
@@ -237,8 +215,8 @@ export class MessageComponent implements OnInit,OnDestroy {
        _messages
     )
   }
-  
-  onNewMessage(message:Message.One){
+
+  onNewMessage = this.socket.on('newMessage',(message:Message.One) => {
     if(message.accept === this.user._id && message.sender === this._id){
       this.updateOnReadFn({_id:message._id})
       this.messages.update((current) => {
@@ -251,9 +229,24 @@ export class MessageComponent implements OnInit,OnDestroy {
         ]
       })
     }
-  }
+  })
+  
+  // onNewMessage(message:Message.One){
+  //   if(message.accept === this.user._id && message.sender === this._id){
+  //     this.updateOnReadFn({_id:message._id})
+  //     this.messages.update((current) => {
+  //       return [
+  //         ...current,{
+  //           ...message,
+  //           sent:true,
+  //           read:true
+  //         }
+  //       ]
+  //     })
+  //   }
+  // }
 
-  onUpdated(_id:string){
+  onUpdated = this.socket.on('updated',(_id:string) => {
     var _messages = this.messages()
     var [filter] = _messages.filter(x => {
       return _id === x._id
@@ -269,7 +262,34 @@ export class MessageComponent implements OnInit,OnDestroy {
     this.messages.set(
       _messages
     )
-  }
+  })
+
+  onConnected = this.socket.on('connect',() => {
+    var roomId = this.pageState.groupId
+
+    this.socket.emit(
+      'join',
+      roomId
+    )
+  })
+
+  // onUpdated(_id:string){
+  //   var _messages = this.messages()
+  //   var [filter] = _messages.filter(x => {
+  //     return _id === x._id
+  //   })
+
+  //   var index = _messages.indexOf(filter)
+
+  //   _messages[index] = {
+  //     ...filter,
+  //     read:true
+  //   }
+
+  //   this.messages.set(
+  //     _messages
+  //   )
+  // }
 
   retry(){
     (this.fetchAllMessageState().retryFunction as Function)()

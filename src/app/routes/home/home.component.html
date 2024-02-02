@@ -13,7 +13,7 @@
           {{u().profile?.firstName}} {{u().profile?.surname}}
         </p>
 
-        <p class="text-slate-300" *ngIf="!socketService.connected">
+        <p class="text-slate-300" *ngIf="!connected">
           (disconnected)
         </p>
       </div>
