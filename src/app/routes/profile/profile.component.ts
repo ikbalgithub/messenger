@@ -9,7 +9,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms'
 import { InputTextModule } from 'primeng/inputtext';
 import { FirebaseService } from '../../services/firebase/firebase.service'
-import { CommonService } from '../../services/common/common.service'
 import { RequestService } from '../../services/request/request.service'
 import { StoreService } from '../../services/store/store.service'
 
@@ -30,24 +29,26 @@ export class ProfileComponent {
   location = inject(Location)
   storeService = inject(StoreService)
   firebaseService = inject(FirebaseService)
-  common = inject(CommonService)
-  request = inject(RequestService)
+  requestService = inject(RequestService)
   
   user = this.storeService.user
-  authorization = this.storeService.authorization
-  uploadRef = `profileImages/${this.user._id}`
+  profile = this.user().profile
+  hAuth = this.storeService.authorization
+  uploadRef = `profileImages/${this.user()._id}`
   _ref = ref(this.firebaseService.storage,this.uploadRef)
+
+  newProfileImage : null | File = null
     
-  formsUpdate : FormGroup = new FormGroup({
-    profileImage:new FormControl(this.user.profile.profileImage),
-    firstName:new FormControl(this.user.profile.firstName),
-    surname:new FormControl(this.user.profile.surname),
-    _id:new FormControl(this.user.profile?._id)
+  updateForm = new FormGroup({
+    profileImage:new FormControl(this.profile.profileImage),
+    firstName:new FormControl(this.profile.firstName),
+    surname:new FormControl(this.profile.surname),
+    _id:new FormControl(this.profile?._id)
   })
 
-  updateState = this.request.createInitialState<any>()
+  updateState = this.requestService.createInitialState<any>()
 
-  update = this.request.put<any,any>({
+  update = this.requestService.put<any,any>({
     state:this.updateState,
     failedCb:e => console.log(e),
     cb:this.onSuccessUpdate.bind(this),
@@ -57,16 +58,14 @@ export class ProfileComponent {
   onSuccessUpdate({__v,_id,usersRef,...profile}:any){
     this.storeService.store.dispatch(
       setUser({
-        ...this.user,
+        ...this.user(),
         profile
       })
     )
   }
 
-  newProfileImage : null | File = null
-
-  onFileChange(event:any){
-    let reader = new FileReader();
+  onFileChange(event:any,form = this.updateForm as FormGroup){
+    var reader = new FileReader();
  
     if(event.target.files && event.target.files.length) {
       const [file] = event.target.files;
@@ -74,33 +73,34 @@ export class ProfileComponent {
       reader.readAsDataURL(file);
 
       reader.onload = () => {
-        this.formsUpdate.patchValue({
-          ...this.formsUpdate.value,
+        form.patchValue({
+          ...form.value,
           profileImage:reader.result,
         });
       };
     }
   }
 
-  async setUpdate(){
+  async setUpdate(form = this.updateForm as FormGroup){
     try{
       var headers = new HttpHeaders({
-        authorization:this.authorization
+        authorization:this.hAuth()
       })
       if(this.newProfileImage){
         var result = await  uploadBytes(this._ref,this.newProfileImage as File)
         var url = await getDownloadURL(result.ref)
-        this.formsUpdate.patchValue({
-          ...this.formsUpdate.value,
-            profileImage:url,
+       
+        form.patchValue({
+          ...form.value,
+          profileImage:url,
         })
 
-        this.update(this.formsUpdate.value,{
+        this.update(form.value,{
           headers
         })
       }
       else{
-        this.update(this.formsUpdate.value,{
+        this.update(form.value,{
           headers
         })
       }

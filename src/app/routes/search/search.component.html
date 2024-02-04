@@ -24,7 +24,7 @@
               [profile]="x | profile:'':'search'"
               [unreadCounter]="x.message ? (x.message.unreadCounter | toString) : '0'"
               [unread]="x?.message?.sender === x.usersRef"
-              [groupId]="x?.message?.groupId ?? _alternativeId"
+              [groupId]="x?.message?.groupId ?? _altId"
               [value]="x?.message?.value ?? ''"
             />
           }

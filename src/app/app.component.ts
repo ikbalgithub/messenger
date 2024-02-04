@@ -1,9 +1,10 @@
 import { Store } from '@ngrx/store'
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
-import { Component,signal,computed,effect,HostListener,inject } from '@angular/core';
+import { Component,signal,effect,inject } from '@angular/core';
 import { Ngrx } from '../index.d'
 import { CommonModule } from '@angular/common'
+import { StoreService } from './services/store/store.service'
 
 
 
@@ -15,21 +16,6 @@ import { CommonModule } from '@angular/common'
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  store = inject(Store<Ngrx.State>)
-  user = toSignal(this.store.select('user'))
-  authentication = toSignal(this.store.select('authentication'))
-  authorization = toSignal(this.store.select('authorization'))
-
-  syncWithLocalStorage = effect(() => {
-    var jsonState = JSON.stringify({
-      authentication:this.authentication(),
-      authorization:this.authorization(),
-      user:this.user()
-    })
-
-    localStorage.setItem(
-      "ngrx",
-      jsonState
-    )
-  })
+  store = inject(StoreService)
+  rootInit = this.store.init()
 }

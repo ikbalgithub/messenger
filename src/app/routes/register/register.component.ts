@@ -36,7 +36,6 @@ export class RegisterComponent implements OnInit{
   auth = getAuth()
 
 
-  messages = [{ severity: 'error', summary: 'Failed', detail: 'failed'}]
 
   authInfo:FormGroup = new FormGroup({
     email: new FormControl(''),

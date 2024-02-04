@@ -39,9 +39,9 @@ export class SearchComponent {
   commonService = inject(CommonService)
     
   user = this.storeService.user
-  authorization = this.storeService.authorization
+  hAuth = this.storeService.authorization
 
-  _alternativeId = new Types.ObjectId().toString()
+  _altId = new Types.ObjectId().toString()
 
 
   searchState = this.requestService.createInitialState<Search.Result[]>()
@@ -53,7 +53,7 @@ export class SearchComponent {
 
   onChange(value:string){
     var headers = new HttpHeaders({
-      authorization:this.authorization
+      authorization:this.hAuth()
     })
 
     if(value.length > 0) this.searchFn(

@@ -265,7 +265,9 @@ export class MessageComponent implements OnInit,OnDestroy {
   })
 
   onConnected = this.socket.on('connect',() => {
-    var roomId = this.pageState.groupId
+    var _id = this.user._id
+    var groupId = this.pageState.groupId
+    var roomId = `${groupId}/${_id}`
 
     this.socket.emit(
       'join',

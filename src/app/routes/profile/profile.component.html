@@ -6,10 +6,10 @@
     </div>
   </div>
   <div class="border-2 border-black flex-1 flex flex-col center">
-    <form class="bg-white shadow-2xl rounded-md p-6 py-8 flex flex-col gap-5" [formGroup]="formsUpdate" (submit)="setUpdate()">
+    <form class="bg-white shadow-2xl rounded-md p-6 py-8 flex flex-col gap-5" [formGroup]="updateForm" (submit)="setUpdate()">
     <div class="flex flex-row justify-center">
       <p-avatar
-        [image]="formsUpdate.value.profileImage" 
+        [image]="updateForm.value.profileImage" 
         size="xlarge" 
         shape="circle"
       />

@@ -4,13 +4,13 @@
       <p-avatar
         (click)="router.navigate(['profile'])"
         class="cursor-pointer"
-        [image]="u().profile.profileImage" 
+        [image]="user().profile.profileImage" 
         size="xlarge" 
         shape="circle"
       />
       <div class="flex flex-row gap-2">
         <p class="text-white font-medium">
-          {{u().profile?.firstName}} {{u().profile?.surname}}
+          {{user().profile?.firstName}} {{user().profile?.surname}}
         </p>
 
         <p class="text-slate-300" *ngIf="!connected">
@@ -28,8 +28,8 @@
       @if(!fetchState().isError){
         @for(message of fetchState().result; track message){
           <app-last-message
-            [profile]="message | profile:user._id:'home'"
-            [unread]="message.sender.usersRef !== user._id"
+            [profile]="message | profile:user()._id:'home'"
+            [unread]="message.sender.usersRef !== user()._id"
             [unreadCounter]="message.unreadCounter | toString"
             [groupId]="message.groupId"
             [value]="message.value"
@@ -53,8 +53,6 @@
       class="fixed bottom-7 right-5"
       (click)="router.navigate(['search'])"
     />
-
-
   </div>
 </div>
 

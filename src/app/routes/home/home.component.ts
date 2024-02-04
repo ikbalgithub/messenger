@@ -16,7 +16,6 @@ import { AvatarModule } from 'primeng/avatar';
 import { CommonService } from '../../services/common/common.service'
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { StoreService } from '../../services/store/store.service'
-import { SocketService } from '../../services/socket/socket.service'
 import { ButtonModule } from 'primeng/button';
 
 @Component({
@@ -34,22 +33,18 @@ import { ButtonModule } from 'primeng/button';
     ToStringPipe,
   ],
 })
-export class HomeComponent implements OnInit{
+export class HomeComponent implements OnInit,OnDestroy{
   connected = false
   router = inject(Router)
   storeService = inject(StoreService)
   requestService = inject(RequestService)
   commonService = inject(CommonService)
-  socketService = inject(SocketService)
-  store = inject(Store<Ngrx.State>)
-
   user = this.storeService.user
-  authorization = this.storeService.authorization
-  u = toSignal(this.store.select('user'))
+  hAuth = this.storeService.authorization
 
-  recentlyMessages = signal<Message.Last[]>([])
+  socket = io(import.meta.env.NG_APP_SERVER)
  
-  onNewMessage = this.socketService.socket.on('newMessage',(newMessage:Message.One) =>{
+  onNewMessage = this.socket.on('newMessage',(newMessage:Message.One) =>{
     var result = this.fetchState().result as Message.Last[]
     var JSONMessages = result.map(m => JSON.stringify(m))
     var [filter] = result.filter((message,index) => {
@@ -106,7 +101,7 @@ export class HomeComponent implements OnInit{
     }
   })
 
-  onMessage = this.socketService.socket.on('message',(newMessage:Message.Populated) => {
+  onMessage = this.socket.on('message',(newMessage:Message.Populated) => {
     var messages = this.fetchState().result as Message.Last[]
     if(messages.filter(e => e._id === newMessage._id)?.length < 1){
       //if(newMessage.accept.usersRef === this.user._id){
@@ -130,37 +125,40 @@ export class HomeComponent implements OnInit{
     }
   })
 
-  onConnected = this.socketService.socket.on('connect',() => {
+  onConnect = this.socket.on('connect',() => {
     this.connected = true
 
-    this.socketService.socket.emit(
+    this.socket.emit(
       'join',
-      this.user._id
+      this.user()._id
     )
   })
 
-  onDisconnect = this.socketService.socket.on('disconnected',() => {
+  onDisconnected = this.socket.on('disconnect',() => {
     this.connected = false
   })
-
 
   fetchState = this.requestService.createInitialState<Message.Last[]>()
 
   fetchMessage = this.requestService.get<Message.Last[]>({
     state:this.fetchState,
-    cb:r => this.recentlyMessages.set(r),
+    cb:r => console.log(r),
     failedCb: e => console.log(e)
   })
 
   ngOnInit(){
     var path = `message/recently`
     var headers = new HttpHeaders({
-      authorization:this.authorization
+      authorization:this.hAuth()
     })
 
     this.fetchMessage(
       path,{headers}
     )
+  }
+
+  ngOnDestroy(){
+    this.socket.disconnect()
   }
 
   retry(){
