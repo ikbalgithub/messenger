@@ -55,7 +55,7 @@ export class MessageComponent implements OnInit,OnDestroy {
    * fetch all message result
    */
   
-  messages = signal<Message.All>([])
+  //messages = signal<Message.All>([])
   
   /**
    * new message form
@@ -75,7 +75,7 @@ export class MessageComponent implements OnInit,OnDestroy {
    * request state and function
    */
 
-  fetchAllMessageState = this.request.createInitialState<Message.All>()
+  fetchState = this.request.createInitialState<Message.All>()
   sendMessageState = this.request.createInitialState<Message.One>()
   updateOnReadState = this.request.createInitialState<Message.One>()
 
@@ -86,10 +86,10 @@ export class MessageComponent implements OnInit,OnDestroy {
     path:'message'
   })
 
-  fetchAllMessageFn = this.request.get<Message.All>({
+  fetch = this.request.get<Message.All>({
     cb:r => this.onSuccessFetch(r),
-    state:this.fetchAllMessageState,
     failedCb: e => console.log(e),
+    state:this.fetchState,
   })
 
   updateOnReadFn = this.request.put<Message.Update,Message.One>({
@@ -103,12 +103,12 @@ export class MessageComponent implements OnInit,OnDestroy {
    * implements on init
    */
 
-  ngOnInit(){
+  ngOnInit(path = `message/all/${this._id}`){
     var headers = new HttpHeaders({
       authorization:this.authorization
     })
 
-    this.fetchAllMessageFn(`message/all/${this._id}`,{
+    this.fetch(path,{
       headers
     })
   }
@@ -133,10 +133,7 @@ export class MessageComponent implements OnInit,OnDestroy {
    * - trigger send message http function
    */
 
-  send(){
-    var now = Date.now()
-    var _id = new Types.ObjectId()
-
+  send(now = Date.now(),_id = new Types.ObjectId()){
     var newMessage:Message.One = {
       ...this.newMessage.value,
       sender:this.user._id,
@@ -154,11 +151,16 @@ export class MessageComponent implements OnInit,OnDestroy {
       sendAt:now
     }
 
-    this.messages.update(current => {
-      return [
-         ...current,
-         newMessage
+    this.fetchState.update(current => {
+      var result = [
+        ...current.result,
+        newMessage
       ]
+
+      return {
+        ...current,
+        result
+      }
     })
 
     var headers = new HttpHeaders({
@@ -176,92 +178,123 @@ export class MessageComponent implements OnInit,OnDestroy {
    */
 
   onSuccessSend(_id:string){
-    var _messages = this.messages()
-    var [filter] = this.messages().filter(
-      f => f._id === _id
+    var result = this.fetchState().result
+    var JSONResult = result.map(m => {
+      return JSON.stringify(m)
+    })
+
+    var [filter] = result.filter(f => {
+      return f._id === _id
+    })
+
+    var index = JSONResult.indexOf(
+      JSON.stringify(filter)
     )
 
-    var index = _messages.indexOf(filter)
-    _messages[index] = {
+    result[index] = {
       ...filter,
       sent:true
     }
 
-    this.messages.set(_messages)
+    this.fetchState.update(
+      current => ({
+        ...current,
+        result
+      })
+    )
   }
 
   onSuccessFetch(messages:Message.All){
-    var unread = messages.filter(
+    var result = messages.map(
+      message => ({
+        ...message,
+        sent:true
+      })
+    )
+
+    messages.filter(
       x => 
         x.read === false &&
         x.sender === this._id
     )
-
-    unread.map((unreadMessage) => {
-      var {_id} = unreadMessage
-      this.updateOnReadFn({
-        _id
-      })
-    })
-
-    var _messages = messages.map(x => {
-       return {
-        ...x,
-        sent:true
-       }
-    })
-
-    this.messages.set(
-       _messages
+    .map(
+      message => {
+        this.updateOnReadFn({
+          _id:message._id
+        })
+      }
     )
+
+    setTimeout(() => {
+      this.fetchState.update(
+        current => ({
+          ...current,
+          result
+        })
+      )
+    })
   }
 
   onNewMessage = this.socket.on('newMessage',(message:Message.One) => {
-    if(message.accept === this.user._id && message.sender === this._id){
-      this.updateOnReadFn({_id:message._id})
-      this.messages.update((current) => {
-        return [
-          ...current,{
-            ...message,
-            sent:true,
-            read:true
-          }
-        ]
-      })
-    }
+    this.updateOnReadFn({_id:message._id})
+    this.fetchState.update(current => {
+      var newMessage = {
+        ...message,
+        sent:true,
+        read:true
+      }
+      var result = [
+        ...current.result,
+        newMessage
+      ]
+      return {
+        ...current,
+        result
+      }
+    })
   })
   
-  // onNewMessage(message:Message.One){
-  //   if(message.accept === this.user._id && message.sender === this._id){
-  //     this.updateOnReadFn({_id:message._id})
-  //     this.messages.update((current) => {
-  //       return [
-  //         ...current,{
-  //           ...message,
-  //           sent:true,
-  //           read:true
-  //         }
-  //       ]
-  //     })
-  //   }
-  // }
 
   onUpdated = this.socket.on('updated',(_id:string) => {
-    var _messages = this.messages()
-    var [filter] = _messages.filter(x => {
-      return _id === x._id
+    var result = this.fetchState().result
+    var JSONResult = result.map(m => {
+      return JSON.stringify(m)
     })
 
-    var index = _messages.indexOf(filter)
+    var [filter] = result.filter(m => {
+      return _id === m._id
+    })
 
-    _messages[index] = {
+    var index = JSONResult.indexOf(
+      JSON.stringify(filter)
+    )
+
+    result[index] = {
       ...filter,
       read:true
     }
 
-    this.messages.set(
-      _messages
+    this.fetchState.update(
+      current => ({
+      	...current,
+      	result
+      })
     )
+    // var _messages = this.messages()
+    // var [filter] = _messages.filter(x => {
+    //   return _id === x._id
+    // })
+
+    // var index = _messages.indexOf(filter)
+
+    // _messages[index] = {
+    //   ...filter,
+    //   read:true
+    // }
+
+    // this.messages.set(
+    //   _messages
+    // )
   })
 
   onConnected = this.socket.on('connect',() => {
@@ -294,7 +327,7 @@ export class MessageComponent implements OnInit,OnDestroy {
   // }
 
   retry(){
-    (this.fetchAllMessageState().retryFunction as Function)()
+    (this.fetchState().retryFunction as Function)()
   }
 }
 
