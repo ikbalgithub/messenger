@@ -3,15 +3,19 @@
     <div (click)="location.back()" class="flex btn-back flex-row gap-3 items-center">
       <i class="pi pi-arrow-left text-[1.5rem] text-white"></i>
       <p-avatar
-        [image]="pageState.profile.profileImage" 
+        [image]="routeState.profile.profileImage" 
         size="xlarge" 
         shape="circle"
         class="flex flex-col justify-center"
       />
     </div>
-    <div class="flex flex-col flex-1 justify-center">
+    <div class="flex flex-row flex-1 gap-2 items-center">
       <p class="text-white font-medium">
-        {{pageState.profile.firstName}}
+        {{routeState.profile.firstName}}
+      </p>
+
+      <p *ngIf="!connected" class="text-slate-300">
+        (disconnected)
       </p>
     </div>
   </div>
@@ -24,7 +28,7 @@
     <ng-template #result>
       @if(!fetchState().isError){
         @for(message of fetchState().result; track message){
-          @if(message.sender === user._id){
+          @if(message.sender === user()._id){
             <div class="flex flex-row justify-end">
               <div class="p-3 flex flex-row gap-1 items-center rounded bg-green-500">
                 <div>

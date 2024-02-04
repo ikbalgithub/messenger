@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { CommonModule,Location } from '@angular/common';
 import { Message,Ngrx } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
-import { CommonService } from '../../services/common/common.service'
+import { StoreService } from '../../services/store/store.service'
 import { HttpHeaders } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -34,22 +34,18 @@ import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
 })
 export class MessageComponent implements OnInit,OnDestroy {
 
-
+  connected = false
   router   = inject(Router)
   route    = inject(ActivatedRoute)
   location = inject(Location)
   request  = inject(RequestService)
-  store    = inject(Store<Ngrx.State>)
-  common   = inject(CommonService)
-  
+  storeService    = inject(StoreService)  
   socket = io(import.meta.env.NG_APP_SERVER)
 
-  user = toSignal(this.store.select('user'))()
-  pageState:PageState = window.history.state
+  user = this.storeService.user
+  routeState = window.history.state
   _id = this.route.snapshot.params['_id']
-  authorization = toSignal(
-    this.store.select('authorization')
-  )()
+  hAuth = this.storeService.authorization
 
   /**
    * fetch all message result
@@ -64,7 +60,7 @@ export class MessageComponent implements OnInit,OnDestroy {
   newMessage:FormGroup = new FormGroup({
     value:new FormControl<string>(''),
     groupId:new FormControl<string>(
-      this.pageState.groupId
+      this.routeState.groupId
     ),
     accept:new FormControl<string>(
       this._id
@@ -105,7 +101,7 @@ export class MessageComponent implements OnInit,OnDestroy {
 
   ngOnInit(path = `message/all/${this._id}`){
     var headers = new HttpHeaders({
-      authorization:this.authorization
+      authorization:this.hAuth()
     })
 
     this.fetch(path,{
@@ -136,7 +132,7 @@ export class MessageComponent implements OnInit,OnDestroy {
   send(now = Date.now(),_id = new Types.ObjectId()){
     var newMessage:Message.One = {
       ...this.newMessage.value,
-      sender:this.user._id,
+      sender:this.user()._id,
       _id:_id.toString(),
       sendAt:now,
       sent:false,
@@ -164,7 +160,7 @@ export class MessageComponent implements OnInit,OnDestroy {
     })
 
     var headers = new HttpHeaders({
-      authorization:this.authorization
+      authorization:this.hAuth()
     })
 
     this.sendNewMessage(
@@ -280,27 +276,14 @@ export class MessageComponent implements OnInit,OnDestroy {
       	result
       })
     )
-    // var _messages = this.messages()
-    // var [filter] = _messages.filter(x => {
-    //   return _id === x._id
-    // })
-
-    // var index = _messages.indexOf(filter)
-
-    // _messages[index] = {
-    //   ...filter,
-    //   read:true
-    // }
-
-    // this.messages.set(
-    //   _messages
-    // )
   })
 
-  onConnected = this.socket.on('connect',() => {
-    var _id = this.user._id
-    var groupId = this.pageState.groupId
+  onConnect = this.socket.on('connect',() => {
+    var _id = this.user()._id
+    var groupId = this.routeState.groupId
     var roomId = `${groupId}/${_id}`
+
+    this.connected = true
 
     this.socket.emit(
       'join',
@@ -308,30 +291,11 @@ export class MessageComponent implements OnInit,OnDestroy {
     )
   })
 
-  // onUpdated(_id:string){
-  //   var _messages = this.messages()
-  //   var [filter] = _messages.filter(x => {
-  //     return _id === x._id
-  //   })
-
-  //   var index = _messages.indexOf(filter)
-
-  //   _messages[index] = {
-  //     ...filter,
-  //     read:true
-  //   }
-
-  //   this.messages.set(
-  //     _messages
-  //   )
-  // }
+  onDisconnect = this.socket.on('disconnect',() => {
+  	this.connected = false
+  })
 
   retry(){
     (this.fetchState().retryFunction as Function)()
   }
-}
-
-interface PageState{
-  profile:Common.Profile,
-  groupId:string
 }
