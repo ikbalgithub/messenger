@@ -1,0 +1,19 @@
+<div class="bg-blue-900 flex flex-row items-center w-full p-3 gap-3 fixed shadow-inner">
+  <div class="flex flex-row gap-3 items-center cursor-pointer" (click)="fn.emit()">
+    <ng-content [select]="fn"></ng-content>
+    <p-avatar
+      [image]="image" 
+      size="xlarge" 
+      shape="circle"
+      class="flex flex-col"
+    />
+  </div>
+  <div class="flex flex-row gap-2">
+    <p class="text-white font-medium" >
+      {{firstName}} {{surname}}
+    </p>
+    <p class="text-slate-300" *ngIf="!connected">
+      (disconnected)
+    </p>
+  </div>
+</div>

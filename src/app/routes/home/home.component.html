@@ -1,24 +1,11 @@
 <div class="fullscreen bg-slate-300 flex flex-col">
-  <div class="bg-blue-900 flex flex-row w-full fixed shadow-inner">
-    <div class="flex flex-row flex-1 p-3 gap-3 items-center">
-      <p-avatar
-        (click)="router.navigate(['profile'])"
-        class="cursor-pointer"
-        [image]="user().profile.profileImage" 
-        size="xlarge" 
-        shape="circle"
-      />
-      <div class="flex flex-row gap-2">
-        <p class="text-white font-medium">
-          {{user().profile?.firstName}} {{user().profile?.surname}}
-        </p>
-
-        <p class="text-slate-300" *ngIf="!connected">
-          (disconnected)
-        </p>
-      </div>
-    </div>
-  </div>
+  <app-navbar
+    [image]="user().profile.profileImage"
+    [firstName]="user().profile.firstName"
+    [surname]="user().profile.surname"
+    [connected]="connected"
+    (fn)="router.navigate(['profile'])"
+  />
   <div class="mt-[94px] border-2 border-black flex flex-col flex-1 gap-3 p-3 {{fetchState().isError ? 'center':''}}">
     <div *ngIf="fetchState().running; else messages" class="flex-1 flex flex-col center">
       <p-progressSpinner/>

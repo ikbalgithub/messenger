@@ -17,7 +17,7 @@ import { CommonService } from '../../services/common/common.service'
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { StoreService } from '../../services/store/store.service'
 import { ButtonModule } from 'primeng/button';
-
+import { NavbarComponent } from '../../components/navbar/navbar.component'
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -31,6 +31,7 @@ import { ButtonModule } from 'primeng/button';
     ButtonModule,
     ProgressSpinnerModule,
     ToStringPipe,
+    NavbarComponent
   ],
 })
 export class HomeComponent implements OnInit,OnDestroy{

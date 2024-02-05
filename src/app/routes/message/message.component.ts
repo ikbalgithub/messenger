@@ -15,9 +15,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
-
-
-
+import { SendMessageComponent } from '../../components/send-message/send-message.component'
+import { MessageAcceptComponent } from '../../components/message-accept/message-accept.component'
+import { MessageSentComponent } from '../../components/message-sent/message-sent.component'
+import { NavbarComponent } from '../../components/navbar/navbar.component'
 @Component({
   selector: 'app-message',
   standalone: true,
@@ -29,12 +30,17 @@ import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
     ProgressSpinnerModule,
     CommonModule,
     InputGroupModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    SendMessageComponent,
+    MessageAcceptComponent,
+    MessageSentComponent,
+    NavbarComponent
   ]
 })
 export class MessageComponent implements OnInit,OnDestroy {
 
   connected = false
+  isValid = /^\s*$/;
   router   = inject(Router)
   route    = inject(ActivatedRoute)
   location = inject(Location)
@@ -46,16 +52,6 @@ export class MessageComponent implements OnInit,OnDestroy {
   routeState = window.history.state
   _id = this.route.snapshot.params['_id']
   hAuth = this.storeService.authorization
-
-  /**
-   * fetch all message result
-   */
-  
-  //messages = signal<Message.All>([])
-  
-  /**
-   * new message form
-   */
 
   newMessage:FormGroup = new FormGroup({
     value:new FormControl<string>(''),
@@ -72,17 +68,17 @@ export class MessageComponent implements OnInit,OnDestroy {
    */
 
   fetchState = this.request.createInitialState<Message.All>()
-  sendMessageState = this.request.createInitialState<Message.One>()
+  sendState = this.request.createInitialState<Message.One>()
   updateOnReadState = this.request.createInitialState<Message.One>()
 
-  sendNewMessage = this.request.post<Message.New,Message.One>({
+  requestSend = this.request.post<Message.New,Message.One>({
     cb:r => this.onSuccessSend(r._id),
     failedCb:r => console.log(r),
-    state:this.sendMessageState,
+    state:this.sendState,
     path:'message'
   })
 
-  fetch = this.request.get<Message.All>({
+  requestFetch = this.request.get<Message.All>({
     cb:r => this.onSuccessFetch(r),
     failedCb: e => console.log(e),
     state:this.fetchState,
@@ -104,34 +100,19 @@ export class MessageComponent implements OnInit,OnDestroy {
       authorization:this.hAuth()
     })
 
-    this.fetch(path,{
-      headers
-    })
+    this.requestFetch(
+      path,
+      {headers}
+    )
   }
 
   ngOnDestroy(){
     this.socket.disconnect()
   }
-  
-  /**
-   * is valid current message input
-   */
 
-  isValid(message:string):boolean{
-    var regex = /^\s*$/;
-    return regex.test(
-      message
-    ) 
-  }
-
-  /**
-   * - add new message to message list
-   * - trigger send message http function
-   */
-
-  send(now = Date.now(),_id = new Types.ObjectId()){
+  send(form:FormGroup,now = Date.now(),_id = new Types.ObjectId()){
     var newMessage:Message.One = {
-      ...this.newMessage.value,
+      ...form.value,
       sender:this.user()._id,
       _id:_id.toString(),
       sendAt:now,
@@ -142,7 +123,7 @@ export class MessageComponent implements OnInit,OnDestroy {
     }
 
     var sendObject:Message.New = {
-      ...this.newMessage.value,
+      ...form.value,
       _id:_id.toString(),
       sendAt:now
     }
@@ -163,7 +144,7 @@ export class MessageComponent implements OnInit,OnDestroy {
       authorization:this.hAuth()
     })
 
-    this.sendNewMessage(
+    this.requestSend(
       sendObject,
       {headers}
     )

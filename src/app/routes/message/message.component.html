@@ -1,24 +1,14 @@
-<div class="fullscreen bg-slate-200 flex flex-col">
-  <div class="bg-blue-900 flex flex-row gap-3 p-3 fixed w-full">
-    <div (click)="location.back()" class="flex btn-back flex-row gap-3 items-center">
-      <i class="pi pi-arrow-left text-[1.5rem] text-white"></i>
-      <p-avatar
-        [image]="routeState.profile.profileImage" 
-        size="xlarge" 
-        shape="circle"
-        class="flex flex-col justify-center"
-      />
-    </div>
-    <div class="flex flex-row flex-1 gap-2 items-center">
-      <p class="text-white font-medium">
-        {{routeState.profile.firstName}}
-      </p>
+<div class="fullscreen bg-slate-300 flex flex-col">
+  <app-navbar
+    [image]="routeState.profile.profileImage"
+    [firstName]="routeState.profile.firstName"
+    [surname]="routeState.profile.surname"
+    [connected]="connected"
+    (fn)="router.navigate([''])"
+  >
+    <i class="pi pi-arrow-left text-white text-[1rem]" fn></i>
+  </app-navbar>
 
-      <p *ngIf="!connected" class="text-slate-300">
-        (disconnected)
-      </p>
-    </div>
-  </div>
   <div class="flex-1 overflox-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex-1 flex flex-col {{fetchState().isError ? 'center':''}}">
     <div class="flex-1 flex flex-col center" *ngIf="fetchState().running; else result">
       <p-progressSpinner/>
@@ -29,23 +19,9 @@
       @if(!fetchState().isError){
         @for(message of fetchState().result; track message){
           @if(message.sender === user()._id){
-            <div class="flex flex-row justify-end">
-              <div class="p-3 flex flex-row gap-1 items-center rounded bg-green-500">
-                <div>
-                  <p>{{message.value}}</p>
-                </div>
-                <div *ngIf="!message?.sent">
-                  <i class="pi pi-check text-[1rem]" ></i>
-                </div>
-                <div *ngIf="message?.sent && !message.read">
-                  <i class="pi pi-check text-white text-[1rem]" ></i>
-                </div>
-                <div *ngIf="message?.sent && message.read">
-                  <i class="pi pi-check text-[1rem] text-white"></i>
-                  <i class="pi pi-check text-[1rem] text-white"></i>
-                </div>
-              </div>
-            </div>
+            <app-message-sent
+              [message]="message"
+            />
           }
           @else{
             <ng-container 
@@ -62,29 +38,19 @@
    </ng-template>
   
     <ng-template #accept let-message="message">
-      <div class="flex flex-row">
-      <div class="p-3 rounded bg-white">
-        <p [attr.data-sendTime]="message.sendAt">
-          {{message.value}}
-        </p>
-      </div>
-    </div>
+      <app-message-accept
+        [message]="message"
+      />
     </ng-template>
 
     <ng-template #error>
       <button (click)="retry()">click to retry</button>
     </ng-template>
   </div>
-  <form (submit)="send()" class="fixed bottom-0 bg-slate-200 w-full p-3 shadow-inner" [formGroup]="newMessage">
-    <p-inputGroup class="flex flex-row">
-      <input 
-        type="text" 
-        pInputText 
-        placeholder="Keyword"
-        class="flex-1 px-3 outline-none"
-        formControlName="value"
-      />
-      <button type="submit" [disabled]="isValid(newMessage.value.value)" pButton icon="pi pi-arrow-up"></button>
-    </p-inputGroup>
-  </form>
+  <app-send-message 
+    (send)="send($event)"
+    [newMessage]="newMessage"
+    [isRunning]="sendState().running"
+    [isValid]="isValid.test(newMessage.value.value)"
+  />
 </div>

@@ -1,0 +1,12 @@
+<form (submit)="send.emit(newMessage)" class="fixed bottom-0 bg-slate-200 w-full p-3 shadow-inner" [formGroup]="newMessage">
+  <p-inputGroup class="flex flex-row">
+    <input 
+      type="text" 
+      pInputText 
+      placeholder="Keyword"
+      class="flex-1 px-3 outline-none"
+      formControlName="value"
+    />
+    <button type="submit" [disabled]="isValid || isRunning" pButton icon="pi pi-arrow-up"></button>
+  </p-inputGroup>
+</form>
