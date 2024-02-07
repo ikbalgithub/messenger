@@ -1,0 +1,27 @@
+<div *ngIf="onFetch; else result" class="flex-1 border-2 border-black flex flex-col center">
+  <p-progressSpinner/>
+</div> 
+
+<ng-template #result>
+  @if(!isError){
+    @for(message of messages; track message){
+      @if(message.sender === userId){
+        <app-message-sent
+          [message]="message"
+        />
+      }
+      @else{
+        <ng-container
+          *ngTemplateOutlet="accept; context:{message}"
+        />
+      }
+    }
+  }  
+  
+</ng-template>
+
+<ng-template #accept let-message="message">
+  <app-message-accept
+    [message]="message"
+  />
+</ng-template>
