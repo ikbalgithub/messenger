@@ -8,45 +8,13 @@
   >
     <i class="pi pi-arrow-left text-white text-[1rem]" fn></i>
   </app-navbar>
-
-  <div class="flex-1 overflox-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex-1 flex flex-col {{fetchState().isError ? 'center':''}}">
-    <div class="flex-1 flex flex-col center" *ngIf="fetchState().running; else result">
-      <p-progressSpinner/>
-    </div> 
-
-
-    <ng-template #result>
-      @if(!fetchState().isError){
-        @for(message of fetchState().result; track message){
-          @if(message.sender === user()._id){
-            <app-message-sent
-              [message]="message"
-            />
-          }
-          @else{
-            <ng-container 
-              *ngTemplateOutlet="accept; context:{message}"
-            />
-          }
-        }
-      }
-      @else{
-        <ng-container 
-          *ngTemplateOutlet="error"
-        />
-      } 
-   </ng-template>
-  
-    <ng-template #accept let-message="message">
-      <app-message-accept
-        [message]="message"
-      />
-    </ng-template>
-
-    <ng-template #error>
-      <button (click)="retry()">click to retry</button>
-    </ng-template>
-  </div>
+  <app-messages
+    [userId]="user()._id"
+    [onFetch]="fetchState().running"
+    [messages]="fetchState().result"
+    [isError]="fetchState().isError"
+    class="flex-1 overflow-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex flex-col {{fetchState().result.isError ? 'center':''}} "
+  />
   <app-send-message 
     (send)="send($event)"
     [newMessage]="newMessage"

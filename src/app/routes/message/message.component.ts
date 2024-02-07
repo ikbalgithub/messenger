@@ -19,6 +19,7 @@ import { SendMessageComponent } from '../../components/send-message/send-message
 import { MessageAcceptComponent } from '../../components/message-accept/message-accept.component'
 import { MessageSentComponent } from '../../components/message-sent/message-sent.component'
 import { NavbarComponent } from '../../components/navbar/navbar.component'
+import { MessagesComponent } from '../../components/messages/messages.component'
 @Component({
   selector: 'app-message',
   standalone: true,
@@ -34,7 +35,8 @@ import { NavbarComponent } from '../../components/navbar/navbar.component'
     SendMessageComponent,
     MessageAcceptComponent,
     MessageSentComponent,
-    NavbarComponent
+    NavbarComponent,
+    MessagesComponent
   ]
 })
 export class MessageComponent implements OnInit,OnDestroy {
