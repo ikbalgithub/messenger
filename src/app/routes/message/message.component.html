@@ -13,7 +13,7 @@
     [onFetch]="fetchState().running"
     [messages]="fetchState().result"
     [isError]="fetchState().isError"
-    class="flex-1 overflow-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex flex-col {{fetchState().result.isError ? 'center':''}} "
+    class="flex-1 overflow-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex flex-col {{fetchState().isError ? 'center':''}} "
   />
   <app-send-message 
     (send)="send($event)"
