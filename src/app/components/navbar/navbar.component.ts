@@ -1,7 +1,7 @@
-import { Component,Input,Output,EventEmitter } from '@angular/core';
+import { Component,Input,inject } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { CommonModule } from '@angular/common'
-
+import { Router } from '@angular/router'
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -14,5 +14,19 @@ export class NavbarComponent {
   @Input() connected!:boolean
   @Input() surname!:string
   @Input() firstName!:string
-  @Output() fn = new EventEmitter<void>()
+  @Input() page!:string
+  @Input() _id!:string
+
+  router = inject(Router)
+
+  view(){
+    this.router.navigate(
+      [`profile/${this._id}`],{state:{
+        firstName:this.firstName,
+        surname:this.surname,
+        image:this.image
+      }}
+    )
+  }
+
 }

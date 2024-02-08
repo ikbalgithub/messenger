@@ -1,7 +1,7 @@
 import { HttpHeaders } from '@angular/common/http';
 import { setUser } from '../../ngrx/actions/user.actions'
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
-import { Component,inject,signal} from '@angular/core';
+import { Component,inject,signal } from '@angular/core';
 import { CommonModule,Location } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
 import { Ngrx } from '../../../index.d'
@@ -11,6 +11,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { RequestService } from '../../services/request/request.service'
 import { StoreService } from '../../services/store/store.service'
+import { DecoratorService } from '../../services/decorator/decorator.service'
+import { ActivatedRoute,Router } from '@angular/router';
+
+
 
 @Component({
   selector: 'app-profile',
@@ -30,12 +34,19 @@ export class ProfileComponent {
   storeService = inject(StoreService)
   firebaseService = inject(FirebaseService)
   requestService = inject(RequestService)
+  router = inject(Router)
+  route = inject(ActivatedRoute)
+  decorator = inject(DecoratorService)
   
   user = this.storeService.user
   profile = this.user().profile
   hAuth = this.storeService.authorization
   uploadRef = `profileImages/${this.user()._id}`
   _ref = ref(this.firebaseService.storage,this.uploadRef)
+  editable = this.route.snapshot.data['editable']
+  navigation = this.router.getCurrentNavigation()
+
+  nonEditableState = this.navigation?.extras.state
 
   newProfileImage : null | File = null
     
@@ -45,6 +56,13 @@ export class ProfileComponent {
     surname:new FormControl(this.profile.surname),
     _id:new FormControl(this.profile?._id)
   })
+
+  nonEditableForm = new FormGroup({
+    profileImage:new FormControl(this.nonEditableState?.['image']),
+    firstName:new FormControl(this.nonEditableState?.['firstName']),
+    surname:new FormControl(this.nonEditableState?.['surname'])
+  })
+
 
   updateState = this.requestService.createInitialState<any>()
 

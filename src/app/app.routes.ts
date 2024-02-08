@@ -39,7 +39,17 @@ export const routes: Routes = [
   },
   {
     path:'profile',
-    component:ProfileComponent
+    component:ProfileComponent,
+    data:{
+      editable:true
+    }
+  },
+  {
+    path:'profile/:_id',
+    component:ProfileComponent,
+    data:{
+      editable:false
+    }
   },
   {
     path:"**",

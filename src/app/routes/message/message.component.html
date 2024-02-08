@@ -4,10 +4,9 @@
     [firstName]="routeState.profile.firstName"
     [surname]="routeState.profile.surname"
     [connected]="connected"
-    (fn)="router.navigate([''])"
-  >
-    <i class="pi pi-arrow-left text-white text-[1rem]" fn></i>
-  </app-navbar>
+    [_id]="_id"
+    page="message"
+  />
   <app-messages
     [userId]="user()._id"
     [onFetch]="fetchState().running"
