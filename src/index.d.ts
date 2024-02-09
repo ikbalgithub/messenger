@@ -43,7 +43,9 @@ export namespace Message{
     value:string,
     accept:string,
     groupId:string,
-    sendAt:number
+    sendAt:number,
+    description:string,
+    contentType:string
   }
 
   type Update = {

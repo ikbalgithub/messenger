@@ -2,6 +2,9 @@ import { Component,Output,Input,EventEmitter } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { ImageModule } from 'primeng/image';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
   standalone:true,
@@ -11,7 +14,10 @@ import { ButtonModule } from 'primeng/button';
   imports: [
     InputGroupModule,
     ButtonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    DialogModule,
+    ImageModule,
+    InputTextModule
   ]
 })
 export class SendMessageComponent {
@@ -19,11 +25,12 @@ export class SendMessageComponent {
   @Input() newMessage!:FormGroup
   @Input() isValid!:boolean
   @Input() isRunning!:boolean
-  // isValid(message:string):boolean{
-  //   var regex = /^\s*$/;
-  //   return regex.test(
-  //     message
-  //   ) 
-  // }
+  @Input() uploading!:boolean
+  @Output() upload = new EventEmitter<File>()
 
+  onFileChange(event:any){
+    if(event.target.files && event.target.files.length) {
+      this.upload.emit(event.target.files[0])
+    }
+  }
 }

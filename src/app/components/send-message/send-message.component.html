@@ -7,6 +7,12 @@
       class="flex-1 px-3 outline-none"
       formControlName="value"
     />
+    <button [disabled]="uploading" pButton icon="pi pi-image relative">
+      <input type="file" 
+        class="opacity-0 absolute"
+        (change)="onFileChange($event)"
+      />
+    </button>
     <button type="submit" [disabled]="isValid || isRunning" pButton icon="pi pi-arrow-up"></button>
   </p-inputGroup>
 </form>

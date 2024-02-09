@@ -12,12 +12,37 @@
     [onFetch]="fetchState().running"
     [messages]="fetchState().result"
     [isError]="fetchState().isError"
-    class="flex-1 overflow-x-auto gap-3 p-3 mt-[88px] mb-[74px] flex flex-col {{fetchState().isError ? 'center':''}} "
+    class="flex-1 overflow-x-auto gap-3 p-6 mt-[88px] mb-[74px] flex flex-col {{fetchState().isError ? 'center':''}} "
   />
   <app-send-message 
     (send)="send($event)"
+    [uploading]="uploading"
     [newMessage]="newMessage"
     [isRunning]="sendState().running"
     [isValid]="isValid.test(newMessage.value.value)"
+    (upload)="upload($event)"
   />
+
+  <p-dialog header="Send" [(visible)]="visible" [modal]="true">
+    <div class="flex flex-col gap-3">
+      <img
+        [src]="imageMessage.value.value" 
+        alt="Image"
+        class="h-72 aspect-square rounded"
+      />
+      <form [formGroup]="imageMessage" (submit)="sendImage(imageMessage)">
+        <p-inputGroup class="flex flex-row">
+          <input 
+            type="text" 
+            pInputText 
+            placeholder="Description"
+            class="flex-1 px-3 outline-none"
+            formControlName="description"
+          />
+          <button type="submit" pButton icon="pi pi-send">
+          </button>
+        </p-inputGroup>
+      </form>
+  </div>
+  </p-dialog>
 </div>

@@ -20,6 +20,10 @@ import { MessageAcceptComponent } from '../../components/message-accept/message-
 import { MessageSentComponent } from '../../components/message-sent/message-sent.component'
 import { NavbarComponent } from '../../components/navbar/navbar.component'
 import { MessagesComponent } from '../../components/messages/messages.component'
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { FirebaseService } from '../../services/firebase/firebase.service'
+import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 
 @Component({
   selector: 'app-message',
@@ -37,26 +41,43 @@ import { MessagesComponent } from '../../components/messages/messages.component'
     MessageAcceptComponent,
     MessageSentComponent,
     NavbarComponent,
-    MessagesComponent
+    MessagesComponent,
+    DialogModule,
+    InputTextModule
   ]
 })
 export class MessageComponent implements OnInit,OnDestroy {
 
   connected = false
-  isValid = /^\s*$/;
-  router   = inject(Router)
-  route    = inject(ActivatedRoute)
-  location = inject(Location)
-  request  = inject(RequestService)
-  storeService    = inject(StoreService)  
+  visible   = false
+  isValid   = /^\s*$/;
+  uploading = false
+  router    = inject(Router)
+  route     = inject(ActivatedRoute)
+  location  = inject(Location)
+  request   = inject(RequestService)
+  storeService = inject(StoreService)
+  firebaseService = inject(FirebaseService)
   socket = io(import.meta.env.NG_APP_SERVER)
 
   user = this.storeService.user
   routeState = window.history.state
   _id = this.route.snapshot.params['_id']
   hAuth = this.storeService.authorization
+  storage = this.firebaseService.storage
 
   newMessage:FormGroup = new FormGroup({
+    value:new FormControl<string>(''),
+    groupId:new FormControl<string>(
+      this.routeState.groupId
+    ),
+    accept:new FormControl<string>(
+      this._id
+    )
+  })
+
+  imageMessage:FormGroup = new FormGroup({
+    description:new FormControl<string>(''),
     value:new FormControl<string>(''),
     groupId:new FormControl<string>(
       this.routeState.groupId
@@ -113,6 +134,47 @@ export class MessageComponent implements OnInit,OnDestroy {
     this.socket.disconnect()
   }
 
+  sendImage(form:FormGroup,now = Date.now(),_id = new Types.ObjectId()){
+    var newMessage:Message.One = {
+      ...form.value,
+      sender:this.user()._id,
+      _id:_id.toString(),
+      sendAt:now,
+      sent:false,
+      read:false,
+      contentType:'image',
+    }
+
+    var sendObject:Message.New = {
+      ...form.value,
+      contentType:'image',
+      _id:_id.toString(),
+      sendAt:now
+    }
+
+    this.fetchState.update(current => {
+      var result = [
+        ...current.result,
+        newMessage
+      ]
+
+      return {
+        ...current,
+        result
+      }
+    })
+
+    var headers = new HttpHeaders({
+      authorization:this.hAuth()
+    })
+
+    this.requestSend(
+      sendObject,
+      {headers}
+    )
+
+  }
+
   send(form:FormGroup,now = Date.now(),_id = new Types.ObjectId()){
     var newMessage:Message.One = {
       ...form.value,
@@ -121,13 +183,15 @@ export class MessageComponent implements OnInit,OnDestroy {
       sendAt:now,
       sent:false,
       read:false,
-      contentType:'',
-      description:'',
+      contentType:'text',
+      description:'none',
     }
 
-    var sendObject:Message.New = {
+    var sendObject = {
       ...form.value,
       _id:_id.toString(),
+      contentType:'text',
+      description:'none',
       sendAt:now
     }
 
@@ -278,6 +342,29 @@ export class MessageComponent implements OnInit,OnDestroy {
   onDisconnect = this.socket.on('disconnect',() => {
   	this.connected = false
   })
+
+  async upload(file:File){
+    try{
+      this.uploading = true
+      var uploadRef = `send/${Date.now()}`
+      var refs = ref(this.storage,uploadRef)
+      var result = await uploadBytes(refs,file)
+      var url = await getDownloadURL(result.ref)
+      
+      this.imageMessage.patchValue({
+        ...this.imageMessage.value,
+        value:url
+      })
+
+      this.visible = true
+    }
+    catch(err:any){
+      console.log(err.message)
+    }
+    finally{
+      this.uploading = false
+    }
+  }
 
   retry(){
     (this.fetchState().retryFunction as Function)()
