@@ -18,9 +18,13 @@
             [value]="unreadCounter"
           />
         </div>
-        <p>
+        <p *ngIf="contentType === 'text'">
           {{value}}
         </p>
+        <div class="flex flex-row items-center gap-2" *ngIf="contentType === 'image'">
+          <i class="pi pi-image text-[1rem]"></i>
+          <span class="text-slate-600">photo</span>
+        </div>
       </div>
     </div>
   </div>

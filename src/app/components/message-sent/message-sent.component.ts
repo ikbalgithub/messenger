@@ -7,7 +7,8 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './message-sent.component.html',
-  styleUrl: './message-sent.component.css'
+  styleUrl: './message-sent.component.css',
+  encapsulation:ViewEncapsulation.None
 })
 export class MessageSentComponent {
   @Input() message!:Message.One
