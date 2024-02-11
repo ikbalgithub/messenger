@@ -1,21 +1,29 @@
-<div class="bg-blue-900 flex flex-row items-center w-full p-3 gap-3 fixed shadow-inner">
-  <div class="flex flex-row gap-3 items-center cursor-pointer">
-    <i (click)="router.navigate([''])" class="pi pi-arrow-left text-white text-[1rem]" *ngIf="page === 'message'" >
-    </i>
-    <p-avatar
-      [image]="image" 
-      size="xlarge" 
-      shape="circle"
-      class="flex flex-col"
-      (click)="page === 'home' ? router.navigate(['profile']) : view()"
-    />
-  </div>
-  <div class="flex flex-row gap-2">
-    <p class="text-white font-medium" >
-      {{firstName}} {{surname}}
-    </p>
-    <p class="text-slate-300" *ngIf="!connected">
-      (disconnected)
-    </p>
+<div class="bg-blue-900 flex flex-row items-center w-full px-5 py-3 gap-3 fixed shadow-inner" *ngIf="page==='home'">
+  <span class="text-white font-bold text-2xl" style="font-family: 'Dancing Script', cursive">Messenger</span>
+  <div class="flex flex-col grow justify-center">
+    <div class="flex flex-row self-end gap-1 cursor-pointer items-center" (click)="menu.toggle($event)">
+      <p-avatar
+        [image]="image" 
+        size="large" 
+        shape="circle"
+        class="flex flex-col"
+      />
+      <i class="pi pi-angle-down text-white"></i>
+    </div>
   </div>
 </div>
+
+<div *ngIf="page==='message'" class="bg-blue-900 flex flex-row items-center w-full px-5 py-3 gap-3 fixed shadow-inner">
+  <div class="flex flex-row gap-3 items-center cursor-pointer" (click)="router.navigate([''])">
+    <i class="pi pi-arrow-left text-white"></i>
+    <p-avatar
+      [image]="image" 
+      size="large" 
+      shape="circle"
+      class="flex flex-col"
+    />
+  </div>
+  <span class="text-white">{{firstName}} {{surname}}</span>
+</div>
+
+<p-menu #menu [model]="options" [popup]="true"/>
