@@ -3,6 +3,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { CommonModule } from '@angular/common'
 import { Router } from '@angular/router'
 import { MenuModule } from 'primeng/menu';
+import { AuthService } from '../../services/auth/auth.service'
 
 @Component({
   selector: 'app-navbar',
@@ -19,6 +20,9 @@ export class NavbarComponent {
   @Input() page!:string
   @Input() _id!:string
 
+  router = inject(Router)
+  authService = inject(AuthService)
+
   options = [
     {
       label: 'Options',
@@ -30,12 +34,11 @@ export class NavbarComponent {
         {
           label: 'Logout',
           icon: 'pi pi-power-off',
+          command:() => this.authService.logout()
         }
       ]
     }
   ]
-
-  router = inject(Router)
 
   view(){
     this.router.navigate(

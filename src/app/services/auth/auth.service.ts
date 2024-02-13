@@ -3,9 +3,9 @@ import { CommonService } from '../common/common.service'
 import { Router } from '@angular/router'
 import { Injectable,inject } from '@angular/core';
 import { Ngrx,Common } from '../../../index.d'
-import { login } from '../../ngrx/actions/authentication.actions'
-import { setUser } from '../../ngrx/actions/user.actions'
-import { setAuthorization } from '../../ngrx/actions/authorization.actions'
+import { login,logout } from '../../ngrx/actions/authentication.actions'
+import { setUser,setNull } from '../../ngrx/actions/user.actions'
+import { setAuthorization,reset } from '../../ngrx/actions/authorization.actions'
 
 @Injectable({providedIn:'root'}) export class AuthService {
   store = inject(Store<Ngrx.State>)
@@ -25,6 +25,16 @@ import { setAuthorization } from '../../ngrx/actions/authorization.actions'
    
     this.router.navigate(
       ['']
+    )
+  }
+
+  logout(){
+    this.store.dispatch(logout())
+    this.store.dispatch(reset())
+    this.store.dispatch(setNull())
+
+    this.router.navigate(
+      ['login']
     )
   }
 
