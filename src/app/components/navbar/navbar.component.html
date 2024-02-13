@@ -4,7 +4,7 @@
     <div class="flex flex-row self-end gap-1 cursor-pointer items-center" (click)="menu.toggle($event)">
       <p-avatar
         [image]="image" 
-        size="large" 
+        size="xlarge" 
         shape="circle"
         class="flex flex-col"
       />
@@ -15,10 +15,10 @@
 
 <div *ngIf="page==='message'" class="bg-blue-900 flex flex-row items-center w-full px-5 py-3 gap-3 fixed shadow-inner">
   <div class="flex flex-row gap-3 items-center cursor-pointer" (click)="router.navigate([''])">
-    <i class="pi pi-arrow-left text-white"></i>
+    <i class="pi pi-arrow-left text-white font-bold text-xl"></i>
     <p-avatar
       [image]="image" 
-      size="large" 
+      size="xlarge" 
       shape="circle"
       class="flex flex-col"
     />

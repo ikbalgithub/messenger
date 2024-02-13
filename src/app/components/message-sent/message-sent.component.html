@@ -1,5 +1,5 @@
 <div *ngIf="message.contentType === 'text'" class="flex flex-row justify-end">
-  <div  class="p-3 flex flex-row gap-1 items-end rounded bg-green-500 sm:w-1/2 w-2/3">
+  <div  class="p-3 flex flex-row gap-3 items-end rounded bg-green-500 max-w-[80%]">
     <div class="flex-1">
       <p>{{message.value}}</p>
     </div>
@@ -17,7 +17,7 @@
 </div>
 
 <div *ngIf="message.contentType === 'image'" class="flex flex-row justify-end">
-  <div class="lg:w-1/4 w-3/5 sm:w-1/2 border-2 border-black flex flex-col gap-2 bg-green-500 p-2 rounded">
+  <div class="lg:w-1/4 w-5/6 sm:w-1/2 border-2 border-black flex flex-col gap-2 bg-green-500 p-2 rounded">
     <img [src]="message.value" class="rounded"/>
     <div class="flex flex-row items-end">
       <p class="flex-1">{{message.description}}</p>

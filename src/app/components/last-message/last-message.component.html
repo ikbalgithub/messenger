@@ -1,22 +1,33 @@
 <a routerLink="/message/{{profile.usersRef}}" [state]="{profile,groupId}">
-  <div class="bg-white shadow-lg rounded p-3 flex flex-row items-center gap-3 w-full">
+  <div class="bg-white p-3 shadow-lg rounded flex flex-row items-center gap-3 w-full">
     <p-avatar
       [image]="profile.profileImage" 
       size="xlarge" 
       shape="circle"
-      severity="danger"
-      class="flex flex-col"
+      class="flex"
     />
     <div class="overflow-hidden flex flex-col" *ngIf="contentType==='text'">
-      <p class="font-medium">
-        {{profile.firstName}}
-      </p> 
+      <div class="flex flex-row items-center gap-2">
+        <span class="font-bold text-lg">
+          {{profile.firstName}}
+        </span>
+        <p-badge 
+          [value]="unreadCounter" 
+          *ngIf="unread"
+        />
+      </div>
       <p class="truncate">{{value}}</p>
     </div>
     <div *ngIf="contentType ==='image'" class="flex flex-col gap-1"> 
-      <p class="font-medium">
-        {{profile.firstName}}
-      </p>
+      <div class="flex flex-row items-center gap-2">
+        <p class="font-medium">
+          {{profile.firstName}}
+        </p>
+        <p-badge 
+          [value]="unreadCounter" 
+          *ngIf="unread"
+        />
+      </div>
       <div class="flex flex-row items-center gap-2">
         <i class="pi pi-image text-[1rem]"></i>
         <span class="text-slate-600">photo</span>
