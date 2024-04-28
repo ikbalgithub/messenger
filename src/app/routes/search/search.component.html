@@ -26,7 +26,7 @@
               [unread]="x?.message?.sender === x.usersRef"
               [groupId]="x?.message?.groupId ?? _altId"
               [value]="x?.message?.value ?? ''"
-              [contentType]="x?.message?.value ? x?.message?.contentType : ''"
+              [contentType]="x?.message?.value ? x?.message?.contentType | toString : ''"
             />
           }
         }
