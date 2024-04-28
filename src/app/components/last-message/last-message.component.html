@@ -6,29 +6,18 @@
       shape="circle"
       class="flex"
     />
-    <div class="overflow-hidden flex flex-col" *ngIf="contentType==='text'">
+    <div class="overflow-hidden flex flex-col">
       <div class="flex flex-row items-center gap-2">
         <span class="font-bold text-lg">
-          {{profile.firstName}}
+          {{ profile.firstName }}
         </span>
         <p-badge 
           [value]="unreadCounter" 
           *ngIf="unread"
         />
       </div>
-      <p class="truncate">{{value}}</p>
-    </div>
-    <div *ngIf="contentType ==='image'" class="flex flex-col gap-1"> 
-      <div class="flex flex-row items-center gap-2">
-        <p class="font-medium">
-          {{profile.firstName}}
-        </p>
-        <p-badge 
-          [value]="unreadCounter" 
-          *ngIf="unread"
-        />
-      </div>
-      <div class="flex flex-row items-center gap-2">
+      <p class="truncate" *ngIf="contentType === 'text'">{{value}}</p>
+      <div class="flex flex-row items-center gap-2" *ngIf="contentType === 'image'">
         <i class="pi pi-image text-[1rem]"></i>
         <span class="text-slate-600">photo</span>
       </div>

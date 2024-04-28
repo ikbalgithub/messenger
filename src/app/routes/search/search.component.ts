@@ -1,5 +1,5 @@
 import { HttpHeaders } from '@angular/common/http';
-import { Component,inject,signal,effect } from '@angular/core';
+import { Component,inject,signal,effect,Input } from '@angular/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { Location,CommonModule } from '@angular/common';
 import { Router } from '@angular/router'
@@ -33,6 +33,7 @@ import { Types } from 'mongoose';
 })
 export class SearchComponent {
   query = ''
+
   location = inject(Location)
   requestService = inject(RequestService)
   storeService = inject(StoreService)
@@ -42,7 +43,6 @@ export class SearchComponent {
   hAuth = this.storeService.authorization
 
   _altId = new Types.ObjectId().toString()
-
 
   searchState = this.requestService.createInitialState<Search.Result[]>()
   searchFn = this.requestService.get<Search.Result[]>({
