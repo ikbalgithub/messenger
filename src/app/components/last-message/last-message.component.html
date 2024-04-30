@@ -13,7 +13,7 @@
         </span>
         <p-badge 
           [value]="unreadCounter" 
-          *ngIf="unread"
+          *ngIf="unread && (unreadCounter | toInt) > 0"
         />
       </div>
       <p class="truncate" *ngIf="contentType === 'text'">{{value}}</p>
