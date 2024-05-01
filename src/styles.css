@@ -5,7 +5,9 @@
 @import "primeng/resources/primeng.css";
 @import "primeicons/primeicons.css";
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Protest+Riot&display=swap');
+
 @tailwind utilities;
+@tailwind components;
 
 @layer utilties{
   .fullscreen{
@@ -24,5 +26,17 @@
     @apply hover:cursor-pointer;
     @apply active:outline outline-2 outline-white;
     @apply rounded;
+  }
+}
+
+@layer components{
+  .btn-google{
+    @apply flex;
+    @apply flex-row;
+    @apply items-center;
+    @apply bg-red-600;
+    @apply text-white;
+    @apply w-full p-3;
+    @apply rounded-md;
   }
 }

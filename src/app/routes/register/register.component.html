@@ -1,23 +1,39 @@
-<div class="fullscreen bg-slate-200 flex flex-col gap-3 center">
+<div class="fullscreen bg-blue-400 flex flex-col gap-5 center">
+  <span style="font-family: 'Dancing Script', cursive" class="text-4xl text-white">
+    Messenger
+  </span>
   <div *ngIf="signUpWithGoogleMessage()" class="bg-red-900 lg:w-1/4 md:w-2/4 w-4/5 p-3 rounded text-center text-white">
     {{signUpWithGoogleMessage()}}
   </div>
-  <div class="flex flex-col items-center lg:w-1/4 md:w-2/4 w-3/4 bg-white shadow-2xl rounded rounded-md p-6 gap-5">
+  <div class="flex flex-col items-center lg:w-1/3 md:w-2/4 w-3/4 bg-white shadow-2xl rounded rounded-md p-10 gap-7">
     <div class="w-full flex flex-col items-center">
-      <h1 class="font-bold text-xl">Sign-up</h1>
-      <span class="text-gray-600">Create your account right now!</span>
+      <span class="font-bold text-base text-slate-500">
+        Sign up for your free Messenger account</span>
     </div>
-    <div class="w-full flex flex-col gap-3">
-      <button [disabled]="signUpWithGoogleMessage()" (click)="signUpWithGoogle()" class="flex flex-row items-center outline outline-2 outline-black w-full p-3 rounded-md">
+    <div class="w-full flex flex-col gap-2 text-center">
+      <button [disabled]="signUpWithGoogleMessage()" (click)="signUpWithGoogle()" class="btn-google">
         <i class="pi pi-google text-xl"></i>
         <span class="flex-1">Continue with google</span>
       </button>
-      <button class="flex flex-row items-center outline outline-2 outline-black w-full p-3 rounded-md">
+      <div>
+        <span class="text-slate-900">
+          Use your Google account to sign up to Messenger.
+        </span>
+        <span class="text-slate-900">
+          It's that easy. Or, <a class="underline text-blue-900" href="#">register with a password</a> instead
+        </span>
+      </div>
+      <!-- 
+        <button class="flex flex-row items-center outline outline-2 outline-black w-full p-3 rounded-md">
         <i class="pi pi-facebook text-xl"></i>
         <span class="flex-1">Continue with facebook</span>
-      </button>
+        </button> 
+      --> 
     </div>
-    <p (click)="withEmail=true" class="text-slate-500 font-bold cursor-pointer">Continue with email</p>
+    <a class="text-xs text-blue-900 underline" href="#">Login to your Messenger account</a>
+    <!--
+      <p (click)="withEmail=true" class="text-slate-500 font-bold cursor-pointer">Continue with email</p>
+    -->
   </div>
 </div>
 
