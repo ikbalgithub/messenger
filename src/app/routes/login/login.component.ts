@@ -10,13 +10,19 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { signInWithPopup,GoogleAuthProvider,getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { RouterLink } from '@angular/router'
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  imports:[CommonModule,ReactiveFormsModule,RouterLink]
+  imports:[
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    ProgressSpinnerModule
+  ]
 })
 export class LoginComponent {
   router = inject(Router)

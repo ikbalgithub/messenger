@@ -45,3 +45,7 @@
     </span>
 	</div>
 </div>
+
+<div *ngIf="loginState().running" class="fullscreen flex flex-col center bg-black opacity-50">
+  <p-progressSpinner/>
+</div>
