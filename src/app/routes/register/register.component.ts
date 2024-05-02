@@ -28,103 +28,44 @@ import { Router } from '@angular/router'
     ReactiveFormsModule
   ]
 })
-export class RegisterComponent implements OnInit{
+export class RegisterComponent{
   router = inject(Router)
   authService = inject(AuthService)
   requestService = inject(RequestService)
   firebaseService = inject(FirebaseService)
   auth = getAuth()
+   
+  verification = this.requestService.createInitialState<any>()
 
-
-
-  authInfo:FormGroup = new FormGroup({
-    email: new FormControl(''),
-    password: new FormControl(''),
-  })
-
-  withEmail = false
-  
-  info = "https://www.googleapis.com/auth/userinfo"
-  signUpWithEmailErrorMessage = signal<string>('')
-  signUpWithGoogleMessage = signal<null|string>(null)
-  successSignUpWithEmail = signal<boolean>(false)
-
-  setErrorNull = effect(() => {
-    let message = this.signUpWithGoogleMessage()
-    setTimeout(() => {
-       this.signUpWithGoogleMessage.set(null)
-    },3000)
-  })
-
- 
-  provider = new GoogleAuthProvider()
-  isUserExist = this.requestService.createInitialState<any>()
-
-  findOrCreate = this.requestService.post<any,any>({
-    failedCb:e => this.signUpWithGoogleMessage.set(
-      e.message
-    ),
+  findOrCreateNewAccount = this.requestService.post<any,any>({
+    failedCb:message => console.error(message),
     cb:r => this.authService.next(r),
-    state:this.isUserExist,
+    state:this.verification,
     path:'oauth'
   })
   
 
   async signUpWithGoogle(){
     try{
-      var {user} = await signInWithPopup(
+      var account = await signInWithPopup(
         this.auth,
-        this.provider
+        new GoogleAuthProvider()
       )
 
-      this.findOrCreate({
-        profile:{
-          firstName:user?.displayName?.split(" ")[0],
-          surname:user?.displayName?.split(" ")[1],
-          profileImage:user.photoURL,
-        }, 
-        uid:user.uid
+      var uid = account.user.uid
+      var fullName = account?.user.displayName
+      var firstName = fullName?.split(" ")[0]
+      var surname = fullName?.split(" ")[1]
+      var profileImage = account.user.photoURL
+      var profile = {firstName,surname,profileImage}
+
+      this.findOrCreateNewAccount({
+        profile, 
+        uid
       })
     }
     catch(e:any){
-      this.signUpWithGoogleMessage.update(
-        current => e.message
-          .match(/\((.*?)\)/)[1]
-            .split('/')[1]
-              .replace(/-/g, ' ')
-      )
+      console.error(e)
     }
-  }
-
-  async signUpWithEmail(){
-    try{
-      var result = await createUserWithEmailAndPassword(
-        this.auth,
-        this.authInfo.value.email,
-        this.authInfo.value.password
-      )
-
-      this.successSignUpWithEmail.set(true)
-      this.authInfo.get("email")?.disable()
-      this.authInfo.get("password")?.disable()
-
-      sendEmailVerification(result.user)
-    }
-    catch(e:any){
-      this.signUpWithEmailErrorMessage.set(
-        e.message
-          .match(/\((.*?)\)/)[1]
-            .split('/')[1]
-              .replace(/-/g, ' ')
-      )
-    }
-  }
-
-  ngOnInit(){
-    ['.email','.profile'].forEach(s => {
-      this.provider.addScope(
-        `${this.info}${s}`
-      )
-    })
   }
 }

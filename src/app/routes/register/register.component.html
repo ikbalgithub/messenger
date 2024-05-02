@@ -2,16 +2,13 @@
   <span style="font-family: 'Dancing Script', cursive" class="text-4xl text-white">
     Messenger
   </span>
-  <div *ngIf="signUpWithGoogleMessage()" class="bg-red-900 lg:w-1/4 md:w-2/4 w-4/5 p-3 rounded text-center text-white">
-    {{signUpWithGoogleMessage()}}
-  </div>
   <div class="flex flex-col items-center lg:w-1/3 md:w-2/4 w-3/4 bg-white shadow-2xl rounded rounded-md p-10 gap-7">
     <div class="w-full flex flex-col items-center">
       <span class="font-bold text-base text-slate-500">
         Sign up for your free Messenger account</span>
     </div>
     <div class="w-full flex flex-col gap-2 text-center">
-      <button [disabled]="signUpWithGoogleMessage()" (click)="signUpWithGoogle()" class="btn-google">
+      <button (click)="signUpWithGoogle()" class="btn-google">
         <i class="pi pi-google text-xl"></i>
         <span class="flex-1">Continue with google</span>
       </button>
@@ -23,40 +20,13 @@
           It's that easy. Or, <a class="underline text-blue-900" href="#">register with a password</a> instead
         </span>
       </div>
-      <!-- 
-        <button class="flex flex-row items-center outline outline-2 outline-black w-full p-3 rounded-md">
-        <i class="pi pi-facebook text-xl"></i>
-        <span class="flex-1">Continue with facebook</span>
-        </button> 
-      --> 
     </div>
     <a class="text-xs text-blue-900 underline" href="#">Login to your Messenger account</a>
-    <!--
-      <p (click)="withEmail=true" class="text-slate-500 font-bold cursor-pointer">Continue with email</p>
-    -->
   </div>
 </div>
 
-<p-dialog header="Sign up" [(visible)]="withEmail" [modal]="true" class="lg:w-1/4 md:w-2/4 w-4/5">
-  <form class="flex flex-col gap-3" [formGroup]="authInfo">
-    <div class="flex flex-col gap-1">
-      <label for="email" class="font-bold">Email</label>
-      <input type="email" class="{{successSignUpWithEmail() ? 'bg-slate-200' : ''}}" formControlName="email" pInputText id="email">
-    </div>
-    <div class="flex flex-col gap-1">
-      <label for="password" class="font-bold">Password</label>
-      <input class="{{successSignUpWithEmail() ? 'bg-slate-200' : ''}}" formControlName="password" pInputText id="password" />
-    </div>
-    <p *ngIf="successSignUpWithEmail()">
-      an email verification has been sent. open it and verify your account
-    </p>
-    <p class="text-red-900">{{signUpWithEmailErrorMessage()}}</p>
-  </form>
-  <ng-template pTemplate="footer">
-    <p-button [disabled]="successSignUpWithEmail()" (click)="signUpWithEmail()" label="Next" pAutoFocus [autofocus]="true"></p-button>
-  </ng-template>
-</p-dialog>
 
-<div *ngIf="isUserExist().running" class="fullscreen flex flex-col center bg-black opacity-50">
+
+<div *ngIf="verification().running" class="fullscreen flex flex-col center bg-black opacity-50">
   <p-progressSpinner/>
 </div>
