@@ -6,11 +6,11 @@ import { AuthService } from '../../services/auth/auth.service'
 import { RequestService } from '../../services/request/request.service'
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms'
-import { GoogleAuthProvider,getAuth,signInWithPopup,createUserWithEmailAndPassword,sendEmailVerification } from "firebase/auth";
+import { GoogleAuthProvider,getAuth,signInWithPopup } from "firebase/auth";
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { Router } from '@angular/router'
+import { Router,RouterLink } from '@angular/router'
 
 
 @Component({
@@ -25,7 +25,8 @@ import { Router } from '@angular/router'
     InputTextModule,
     DialogModule,
     ButtonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterLink
   ]
 })
 export class RegisterComponent{
@@ -33,7 +34,6 @@ export class RegisterComponent{
   authService = inject(AuthService)
   requestService = inject(RequestService)
   firebaseService = inject(FirebaseService)
-  auth = getAuth()
    
   verification = this.requestService.createInitialState<any>()
 
@@ -48,7 +48,7 @@ export class RegisterComponent{
   async signUpWithGoogle(){
     try{
       var account = await signInWithPopup(
-        this.auth,
+        getAuth(),
         new GoogleAuthProvider()
       )
 

@@ -8,51 +8,67 @@ import { RequestService } from '../../services/request/request.service'
 import { AuthService } from '../../services/auth/auth.service'
 import { HttpErrorResponse } from '@angular/common/http';
 import { FirebaseService } from '../../services/firebase/firebase.service'
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithPopup,GoogleAuthProvider,getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { RouterLink } from '@angular/router'
 
 @Component({
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  imports:[CommonModule,ReactiveFormsModule],
+  imports:[CommonModule,ReactiveFormsModule,RouterLink]
 })
 export class LoginComponent {
   router = inject(Router)
   requestService = inject(RequestService)
   authService = inject(AuthService)
   firebaseService = inject(FirebaseService)
-  auth = getAuth()
-
-  errorMessage = signal<null|string>(null)
-  placeholder = import.meta.env.NG_APP_PLACEHOLDER
 
   credential = new FormGroup({
     email: new FormControl<string>(''),
     password: new FormControl<string>(''),
   })
 
-  loginState = this.requestService.createInitialState<Common.Authenticated>()
+  placeholder = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgt6wCXkcc2T3ZYH_hSWtwyBudcZLq-rBMBQ&usqp=CAU'
 
-  findOrCreate = this.requestService.post<Common.Oauth,Common.Authenticated>({
+  loginState = this.requestService.createInitialState<any>()
+
+  findOrCreate = this.requestService.post<any,any>({
     state:this.loginState,
     path:'oauth',
     cb:r => this.authService.next(r),
-    failedCb:e => this.errorMessage.update(
-      current => e.message
-    ),
+    failedCb:err => console.log(err)
   })
 
-  setErrorNull = effect(() => {
-    var message = this.errorMessage()
-    setTimeout(() => this.errorMessage.set(null),3000)
-  })
+  async loginWithGoogle(){
+    try{
+      var account = await signInWithPopup(
+        getAuth(),
+        new GoogleAuthProvider()
+      )
+
+      var uid = account.user.uid
+      var fullName = account?.user.displayName
+      var firstName = fullName?.split(" ")[0]
+      var surname = fullName?.split(" ")[1]
+      var profileImage = account.user.photoURL
+      var profile = {firstName,surname,profileImage}
+    
+      this.findOrCreate({
+        profile,
+        uid
+      })
+    }
+    catch(e:any){
+      console.log(e)
+    }
+  }
 
 
   async login(credential = this.credential as FormGroup){
     try{
       var result = await signInWithEmailAndPassword(
-        this.auth, 
+        getAuth(), 
         credential.value.email, 
         credential.value.password
       )
@@ -72,18 +88,11 @@ export class LoginComponent {
         this.findOrCreate(newUser)
       }
       else{
-        this.errorMessage.update(
-          c => `your account hasn't been verificated yet`
-        )
+        console.log('has not been verificated yet')
       }
     }
     catch(e:any){
-      this.errorMessage.update(
-        c => e.message
-          .match(/\((.*?)\)/)[1]
-            .split('/')[1]
-              .replace(/-/g, ' ')
-      )
+      console.log(e)
     }
   }
 }

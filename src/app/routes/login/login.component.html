@@ -1,38 +1,47 @@
-<div class="fullscreen bg-slate-200 flex flex-col gap-3 center">
-	<div class="bg-red rounded p-2 bg-red-900 w-3/5 sm:w-2/5 lg:w-1/4" *ngIf="errorMessage()">
-     <p class="text-white text-center p-3 font-medium">
-       {{errorMessage()}}
-     </p>
-  </div>
+<div class="fullscreen bg-blue-400 flex flex-col gap-3 center">
+	<span style="font-family: 'Dancing Script', cursive" class="text-4xl text-white">
+    Messenger
+  </span>
+  <div class="bg-white px-10 text-center py-8 rounded-md flex flex-col gap-8 shadow-xl w-3/5 sm:w-2/5 lg:w-1/3">
+    <div class="flex justify-center">
+      <span class="font-bold text-base text-slate-600">
+        Log in to your account
+      </span>
+    </div>
 
-  <div class="z-10 bg-white px-4 py-8 rounded-md flex flex-col gap-3 shadow-xl w-3/5 sm:w-2/5 lg:w-1/4">
-    <div class="flex justify-center">
-      <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxV6-92RcVDo2igSLh8yfBliP0wl3hSrONEA&usqp=CAU"
-        class="w-20 aspect-square rounded-full" 
-      />
+    <div class="w-full flex flex-col gap-2 text-center">
+      <button class="btn-google" (click)="loginWithGoogle()">
+        <i class="pi pi-google text-xl"></i>
+        <span class="flex-1">Continue with google</span>
+      </button>
     </div>
-    <div class="flex justify-center">
-      <h1 class="font-semi-bold text-2xl">
-        Login
-      </h1>
+    
+    <div class="flex flex-row gap-2">
+      <hr class="flex-1 font-bold"/>
+      <span class="leading-[0px]">or</span>
+      <hr class="flex-1"/>
     </div>
+
     <form class="flex flex-col gap-4" [formGroup]="credential">
       <input 
         type="email"
-        placeholder="username"
+        placeholder="Your E-mail"
         formControlName="email"
-        class="p-2 border-2 border-black rounded"
+        class="p-2 outline-none border border-slate-300 rounded"
       />
       <input 
         type="password"
-        placeholder="password"
+        placeholder="Your Password"
         formControlName="password"
-        class="p-2 border-2 border-black rounded"
+        class="p-2 outline-none border border-slate-300 rounded"
       />
       <button (click)="login()"  class='bg-black rounded text-white p-2'>
       	Login
       </button>
     </form>
+
+    <span class="text-xs text-slate-500">
+      <a class="underline text-blue-900" href="#">Reset my password.</a> Don't have an account? <a class="underline text-blue-900" routerLink="/register">Sign up.</a>
+    </span>
 	</div>
 </div>
