@@ -1,4 +1,5 @@
-import { Component,Input,ViewEncapsulation } from '@angular/core';
+import { Component,Input,ViewEncapsulation,inject } from '@angular/core';
+import { CommonService } from '../../services/common/common.service'
 import { Message,Ngrx } from '../../../index.d'
 import { CommonModule } from '@angular/common';
 
@@ -8,8 +9,8 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   templateUrl: './message-sent.component.html',
   styleUrl: './message-sent.component.css',
-  encapsulation:ViewEncapsulation.None
 })
 export class MessageSentComponent {
+  common = inject(CommonService)
   @Input() message!:Message.One
 }

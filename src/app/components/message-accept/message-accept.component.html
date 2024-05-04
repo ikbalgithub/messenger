@@ -1,6 +1,7 @@
 <div class="flex flex-row">
-  <div *ngIf="message.contentType === 'text'" class="p-3 rounded bg-white max-w-[80%]">
+  <div *ngIf="message.contentType === 'text'" class="flex flex-col p-3 rounded bg-white max-w-[80%]">
     <p>{{message.value}}</p>
+    <span class="text-xs text-slate-500 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
   </div>
 </div>
 
