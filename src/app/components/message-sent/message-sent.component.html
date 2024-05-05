@@ -22,12 +22,18 @@
     <img [src]="message.value" class="rounded"/>
     <div class="flex flex-row items-end">
       <p class="flex-1">{{message.description}}</p>
-        <i *ngIf="!message?.sent" class="pi pi-check text-[1rem]" ></i>
-        <i *ngIf="message?.sent && !message.read" class="pi pi-check text-white text-[1rem]" ></i> 
-        <div *ngIf="message?.sent && message.read">
+      <i *ngIf="!message?.sent" class="pi pi-check text-[1rem]" ></i>
+      <div class="flex flex-row gap-2" *ngIf="message?.sent && !message.read">
+        <span class="text-xs text-slate-900 leading-loose">{{common.relativeTimeFormat(message.sendAt)}}</span>
+        <i class="pi pi-check text-white text-[1rem]" ></i> 
+      </div>
+      <div *ngIf="message?.sent && message.read" class="flex flex-row gap-2">
+        <span class="text-xs text-slate-900 leading-loose">{{common.relativeTimeFormat(message.sendAt)}}</span>
+        <div>
           <i class="pi pi-check text-[1rem] text-white"></i>
           <i class="pi pi-check text-[1rem] text-white"></i>
         </div>
+      </div>
     </div>
   </div>
 </div>
