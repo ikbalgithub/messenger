@@ -23,15 +23,17 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
   post<Body,Result>(config:Request.RequestConfig<Result>):Request.Post<Body>{
     
+    var postObject:Body
+
     var recursive = (this.post<Body,Result>).bind(this)
 
     var retryFunction = () => { /* run retry ... */ }
-    
+
     var error = (response:HttpErrorResponse) => {
       var message = response.message
 
       if(config.failedCb) config.failedCb(
-        response
+        response,postObject
       )
 
       config.state.set({
@@ -70,6 +72,8 @@ import { HttpEvent,HttpClient,HttpErrorResponse } from '@angular/common/http';
 
 
     return (body:Body,options?:any):void => {
+      postObject = body
+
       config.state.set({
         running:true,
         isError:false,
