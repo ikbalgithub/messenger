@@ -96,8 +96,34 @@ export class MessageComponent implements OnInit,OnDestroy {
   updateOnReadState = this.request.createInitialState<Message.One>()
 
   requestSend = this.request.post<Message.New,Message.One>({
+    failedCb:(error,body) => {
+      var postObject = body as Message.New
+      var result = this.fetchState().result
+      var JSONResult = result.map(m => {
+        return JSON.stringify(m)
+      })
+
+      var [filter] = result.filter(f => {
+        return f._id === postObject._id
+      })
+
+      var index = JSONResult.indexOf(
+        JSON.stringify(filter)
+      )
+
+      result[index] = {
+        ...filter,
+        failed:true
+      }
+      
+      this.fetchState.update(
+        current => ({
+          ...current,
+          result
+        })
+      )
+    },
     cb:r => this.onSuccessSend(r._id),
-    failedCb:r => console.log(r),
     state:this.sendState,
     path:'message'
   })
@@ -237,7 +263,8 @@ export class MessageComponent implements OnInit,OnDestroy {
 
     result[index] = {
       ...filter,
-      sent:true
+      sent:true,
+      failed:false
     }
 
     this.fetchState.update(
@@ -255,6 +282,10 @@ export class MessageComponent implements OnInit,OnDestroy {
         sent:true
       })
     )
+
+    var sortedResult = result.sort((a,b) => {
+      return a.sendAt > b.sendAt ? 1 : -1
+    })
 
     messages.filter(
       x => 
@@ -281,21 +312,46 @@ export class MessageComponent implements OnInit,OnDestroy {
 
   onNewMessage = this.socket.on('newMessage',(message:Message.One) => {
     this.updateOnReadFn({_id:message._id})
+    
+    var result = this.fetchState().result
+    
+    var newMessage = {
+      ...message,
+      sent:true,
+      read:true
+    }
+
+    var sortedResult = [...result,newMessage].sort(
+      (a,b) => a.sendAt > b.sendAt ? 1 : -1
+    )
+
     this.fetchState.update(current => {
-      var newMessage = {
-        ...message,
-        sent:true,
-        read:true
-      }
-      var result = [
-        ...current.result,
-        newMessage
-      ]
       return {
         ...current,
-        result
+        result:[...sortedResult]
       }
     })
+
+    // this.fetchState.update(current => {
+    //   var newMessage = {
+    //     ...message,
+    //     sent:true,
+    //     read:true
+    //   }
+    //   var result = [
+    //     ...current.result,
+    //     newMessage
+    //   ]
+
+    //   var sortedResult = result.sort((a,b) => {
+    //     return a.sendAt > b.sendAt ? 1 : -1
+    //   })
+
+    //   return {
+    //     ...current,
+    //     result:[...sortedResult]
+    //   }
+    // })
   })
   
 
@@ -368,5 +424,16 @@ export class MessageComponent implements OnInit,OnDestroy {
 
   retry(){
     (this.fetchState().retryFunction as Function)()
+  }
+
+  resend({read,...message}:Message.One){
+    var headers = new HttpHeaders({
+      authorization:this.hAuth()
+    })
+
+    this.requestSend(
+      message,
+      {headers}
+    )
   }
 }

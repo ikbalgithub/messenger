@@ -9,6 +9,7 @@
       @if(message.sender === userId){
         <app-message-sent
           [message]="message"
+          (resend)="resend($event)"
         />
       }
       @else{

@@ -28,7 +28,8 @@ export namespace Message{
     read:boolean,
     contentType:string,
     description:string,
-    sent?:boolean
+    sent?:boolean,
+    failed?:boolean
   }[]
 
   export type One = All[number]
@@ -110,7 +111,7 @@ export namespace Request{
   
   interface RequestConfig<Result>{
     cb?:(result:Result) => void,
-    failedCb?:(err:HttpErrorResponse)=>void,
+    failedCb?:(err:HttpErrorResponse,other?:any)=>void,
     state:State<Result>,
     path?:string
   }

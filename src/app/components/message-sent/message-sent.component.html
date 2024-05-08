@@ -4,7 +4,7 @@
       <p>{{message.value}}</p>
       <span class="text-xs text-slate-900 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
     </div>
-    <div *ngIf="!message?.sent">
+    <div *ngIf="!message?.sent && !message?.failed">
       <i class="pi pi-check text-[1rem]" ></i>
     </div>
     <div *ngIf="message?.sent && !message.read">
@@ -14,6 +14,9 @@
       <i class="pi pi-check text-[1rem] text-white"></i>
       <i class="pi pi-check text-[1rem] text-white"></i>
     </div>
+    <div *ngIf="message?.failed" class="cursor-pointer" (click)="resend.emit(message)">
+      <i class="pi pi-replay text-[1rem] text-white"></i>
+    </div>
   </div>
 </div>
 
@@ -22,7 +25,7 @@
     <img [src]="message.value" class="rounded"/>
     <div class="flex flex-row items-end">
       <p class="flex-1">{{message.description}}</p>
-      <i *ngIf="!message?.sent" class="pi pi-check text-[1rem]" ></i>
+      <i *ngIf="!message?.sent && !message.failed" class="pi pi-check text-[1rem]" ></i>
       <div class="flex flex-row gap-2" *ngIf="message?.sent && !message.read">
         <span class="text-xs text-slate-900 leading-loose">{{common.relativeTimeFormat(message.sendAt)}}</span>
         <i class="pi pi-check text-white text-[1rem]" ></i> 
@@ -33,6 +36,10 @@
           <i class="pi pi-check text-[1rem] text-white"></i>
           <i class="pi pi-check text-[1rem] text-white"></i>
         </div>
+      </div>
+      <div *ngIf="message?.failed" class="cursor-pointer flex flex-row gap-2">
+        <span class="text-xs text-slate-900 leading-loose">{{common.relativeTimeFormat(message.sendAt)}}</span>
+        <i class="pi pi-replay text-[1rem] text-white" (click)="resend.emit(message)"></i>
       </div>
     </div>
   </div>

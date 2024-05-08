@@ -1,6 +1,6 @@
 import { Message,Ngrx } from '../../../index.d'
 import { CommonModule } from '@angular/common'
-import { Component,Input,ViewEncapsulation } from '@angular/core';
+import { Component,Input,Output,EventEmitter } from '@angular/core';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageSentComponent } from '../../components/message-sent/message-sent.component'
 import { MessageAcceptComponent } from '../../components/message-accept/message-accept.component'
@@ -22,4 +22,12 @@ export class MessagesComponent {
   @Input() messages!:Message.All
   @Input() isError!:boolean
   @Input() userId!:string
+  
+  @Output() requestResend = new EventEmitter<Message.One>()
+
+  resend(message:Message.One){
+    this.requestResend.emit(
+      message
+    )
+  }
 }
