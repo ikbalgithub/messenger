@@ -9,6 +9,7 @@ export const userReducer = createReducer<Ngrx.User>(
   state?.user ?? {
     _id:null,
     profile:null,
+    username:null
   },
 
   on(setUser,(state:Ngrx.User,payload:Ngrx.User) => {
@@ -18,7 +19,8 @@ export const userReducer = createReducer<Ngrx.User>(
   on(setNull,(state:Ngrx.User) => {
     return {
       _id:null,
-      profile:null
+      profile:null,
+      username:null
     }
   })
 

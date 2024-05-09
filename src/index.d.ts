@@ -73,7 +73,8 @@ export namespace Common{
   interface Authenticated{
     _id:string,
     profile:Profile,
-    authorization:string
+    authorization:string,
+    username:string
   }
 
   interface Oauth{
@@ -86,6 +87,7 @@ export namespace Ngrx{
   export interface User {
     _id:string|null,
     profile:Common.Profile|null,
+    username:string|null
   }
 
   export interface Authentication{
