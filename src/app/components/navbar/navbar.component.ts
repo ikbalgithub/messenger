@@ -30,6 +30,7 @@ export class NavbarComponent {
         {
           label: 'Account Settings',
           icon: 'pi pi-cog',
+          command:() => this.router.navigate(['profile'])
         },
         {
           label: 'Logout',
