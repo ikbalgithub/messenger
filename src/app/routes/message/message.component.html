@@ -41,26 +41,26 @@
     />
 
     <p-dialog header="Send" [(visible)]="visible" [modal]="true">
-    <div class="flex flex-col gap-3">
-      <img
-        [src]="imageMessage.value.value" 
-        alt="Image"
-        class="h-72 aspect-square rounded"
-      />
-      <form [formGroup]="imageMessage" (submit)="sendImage(imageMessage)">
-        <p-inputGroup class="flex flex-row">
-          <input 
-            type="text" 
-            pInputText 
-            placeholder="Description"
-            class="flex-1 px-3 outline-none"
-            formControlName="description"
-          />
-          <button type="submit" pButton icon="pi pi-send">
-          </button>
-        </p-inputGroup>
-      </form>
-    </div>
+      <div class="flex flex-col gap-3">
+        <img
+          [src]="imageMessage.value.value" 
+          alt="Image"
+          class="h-72 aspect-square rounded"
+        />
+        <form [formGroup]="imageMessage" (submit)="sendImage(imageMessage)">
+          <p-inputGroup class="flex flex-row">
+            <input 
+              type="text" 
+              pInputText 
+              placeholder="Description"
+              class="flex-1 px-3 outline-none"
+              formControlName="description"
+            />
+            <button type="submit" pButton icon="pi pi-send">
+            </button>
+          </p-inputGroup>
+        </form>
+      </div>
     </p-dialog>
   </div>  
 
