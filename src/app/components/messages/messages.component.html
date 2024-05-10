@@ -10,6 +10,7 @@
         <app-message-sent
           [message]="message"
           (resend)="resend($event)"
+          class="self-end min-w-[50%] max-w-[50%]"
         />
       }
       @else{
@@ -25,5 +26,6 @@
 <ng-template #accept let-message="message">
   <app-message-accept
     [message]="message"
+    class="self-start min-w-[50%] max-w-[50%]"
   />
 </ng-template>
