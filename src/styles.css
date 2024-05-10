@@ -22,6 +22,12 @@
     @apply justify-center;
   }
 
+  .logo{
+    @apply text-white;
+    @apply font-bold;
+    @apply text-2xl;
+  }
+
   .btn-back{
     @apply hover:cursor-pointer;
     @apply active:outline outline-2 outline-white;
