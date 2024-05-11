@@ -276,9 +276,11 @@ export class MessageComponent implements OnInit,OnDestroy {
   }
 
   onSuccessFetch(messages:Message.All){
-    this.updateOnReadFn({
-      _id:this._id
-    })
+    var _id = this._id
+    var groupId = this.routeState.groupId
+    var roomId = `${groupId}/${_id}`
+
+    this.updateOnReadFn({groupId,_id})
 
     var result = messages.map(
       message => ({
@@ -291,19 +293,6 @@ export class MessageComponent implements OnInit,OnDestroy {
       return a.sendAt > b.sendAt ? 1 : -1
     })
 
-    // messages.filter(
-    //   x => 
-    //     x.read === false &&
-    //     x.sender === this._id
-    // )
-    // .map(
-    //   message => {
-    //     this.updateOnReadFn({
-    //       _id:message._id
-    //     })
-    //   }
-    // )
-
     setTimeout(() => {
       this.fetchState.update(
         current => ({
@@ -315,7 +304,11 @@ export class MessageComponent implements OnInit,OnDestroy {
   }
 
   onNewMessage = this.socket.on('newMessage',(message:Message.One) => {
-    this.updateOnReadFn({_id:this._id})
+    var _id = this._id
+    var groupId = this.routeState.groupId
+    var roomId = `${groupId}/${_id}`
+
+    this.updateOnReadFn({groupId,_id})
     
     var result = this.fetchState().result
     
@@ -335,27 +328,6 @@ export class MessageComponent implements OnInit,OnDestroy {
         result:[...sortedResult]
       }
     })
-
-    // this.fetchState.update(current => {
-    //   var newMessage = {
-    //     ...message,
-    //     sent:true,
-    //     read:true
-    //   }
-    //   var result = [
-    //     ...current.result,
-    //     newMessage
-    //   ]
-
-    //   var sortedResult = result.sort((a,b) => {
-    //     return a.sendAt > b.sendAt ? 1 : -1
-    //   })
-
-    //   return {
-    //     ...current,
-    //     result:[...sortedResult]
-    //   }
-    // })
   })
   
 
@@ -375,30 +347,6 @@ export class MessageComponent implements OnInit,OnDestroy {
         result:newResult
       }
     })
-    
-    // var JSONResult = result.map(m => {
-    //   return JSON.stringify(m)
-    // })
-
-    // var [filter] = result.filter(m => {
-    //   return _id === m._id
-    // })
-
-    // var index = JSONResult.indexOf(
-    //   JSON.stringify(filter)
-    // )
-
-    // result[index] = {
-    //   ...filter,
-    //   read:true
-    // }
-
-    // this.fetchState.update(
-    //   current => ({
-    //   	...current,
-    //   	result
-    //   })
-    // )
   })
 
   onConnect = this.socket.on('connect',() => {

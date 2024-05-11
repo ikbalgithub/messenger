@@ -12,7 +12,7 @@
 <!-- photo accepted message -->
 
 <div class="p-10 bg-white p-2 flex flex-col gap-1 rounded relative" *ngIf="message.contentType === 'image'">
-  <img src="https://shorturl.at/jvNV6" class="rounded"/>
+  <img [src]="message.value" class="rounded"/>
   <div class="flex flex-row">
     <span>{{message.description}}</span>
   </div>
@@ -20,18 +20,3 @@
 <div class="flex flex-col mt-2" *ngIf="message.contentType === 'image'">
   <span class="text-xs text-slate-900 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
 </div>
-
-<!-- <div class="flex flex-row">
-  <div *ngIf="message.contentType === 'text'" class="flex flex-col p-3 rounded bg-white max-w-[80%]">
-    <p>{{message.value}}</p>
-    <span class="text-xs text-slate-500 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
-  </div>
-</div>
-
-<div *ngIf="message.contentType === 'image'" class="border-2 lg:w-1/4 w-5/6 sm:w-1/2 border-black flex flex-col gap-2 bg-white shadow-2-xl p-2 rounded">
-  <img [src]="message.value" class="rounded"/>
-  <div class="flex-1 flex flex-row">
-    <p class="flex-1">{{message.description}}</p>
-    <span class="text-xs text-slate-900 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
-  </div>
-</div> -->

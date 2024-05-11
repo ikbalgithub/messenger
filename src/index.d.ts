@@ -50,6 +50,7 @@ export namespace Message{
   }
 
   type Update = {
+    groupId:string,
     _id:string
   }
 }

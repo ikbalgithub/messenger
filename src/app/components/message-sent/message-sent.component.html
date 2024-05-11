@@ -19,14 +19,14 @@
 <!-- photo sent message -->
 
 <div class="p-10 bg-green-500 p-2 flex flex-col gap-1 rounded relative" *ngIf="message.contentType === 'image'">
-  <img src="https://shorturl.at/jvNV6" class="rounded"/>
+  <img [src]="message.value" class="rounded"/>
   <div class="flex flex-row">
     <span>{{message.description}}</span>
     <div class="flex-1 flex flex-row justify-end items-end">
-      <i *ngIf="!message?.sent && !message?.failed" class="pi pi-check bottom-10 text-blue-900  rounded-full text-[1rem]"></i>
-      <i *ngIf="message?.sent && !message.read" class="pi pi-check text-white-900 rounded-full text-[1rem]"></i>
-      <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white rounded-full text-[1rem]"></i> 
-      <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white rounded-full text-[1rem]"></i> 
+      <i *ngIf="!message?.sent && !message?.failed" class="pi pi-check text-[1rem]"></i>
+      <i *ngIf="message?.sent && !message.read" class="pi pi-check text-white text-[1rem]"></i>
+      <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
+      <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
       <i (click)="resend.emit(message)" class="pi pi-replay text-white text-[1rem]" *ngIf="message?.failed"></i>
     </div>
   </div>
@@ -34,54 +34,3 @@
 <div class="flex flex-col mt-2" *ngIf="message.contentType === 'image'">
   <span class="text-xs text-slate-900 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
 </div>
-<!-- 
-<div *ngIf="message.contentType === 'text'" class="flex flex-row justify-end">
-  <div  class="p-3 flex flex-row gap-3 items-end rounded bg-green-500 max-w-[80%]">
-    <div class="flex-1 flex flex-col">
-      <p>{{message.value}}</p>
-      <span class="text-xs text-slate-900 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
-    </div>
-    <div *ngIf="!message?.sent && !message?.failed">
-      <i class="pi pi-check text-[1rem]" ></i>
-    </div>
-    <div *ngIf="message?.sent && !message.read">
-      <i class="pi pi-check text-white text-[1rem]" ></i>
-    </div>
-    <div *ngIf="message?.sent && message.read">
-      <i class="pi pi-check text-[1rem] text-white"></i>
-      <i class="pi pi-check text-[1rem] text-white"></i>
-    </div>
-    <div *ngIf="message?.failed" class="cursor-pointer" (click)="resend.emit(message)">
-      <i class="pi pi-replay text-[1rem] text-white"></i>
-    </div>
-  </div>
-</div> 
--->
-
-<!-- 
-<div *ngIf="message.contentType === 'image'" class="flex flex-row justify-end">
-  <div class="lg:w-1/4 w-5/6 sm:w-1/2 border-2 border-black flex flex-col gap-2 bg-green-500 p-2 rounded">
-    <img [src]="message.value" class="rounded"/>
-   <div class="flex flex-row items-end">
-      <p class="flex-1">{{message.description}}</p>
-      <i *ngIf="!message?.sent && !message.failed" class="pi pi-check text-[1rem]" ></i>
-      <div class="flex flex-row gap-2" *ngIf="message?.sent && !message.read">
-        <span class="text-xs text-slate-900 leading-loose">{{common.relativeTimeFormat(message.sendAt)}}</span>
-        <i class="pi pi-check text-white text-[1rem]" ></i> 
-      </div>
-      <div *ngIf="message?.sent && message.read" class="flex flex-row gap-2">
-        <span class="text-xs text-slate-900 leading-loose">{{common.relativeTimeFormat(message.sendAt)}}</span>
-        <div>
-          <i class="pi pi-check text-[1rem] text-white"></i>
-          <i class="pi pi-check text-[1rem] text-white"></i>
-        </div>
-      </div>
-      <div *ngIf="message?.failed" class="cursor-pointer flex flex-row gap-2">
-        <span class="text-xs text-slate-900 leading-loose">{{common.relativeTimeFormat(message.sendAt)}}</span>
-        <i class="pi pi-replay text-[1rem] text-white" (click)="resend.emit(message)"></i>
-      </div>
-    </div> 
-
-  </div>
-</div> 
--->
