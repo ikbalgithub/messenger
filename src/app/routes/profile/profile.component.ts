@@ -1,8 +1,7 @@
 import { Component,inject } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { StoreService } from '../../services/store/store.service'
-import { Router } from '@angular/router';
-
+import { SettingSidebarComponent } from '../../components/setting-sidebar/setting-sidebar.component'
 
 
 @Component({
@@ -10,11 +9,8 @@ import { Router } from '@angular/router';
   standalone: true,
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
-  imports: [AvatarModule],
+  imports: [SettingSidebarComponent]
 
 })
 export class ProfileComponent {
-  storeService = inject(StoreService)
-  userStore = this.storeService.user()
-  
 }

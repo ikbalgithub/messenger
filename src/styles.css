@@ -22,6 +22,11 @@
     @apply justify-center;
   }
 
+  .active{
+    @apply bg-red-900;
+    @apply p-3;
+  }
+
   .logo{
     @apply text-white;
     @apply font-bold;

@@ -1,14 +1,14 @@
 import { Component,Input,inject } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { CommonModule } from '@angular/common'
-import { Router } from '@angular/router'
+import { Router,RouterLink } from '@angular/router'
 import { MenuModule } from 'primeng/menu';
 import { AuthService } from '../../services/auth/auth.service'
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [AvatarModule,CommonModule,MenuModule],
+  imports: [AvatarModule,CommonModule,MenuModule,RouterLink],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
@@ -25,30 +25,14 @@ export class NavbarComponent {
 
   options = [
     {
-      label: 'Options',
-      items: [
-        {
-          label: 'Account Settings',
+          label: 'Settings',
           icon: 'pi pi-cog',
-          command:() => this.router.navigate(['profile'])
-        },
-        {
+          command:() => this.router.navigate(['settings/profile'])
+    },
+    {
           label: 'Logout',
           icon: 'pi pi-power-off',
           command:() => this.authService.logout()
-        }
-      ]
     }
   ]
-
-  view(){
-    this.router.navigate(
-      [`profile/${this._id}`],{state:{
-        firstName:this.firstName,
-        surname:this.surname,
-        image:this.image
-      }}
-    )
-  }
-
 }

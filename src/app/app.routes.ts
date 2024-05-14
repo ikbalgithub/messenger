@@ -6,6 +6,7 @@ import { MessageComponent } from './routes/message/message.component'
 import { SearchComponent } from './routes/search/search.component'
 import { RegisterComponent } from './routes/register/register.component'
 import { ProfileComponent } from './routes/profile/profile.component'
+import { AccountComponent } from './routes/account/account.component'
 import { VerificationComponent } from './routes/verification/verification.component'
 import { authGuard } from './guards/auth/auth.guard'
 
@@ -38,18 +39,12 @@ export const routes: Routes = [
     component:VerificationComponent
   },
   {
-    path:'profile',
-    component:ProfileComponent,
-    data:{
-      editable:true
-    }
+    path:'settings/account',
+    component:AccountComponent
   },
   {
-    path:'profile/:_id',
-    component:ProfileComponent,
-    data:{
-      editable:false
-    }
+    path:'settings/profile',
+    component:ProfileComponent
   },
   {
     path:"**",

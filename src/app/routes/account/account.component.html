@@ -1,0 +1,28 @@
+<div class="fullscreen flex flex-row bg-slate-300">
+  <app-setting-sidebar/>
+
+  <div class="flex-1 p-8 flex flex-col">
+    <div class="flex flex-col p-8 gap-3">
+      <span class="font-semibold text-2xl">Change username</span>
+      <div class="divide-y divide-black">
+        <div></div>
+        <div></div>
+      </div>
+      <span>keep yourself easy to find</span>
+      <button (click)="showEditUsername=true" class="w-fit p-2 rounded border-2 border-slate-900 rounded">change username</button>
+    </div>
+  </div>
+
+  <p-dialog header="Enter a new username" [modal]="true" [(visible)]="showEditUsername">
+    <form class="flex flex-col gap-1" [formGroup]="newUsernameForm">
+      <input formControlName="username" pInputText autocomplete="off" class="outline-none border-2 border-slate-500" />
+      <span class="text-xs text-slate-400">Choose a new username</span>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <button (click)="updateUsername(newUsernameForm)" class="w-full p-3 rounded text-white bg-green-600">Change my username</button>
+    </ng-template>
+  </p-dialog>
+
+</div>
+

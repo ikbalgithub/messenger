@@ -1,7 +1,9 @@
-<div class="fullscreen bg-slate-300 flex flex-col gap-2 center">
-  <p-avatar [image]="userStore.profile.profileImage" styleClass="mr-2" size="xlarge" shape="circle"></p-avatar>
-  <div class="flex flex-row gap-2 center">
-    <span class="font-bold text-lg">{{userStore.profile.firstName}} {{userStore.profile.surname}}</span>
-    <span class="text-sm text-slate-600">({{userStore.username}})</span>
+<div class="fullscreen flex flex-row bg-slate-300">
+  
+  <app-setting-sidebar/>
+
+  <div class="flex 1">
+  
   </div>
+
 </div>
