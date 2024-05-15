@@ -12,7 +12,11 @@
 <!-- photo accepted message -->
 
 <div class="p-10 bg-white p-2 flex flex-col gap-1 rounded relative" *ngIf="message.contentType === 'image'">
-  <img [src]="message.value" class="rounded"/>
+  <p-image 
+    [src]="message.value"
+    [preview]="true"
+    alt="Image" 
+  />
   <div class="flex flex-row">
     <span>{{message.description}}</span>
   </div>
