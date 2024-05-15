@@ -2,11 +2,12 @@ import { Component,Input,ViewEncapsulation,inject,Output,EventEmitter } from '@a
 import { CommonService } from '../../services/common/common.service'
 import { Message,Ngrx } from '../../../index.d'
 import { CommonModule } from '@angular/common';
+import { ImageModule } from 'primeng/image';
 
 @Component({
   selector: 'app-message-sent',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,ImageModule],
   templateUrl: './message-sent.component.html',
   styleUrl: './message-sent.component.css',
 })
