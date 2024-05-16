@@ -15,4 +15,5 @@ import { ImageModule } from 'primeng/image';
 export class MessageAcceptComponent {
   common = inject(CommonService)
   @Input() message!:Message.One
+  @Input() isLast!:boolean
 }

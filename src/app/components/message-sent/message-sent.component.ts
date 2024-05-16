@@ -13,6 +13,8 @@ import { ImageModule } from 'primeng/image';
 })
 export class MessageSentComponent {
   common = inject(CommonService)
+
+  @Input() isLast!:boolean
   
   @Input() message!:Message.One
   
