@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store'
 import { Types } from 'mongoose';
 import { io } from 'socket.io-client'
-import { Component,OnInit,OnDestroy,inject,signal,effect } from '@angular/core';
+import { Component,OnInit,OnDestroy,inject,signal } from '@angular/core';
 import { Common } from '../../../index.d'
 import { ActivatedRoute,Router,Params } from '@angular/router'
 import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
-import { CommonModule,Location } from '@angular/common';
+import { CommonModule,Location,ViewportScroller } from '@angular/common';
 import { Message,Ngrx } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { StoreService } from '../../services/store/store.service'
@@ -55,6 +55,7 @@ export class MessageComponent implements OnInit,OnDestroy {
   router    = inject(Router)
   route     = inject(ActivatedRoute)
   location  = inject(Location)
+  scroller  = inject(ViewportScroller)
   request   = inject(RequestService)
   storeService = inject(StoreService)
   firebaseService = inject(FirebaseService)
@@ -190,6 +191,10 @@ export class MessageComponent implements OnInit,OnDestroy {
       }
     })
 
+    setTimeout(() => {
+      this.scrollToBottom()
+    })
+    
     var headers = new HttpHeaders({
       authorization:this.hAuth()
     })
@@ -221,6 +226,8 @@ export class MessageComponent implements OnInit,OnDestroy {
       sendAt:now
     }
 
+    this.scroller.scrollToAnchor("anchor")
+
     this.fetchState.update(current => {
       var result = [
         ...current.result,
@@ -232,6 +239,11 @@ export class MessageComponent implements OnInit,OnDestroy {
         result
       }
     })
+
+    setTimeout(() => {
+      this.scrollToBottom()
+    })
+  
 
     var headers = new HttpHeaders({
       authorization:this.hAuth()
@@ -328,6 +340,11 @@ export class MessageComponent implements OnInit,OnDestroy {
         result:[...sortedResult]
       }
     })
+
+    setTimeout(() => {
+      this.scrollToBottom()
+    },2000)
+
   })
   
 
@@ -402,5 +419,9 @@ export class MessageComponent implements OnInit,OnDestroy {
       message,
       {headers}
     )
+  }
+
+  scrollToBottom(){
+    this.scroller.scrollToAnchor("anchor")
   }
 }

@@ -1,6 +1,6 @@
 <!-- text sent message -->
 
-<div class="p-3 bg-green-500 rounded flex flex-row" *ngIf="message.contentType === 'text'">
+<div [id]="isLast ? 'anchor':''" class="p-3 bg-green-500 rounded flex flex-row" *ngIf="message.contentType === 'text'">
   <span>
     {{message.value}}
   </span>
@@ -12,19 +12,21 @@
     <i (click)="resend.emit(message)" class="pi pi-replay text-white text-[1rem]" *ngIf="message?.failed"></i>
   </div>
 </div>
+
 <div class="flex flex-col mt-2" *ngIf="message.contentType === 'text'">
   <span class="text-xs text-slate-900 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
 </div>
 
+
 <!-- photo sent message -->
 
-<div class="p-10 bg-green-500 p-2 flex flex-col gap-1 rounded relative" *ngIf="message.contentType === 'image'">
+<div [id]="isLast ? 'anchor':''" class="p-10 bg-green-500 p-2 flex flex-col gap-1 rounded relative" *ngIf="message.contentType === 'image'">
   <p-image 
     [src]="message.value"
     [preview]="true"
     alt="Image" 
   />
-  <div class="flex flex-row">
+  <div class="flex flex-row" [id]="isLast ? 'anchor':''">
     <span>{{message.description}}</span>
     <div class="flex-1 flex flex-row justify-end items-end">
       <i *ngIf="!message?.sent && !message?.failed" class="pi pi-check text-[1rem]"></i>
@@ -35,6 +37,7 @@
     </div>
   </div>
 </div>
+
 <div class="flex flex-col mt-2" *ngIf="message.contentType === 'image'">
   <span class="text-xs text-slate-900 self-end">{{common.relativeTimeFormat(message.sendAt)}}</span>
 </div>

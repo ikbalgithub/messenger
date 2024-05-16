@@ -5,17 +5,18 @@
 
 <ng-template #result>
   @if(!isError){
-    @for(message of messages; track message){
+    @for(message of messages; track message._id; let last = $last){
       @if(message.sender === userId){
         <app-message-sent
+          [isLast]="last"
           [message]="message"
           (resend)="resend($event)"
-          class="self-end min-w-[50%] max-w-[50%]"
+          class="self-end min-w-[50%] max-w-[75%]"
         />
       }
       @else{
         <ng-container
-          *ngTemplateOutlet="accept; context:{message}"
+          *ngTemplateOutlet="accept; context:{message,last}"
         />
       }
     }
@@ -23,9 +24,10 @@
   
 </ng-template>
 
-<ng-template #accept let-message="message">
+<ng-template #accept let-message="message" let-last="last">
   <app-message-accept
     [message]="message"
-    class="self-start min-w-[50%] max-w-[50%]"
+    [isLast]="last"
+    class="self-start min-w-[50%] max-w-[75%]"
   />
 </ng-template>
