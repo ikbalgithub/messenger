@@ -195,7 +195,6 @@ export class MessageComponent implements OnInit,OnDestroy {
       this.scrollToBottom()
     })
     
-
     var headers = new HttpHeaders({
       authorization:this.hAuth()
     })

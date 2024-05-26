@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
+import { DetailComponent } from './routes/detail/detail.component'
 import { HomeComponent } from './routes/home/home.component'
 import { LoginComponent } from './routes/login/login.component'
+import { MessagesComponent } from './routes/messages/messages.component'
 import { ErrorComponent } from './routes/error/error.component'
 import { MessageComponent } from './routes/message/message.component'
 import { SearchComponent } from './routes/search/search.component'
@@ -45,6 +47,14 @@ export const routes: Routes = [
   {
     path:'settings/profile',
     component:ProfileComponent
+  },
+  {
+    path:'messages',
+    component:MessagesComponent
+  },
+  {
+    path:'messages/:_id',
+    component:DetailComponent
   },
   {
     path:"**",
