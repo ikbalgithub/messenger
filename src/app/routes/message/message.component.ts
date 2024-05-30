@@ -370,15 +370,14 @@ export class MessageComponent implements OnInit,OnDestroy {
   })
 
   onConnect = this.socket.on('connect',() => {
-    var _id = this.user()._id
-    var groupId = this.routeState.groupId
-    var roomId = `${groupId}/${_id}`
-
-    this.connected = true
-
     this.socket.emit(
       'join',
-      roomId
+      `${this.routeState.groupId}/${this.user()._id}`
+    )
+    
+    this.socket.emit(
+      'join',
+      `chat/${this.user()._id}/${this.route.snapshot.params['_id']}`
     )
   })
 
