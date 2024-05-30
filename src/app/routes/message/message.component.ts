@@ -318,7 +318,7 @@ export class MessageComponent implements OnInit,OnDestroy {
     })
   }
 
-  onNewMessage = this.socket.on('newMessage',(message:Message.One) => {
+  onNewMessage = this.socket.on('incomingMessage',(message:Message.One) => {
     var _id = this._id
     var groupId = this.routeState.groupId
     var roomId = `${groupId}/${_id}`
