@@ -46,6 +46,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   uploading       = false
 	isValid         = /^\s*$/
   routeState      = window.history.state
+  scroller        = inject(ViewportScroller)
   route           = inject(ActivatedRoute)
   firebaseService = inject(FirebaseService)
   requestService  = inject(RequestService)
@@ -178,6 +179,8 @@ export class DetailComponent implements OnInit,OnDestroy {
             result
           }
         })
+
+        setTimeout(() => this.toAnchor("anchor2"))
       })
 
       this.socket.connect()
@@ -221,7 +224,12 @@ export class DetailComponent implements OnInit,OnDestroy {
           result
         }
       })
+
+      this.preview = false
+      setTimeout(() => this.toAnchor("anchor"))
 		})
+
+
    
     this.history.onSendMessage(
 			newMessage,
@@ -257,6 +265,10 @@ export class DetailComponent implements OnInit,OnDestroy {
     finally{
       this.uploading = false
     }
+  }
+
+  toAnchor(anchor:string){
+    this.scroller.scrollToAnchor(anchor)
   }
 
   ngOnInit(){
@@ -321,7 +333,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       
       var result = this.fetchState().result
       
-      result[result.length-1] = {
+      result[result.length] = {
         ...m,
         sent:true,
         read:true
@@ -334,10 +346,8 @@ export class DetailComponent implements OnInit,OnDestroy {
             result
           }
         })
+        setTimeout(() => this.toAnchor("anchor"),2000)
       })
-    
-      
-      //setTimeout(() => this.toAnchor("anchor"),2000)
     })
     
     this.socket.on('history/message',m => {
