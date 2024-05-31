@@ -26,6 +26,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
         `history/${this.user._id}`
       )
     })
+
+    this.socket.on('history/updated',_id => {
+      this.history.onUpdated(_id)
+    })
    
     this.socket.on('history/newMessage',data => {
       this.history.onNewMessage(data)
