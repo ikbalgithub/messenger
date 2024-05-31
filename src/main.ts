@@ -9,12 +9,7 @@ import { AppComponent } from './app/app.component';
       AppComponent,appConfig
     )
   }
-  catch(err:any){
-    console.error(err)
+  catch(error:any){
+    console.error(error)
   }
 })()
-
-
-
-// bootstrapApplication(AppComponent, appConfig)
-//   .catch((err) => console.error(err));

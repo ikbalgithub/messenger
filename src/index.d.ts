@@ -22,8 +22,8 @@ export namespace Message{
 
   type All = {
     _id:string,
-    sender:string,
-    accept:string,
+    sender:Common.Profile,
+    accept:Common.Profile,
     sendAt:number,
     read:boolean,
     contentType:string,

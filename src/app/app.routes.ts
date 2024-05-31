@@ -15,7 +15,7 @@ import { authGuard } from './guards/auth/auth.guard'
 export const routes: Routes = [
   {
   	path:'',
-  	component:HomeComponent,
+  	component:MessagesComponent,
     canActivate:[authGuard]
   },
   {

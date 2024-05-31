@@ -417,10 +417,10 @@ export class MessageComponent implements OnInit,OnDestroy {
       authorization:this.hAuth()
     })
 
-    this.requestSend(
-      message,
-      {headers}
-    )
+    // this.requestSend(
+    //   message,
+    //   {headers}
+    // )
   }
 
   scrollToBottom(){

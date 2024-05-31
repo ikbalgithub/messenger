@@ -55,10 +55,10 @@ export class HomeComponent implements OnInit,OnDestroy{
     var [filter] = result.filter((message,index) => {
       return (
         message.sender.usersRef
-        === newMessage.sender
+        === newMessage.sender.usersRef
       ) || (
         message.accept.usersRef
-        === newMessage.sender
+        === newMessage.sender.usersRef
       )
     })
 

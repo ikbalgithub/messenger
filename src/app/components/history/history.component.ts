@@ -25,17 +25,18 @@ import { BadgeModule } from 'primeng/badge';
   ],
 
 })
-export class HistoryComponent implements Events, OnInit {
+export class HistoryComponent implements OnInit {
+  
   @Input() counterId!:string
   @Input() disabled!:boolean
- 
+
   storeService   = inject(StoreService)
   user           = this.storeService.user()
   requestService = inject(RequestService)
   route          = inject(ActivatedRoute)
   authorization  = this.storeService.authorization()
-  fetchState     = this.requestService.createInitialState<Message.Last[]>()
-    
+  
+	fetchState     = this.requestService.createInitialState<Message.Last[]>()  
 
   fetchRequest = this.requestService.get<Message.Last[]>({
     cb:result => {
@@ -59,150 +60,249 @@ export class HistoryComponent implements Events, OnInit {
     state:this.fetchState
   })
 
-  onNewMessage(newMessage:Message.One){
-    var result = this.fetchState().result as Message.Last[]
+  onNewMessage(newMessage:Message.One & {sender:string,accept:string}){
+    var result = this.fetchState().result
     var JSONMessages = result.map(m => JSON.stringify(m))
-    var [filter] = result.filter((message,index) => {
-      return (
-        message.sender.usersRef
-        === newMessage.sender
-      ) || (
-        message.accept.usersRef
-        === newMessage.sender
-      )
+    var [filter] = result.filter(m => {
+      return m.sender.usersRef ===
+      newMessage.sender || m.accept.usersRef
+      === newMessage.sender
     })
-
+    
     if(filter){
-      if(filter.sender.usersRef === String(newMessage.sender)){
-        var counter = filter.unreadCounter + 1
-        var index = JSONMessages.indexOf(
-          JSON.stringify(filter)
-        )
-
+      var index = JSONMessages.indexOf(
+        JSON.stringify(filter)
+      )
+      if(filter.sender.usersRef === newMessage.sender){
         result[index] = {
           ...newMessage,
           sender:filter.sender,
-          accept:filter.sender,
-          unreadCounter:counter
+          accept:filter.accept,
+          unreadCounter:filter.unreadCounter+1
         }
-
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
-          }
-        })
       }
 
-      if(filter.sender.usersRef === String(newMessage.accept)){
-        var index = JSONMessages.indexOf(
-          JSON.stringify(filter)
-        )
-
+      if(filter.sender.usersRef !== newMessage.sender){
         result[index] = {
           ...newMessage,
           sender:filter.accept,
           accept:filter.sender,
           unreadCounter:1
         }
+      }
 
+      setTimeout(() => {
         this.fetchState.update(current => {
           return {
             ...current,
             result
           }
         })
-      }
+      })
     }
+    
   }
 
   onMessage(newMessage:Message.Populated){
-    var messages = this.fetchState().result as Message.Last[]
-    if(messages.filter(e => e._id === newMessage._id)?.length < 1){
-      this.fetchState.update((current) => {
-        var withCounter = {
-          ...newMessage,
-          unreadCounter:1
-        }
+    
+  }
 
-        var result = [
-          withCounter,
-          ...messages,
-        ]
+  onAfterFetch(_id:string){
+    var result = this.fetchState().result
+    var JSONMessages = result.map(m => JSON.stringify(m))
+    
+    var [filter] = result.filter(m => m.sender.usersRef === _id)
+    
+    var index = JSONMessages.indexOf(JSON.stringify(filter))
 
+    result[index] = {
+      ...filter,
+      unreadCounter:0
+    }
+
+    setTimeout(() => {
+      this.fetchState.update(current => {
         return {
           ...current,
           result
         }
       })
-    }
+    })
   }
 
-  onSendMessage(newMessage:Message.One){
-    var result = this.fetchState().result as Message.Last[]
+  onSendMessage(newMessage:Message.One,paramsId:string){
+    var result = this.fetchState().result
     var JSONMessages = result.map(m => JSON.stringify(m))
+
     var [filter] = result.filter((message,index) => {
       return (
         message.sender.usersRef
-        === newMessage.sender
+        === paramsId
       ) || (
         message.accept.usersRef
-        === newMessage.sender
+        === paramsId
       )
     })
 
-    if(filter){
-      if(filter.sender.usersRef === String(newMessage.sender)){
-        var index = JSONMessages.indexOf(
-          JSON.stringify(filter)
-        )
+    var index = JSONMessages.indexOf(JSON.stringify(filter))
 
-        result[index] = {
-          ...newMessage,
-          sender:filter.sender,
-          accept:filter.accept,
-          unreadCounter:0,
-        }
-
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
-          }
-        })
-      }
-
-      if(filter.sender.usersRef === String(newMessage.accept)){
-        var index = JSONMessages.indexOf(
-          JSON.stringify(filter)
-        )
-
-        result[index] = {
-          ...newMessage,
-          sender:filter.accept,
-          accept:filter.sender,
-          unreadCounter:0
-        }
-
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
-          }
-        })
+    if(filter.sender.usersRef === this.user._id){
+      result[index] = {
+        ...newMessage,
+        sender:filter.sender,
+        accept:filter.accept,
+        unreadCounter:0
       }
     }
+
+    if(filter.sender.usersRef !== this.user._id){
+      result[index] = {
+        ...newMessage,
+        sender:filter.accept,
+        accept:filter.sender,
+        unreadCounter:0
+      }
+    }
+    
+    setTimeout(() => {
+      this.fetchState.update(current => {
+        return {
+          ...current,
+          result
+        }
+      })
+    })
   }
 
-  showUnreadCounter(message:Message.Last):boolean{
-    var {sender,unreadCounter} = message
+  onSuccessSend(_id:string){
+    var result = this.fetchState().result
+    var JSONMessages = result.map(m => JSON.stringify(m))
+    var [filter] = result.filter((message,index) => {
+      return message._id === _id
+    })
+    var index = JSONMessages.indexOf(
+      JSON.stringify(filter)
+    )
+    result[index] = {
+      ...filter,
+      sent:true
+    }
+    setTimeout(() => {
+      this.fetchState.update(current => {
+        return {
+          ...current,
+          result
+        }
+      })
+    })
+  }
 
+  onUpdated(_id:string){
+    var result = this.fetchState().result
+    var JSONMessages = result.map(m => JSON.stringify(m))
+    var [filter] = result.filter(m => m.sender.usersRef === _id || m.accept.usersRef === _id)
+
+    var index = JSONMessages.indexOf(JSON.stringify(filter))
+
+    result[index] = {...filter,read:true}
+
+    setTimeout(() => {
+      this.fetchState.update((current) => {
+        return {
+          ...current,
+          result
+        }
+      })
+    })
+  }
+
+  // onSendMessage(newMessage:Message.One,paramsId:string){
+  //   var result = this.fetchState().result as Message.Last[]
+  //   var JSONMessages = result.map(m => JSON.stringify(m))
+  //   var [filter] = result.filter((message,index) => {
+  //     return (
+  //       message.sender.usersRef
+  //       === paramsId
+  //     ) || (
+  //       message.accept.usersRef
+  //       === paramsId
+  //     )
+  //   })
+  //   var index = JSONMessages.indexOf(
+  //     JSON.stringify(filter)
+  //   )
+  //   result[index] = {
+  //     ...newMessage,
+  //     sender:filter.sender,
+  //     accept:filter.accept,
+  //     unreadCounter:0,
+  //   }
+  //   setTimeout(() => {
+  //     this.fetchState.update(current => {
+  //       return {
+  //         ...current,
+  //         result
+  //       }
+  //     })
+  //   })
+
+  //   /*
+  //   if(filter){
+  //     if(filter.sender.usersRef === paramsId){
+  //       var index = JSONMessages.indexOf(
+  //         JSON.stringify(filter)
+  //       )
+
+  //       result[index] = {
+  //         ...newMessage,
+  //         sender:filter.sender,
+  //         accept:filter.accept,
+  //         unreadCounter:0,
+  //       }
+  //       setTimeout(() => {
+  //         this.fetchState.update(current => {
+  //           return {
+  //             ...current,
+  //             result
+  //           }
+  //         })
+  //       })
+       
+  //     }
+
+  //     if(filter.sender.usersRef !== paramsId){
+  //       var index = JSONMessages.indexOf(
+  //         JSON.stringify(filter)
+  //       )
+
+  //       result[index] = {
+  //         ...newMessage,
+  //         sender:filter.accept,
+  //         accept:filter.sender,
+  //         unreadCounter:0
+  //       }
+
+  //       setTimeout(() => {
+  //         this.fetchState.update(current => {
+  //           return {
+  //             ...current,
+  //             result
+  //           }
+  //         })
+  //       })
+       
+  //     }
+  //   }
+  //   */
+  // }
+
+  showUnreadCounter(message:Message.Last):boolean{
     return (
-      sender.usersRef !== this.user._id 
-        ? sender.usersRef !== this.counterId 
-            ? (unreadCounter as number) > 0 
-                ? true 
-                : false
+      message.sender.usersRef !== this.user._id 
+        ? message.sender.usersRef !== this.counterId 
+            ? message.unreadCounter > 0 
+              ? true 
+              : false
             : false 
         : false
     )
@@ -212,62 +312,70 @@ export class HistoryComponent implements Events, OnInit {
     var authorization = this.authorization
     var headers = new HttpHeaders({authorization})
 
-    this.route.url.subscribe((url) => {
-      this.fetchRequest(
-        'message/recently',
-        {headers}
-      )
-    })
-  }
-
-  onSuccessSend(_id:string){
-    var result = this.fetchState().result as Message.Last[]
-    var JSONMessages = result.map(m => JSON.stringify(m))
-
-    var [filter] = result.filter(m => m._id === _id)
-
-    var index = JSONMessages.indexOf(
-      JSON.stringify(filter)
+    this.fetchRequest(
+      'message/recently',
+      {headers}
     )
-
-    result[index] = {
-      ...filter,
-      sent:true
-    }
-
-    this.fetchState.update(current => {
-      return {
-        ...current,
-        result
-      }
-    })
-
-    //console.log({_id})
-    //console.log(result)
-
-    // result[index] = {
-    //   ...filter,
-    //   sent:true
-    // }
-
-
-    // setTimeout(() => {
-    //   this.fetchState.update(current => {
-    //     return {
-    //       ...current,
-    //       result
-    //     }
-    //   })
-    // })
-    
   }
 
+  // onSuccessSend(_id:string){
+  //   var result = this.fetchState().result as Message.Last[]
+  //   var JSONMessages = result.map(m => JSON.stringify(m))
+
+  //   var [filter] = result.filter(m => m._id === _id)
+
+  //   var index = JSONMessages.indexOf(
+  //     JSON.stringify(filter)
+  //   )
+
+  //   result[index] = {
+  //     ...filter,
+  //     sent:true
+  //   }
+
+  //   setTimeout(() => {
+  //     this.fetchState.update(current => {
+  //     return {
+  //       ...current,
+  //       result
+  //       }
+  //     })
+  //   })
+    
+  // }
+
+  // onUpdated(groupId:string){
+  //   var result = this.fetchState().result as Message.Last[]
+  //   var JSONMessages = result.map(m => JSON.stringify(m))
+
+  //   var [filter] = result.filter(m => {
+  //     return m.groupId === groupId
+  //   })
+
+  //   var index = JSONMessages.indexOf(
+  //     JSON.stringify(filter)
+  //   )
+
+  //   result[index] = {
+  //     ...filter,
+  //     read:true
+  //   }
+
+  //   setTimeout(() => {
+  //     this.fetchState.update(current => {
+  //       return {
+  //         ...current,
+  //         result
+  //       }
+  //     })
+  //   })
+  // }
 }
 
 
 interface Events{
   onNewMessage:(message:Message.One) => void,
   onMessage:(message:Message.Populated) => void,
-  onSendMessage:(message:Message.One) => void,
+  onSendMessage:(message:Message.One,_id:string) => void,
   onSuccessSend:(_id:string) => void
 }

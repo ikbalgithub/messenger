@@ -1,3 +1,4 @@
+<!-- 
 <div class="fullscreen flex flex-col bg-slate-200">
   <div class="flex flex-row flex-1 divide-x divide-slate-300">
     <app-history #appHistory counterId="" class="flex-1 flex flex-col p-6"/>
@@ -11,4 +12,19 @@
       </button>
     </div>
   </div>
+</div> 
+-->
+<div class="fullscreen flex flex-col bg-slate-200">
+<div class="flex flex-row flex-1 divide-x divide-slate-300">
+	<app-history #history counterId="" class="flex-1 flex flex-col p-6"/>
+	<div class="xs:hidden md:flex flex-1 flex flex-col justify-center px-12 gap-6">
+		<div class="flex flex-col gap-2">
+			<span class="text-2xl font-bold">Select a message</span>
+			<span class="text-slate-500">Choose from your existing conversations, start a new one, or just keep swimming.</span>
+		</div>
+		<button class="w-fit rounded-full text-white p-4 font-semibold bg-blue-500">
+			Start a new message
+		</button>
+	</div>
+</div>
 </div>
