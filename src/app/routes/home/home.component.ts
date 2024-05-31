@@ -49,16 +49,16 @@ export class HomeComponent implements OnInit,OnDestroy{
 
   socket = io(import.meta.env.NG_APP_SERVER)
  
-  onNewMessage = this.socket.on('newMessage',(newMessage:Message.One) =>{
+  onNewMessage = this.socket.on('history/newMessage',(newMessage:Message.One) =>{
     var result = this.fetchState().result as Message.Last[]
     var JSONMessages = result.map(m => JSON.stringify(m))
     var [filter] = result.filter((message,index) => {
       return (
         message.sender.usersRef
-        === newMessage.sender
+        === newMessage.sender.usersRef
       ) || (
         message.accept.usersRef
-        === newMessage.sender
+        === newMessage.sender.usersRef
       )
     })
 
@@ -106,7 +106,7 @@ export class HomeComponent implements OnInit,OnDestroy{
     }
   })
 
-  onMessage = this.socket.on('message',(newMessage:Message.Populated) => {
+  onMessage = this.socket.on('history/message',(newMessage:Message.Populated) => {
     var messages = this.fetchState().result as Message.Last[]
     if(messages.filter(e => e._id === newMessage._id)?.length < 1){
       //if(newMessage.accept.usersRef === this.user._id){
@@ -131,11 +131,9 @@ export class HomeComponent implements OnInit,OnDestroy{
   })
 
   onConnect = this.socket.on('connect',() => {
-    this.connected = true
-
     this.socket.emit(
       'join',
-      this.user()._id
+      `history/${this.user()._id}`
     )
   })
 

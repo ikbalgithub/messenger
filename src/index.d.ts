@@ -7,27 +7,29 @@ import { WritableSignal } from '@angular/core';
 export namespace Message{
   interface Last{
     _id?:string,
+    sender:Common.Profile,
+    accept:Common.Profile,
     sendAt:number,
     read:boolean,
     contentType:string,
     description:string,
-    unreadCounter:number
     value:string,
+    unreadCounter:number
     groupId:string,
-    sender:Common.Profile,
-    accept:Common.Profile,
+    sent?:boolean,
+    failed?:boolean
   }
 
   type All = {
     _id:string,
-    sender:string,
+    sender:Common.Profile,
+    accept:Common.Profile,
     sendAt:number,
-    value:string,
-    groupId:string,
-    accept:string,
     read:boolean,
     contentType:string,
     description:string,
+    value:string,
+    groupId:string,
     sent?:boolean,
     failed?:boolean
   }[]
