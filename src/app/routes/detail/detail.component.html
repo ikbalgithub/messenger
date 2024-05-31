@@ -2,7 +2,7 @@
   <div class="flex-1 flex flex-row">
     <app-history
       #history
-      [disabled]="false" 
+      [disabled]="sendState().running" 
       [counterId]="route.snapshot.params['_id']" 
       class="xs:hidden md:flex overflow-y-scroll flex-1 flex flex-col sticky top-0 h-screen"
     />
@@ -35,6 +35,7 @@
                 <i *ngIf="message?.sent && !message.read" class="pi pi-check text-white text-[1rem]"></i>
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
+                <i *ngIf="message?.failed" class="pi pi-replay text-white text-[1rem]"></i>
               </span>
             </div>
           </div>
@@ -153,7 +154,7 @@
               (change)="onFileChange($event,imageForm)"
             />
           </button>
-          <button type="submit" pButton icon="pi pi-arrow-up"></button>
+          <button type="submit" (click)="reset()" [disabled]="isValid.test(messageForm.value.value) || sendState().running || uploading || preview" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
     </div>

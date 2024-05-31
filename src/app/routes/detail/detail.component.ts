@@ -69,7 +69,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     groupId: new FormControl<string>(this.routeState.groupId)
   })
 
-  messageForm = new FormGroup({
+  messageForm:FormGroup = new FormGroup({
     value: new FormControl<string>(''),
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('text'),
@@ -89,7 +89,26 @@ export class DetailComponent implements OnInit,OnDestroy {
   })
 
 	sendRequest = this.requestService.post<Message.New,Message.One>({
-    failedCb:err => console.log(err),
+    failedCb:(err,body) => {
+      var postObject = body as Message.New
+      var result = this.fetchState().result
+      var JSONResult = result.map(m => {
+        return JSON.stringify(m)
+      })
+
+      var [filter] = result.filter(f => {
+        return f._id === postObject._id
+      })
+
+      var index = JSONResult.indexOf(
+        JSON.stringify(filter)
+      )
+
+      result[index] = {
+        ...filter,
+        failed:true
+      }
+    },
     cb:r => {
       var result = this.fetchState().result
       var JSONResult = result.map(m => {
@@ -269,6 +288,15 @@ export class DetailComponent implements OnInit,OnDestroy {
 
   toAnchor(anchor:string){
     this.scroller.scrollToAnchor(anchor)
+  }
+
+  reset(){
+    this.messageForm.patchValue(
+      {
+        ...this.messageForm.value,
+        value:''
+      }
+    )
   }
 
   ngOnInit(){
