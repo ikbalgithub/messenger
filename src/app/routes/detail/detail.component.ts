@@ -271,6 +271,12 @@ export class DetailComponent implements OnInit,OnDestroy {
       )
     })
 
+    
+    this.socket.on('history/updated',(_id:string) => {
+      this.history.onUpdated(_id)
+    })
+    
+
     this.socket.on('updated',(_id:string) => {
       var result = this.fetchState().result
 
