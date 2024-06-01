@@ -299,6 +299,21 @@ export class DetailComponent implements OnInit,OnDestroy {
     )
   }
 
+  resend({read,...message}:Message.One,authorization:string){
+    var headers = new HttpHeaders({authorization})
+
+    var sendObject = {
+      ...message,
+      sender:message.sender.usersRef,
+      accept:message.accept.usersRef as string
+    }
+
+    this.sendRequest(
+      sendObject,
+      {headers}
+    )
+  }
+
   ngOnInit(){
     this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
       var headers = new HttpHeaders({authorization:this.authorization})
