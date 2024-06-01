@@ -305,6 +305,35 @@ export class DetailComponent implements OnInit,OnDestroy {
   resend({read,failed,sent,...message}:Message.One,authorization:string){
     var headers = new HttpHeaders({authorization})
 
+    var result = this.fetchState().result
+    var JSONResult = result.map(m => {
+      return JSON.stringify(m)
+    })
+
+    var [filter] = result.filter(f => {
+      return f._id === message._id
+    })
+
+    var index = JSONResult.indexOf(
+      JSON.stringify(filter)
+    )
+
+    result[index] = {
+      ...filter,
+      failed:false
+    }
+    
+    setTimeout(() => {
+      this.fetchState.update(current => {
+        return {
+          ...current,
+          result
+        }
+      })
+
+      this.history.onResend(message._id)
+    })
+
     var sendObject = {
       ...message,
       sender:message.sender.usersRef,
