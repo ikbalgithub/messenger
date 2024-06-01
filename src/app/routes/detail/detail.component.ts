@@ -299,7 +299,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     )
   }
 
-  resend({read,...message}:Message.One,authorization:string){
+  resend({read,failed,sent,...message}:Message.One,authorization:string){
     var headers = new HttpHeaders({authorization})
 
     var sendObject = {
