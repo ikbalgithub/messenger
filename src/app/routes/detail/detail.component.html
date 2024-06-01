@@ -58,6 +58,8 @@
                 <i *ngIf="message?.sent && !message.read" class="pi pi-check text-white text-[1rem]"></i>
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
+                <i *ngIf="message?.failed" (click)="resend(message,authorization)" class="pi pi-replay text-white text-[1rem] cursor-pointer"></i>
+
               </span>
             </div>
           </div>
