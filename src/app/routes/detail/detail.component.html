@@ -142,12 +142,12 @@
       <form [formGroup]="messageForm" (submit)="sendMessage(messageForm,authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
         <p-inputGroup class="flex flex-row">
           <input 
+            pInputText
             type="text" 
-            pInputText 
-            [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
-            [readonly]="internetConnected ? false : true"
-            class="flex-1 px-3 outline-none {{internetConnected ? '' : 'bg-slate-400'}}"
             formControlName="value"
+            class="flex-1 px-3 outline-none {{internetConnected ? '' : 'bg-slate-400'}}"
+            [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
+            [readonly]="!internetConnected"
           />
           <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
             <input 
