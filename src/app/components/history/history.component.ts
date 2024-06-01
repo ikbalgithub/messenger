@@ -185,7 +185,8 @@ export class HistoryComponent implements OnInit {
     )
     result[index] = {
       ...filter,
-      sent:true
+      sent:true,
+      failed:false
     }
     setTimeout(() => {
       this.fetchState.update(current => {
@@ -216,86 +217,6 @@ export class HistoryComponent implements OnInit {
     })
   }
 
-  // onSendMessage(newMessage:Message.One,paramsId:string){
-  //   var result = this.fetchState().result as Message.Last[]
-  //   var JSONMessages = result.map(m => JSON.stringify(m))
-  //   var [filter] = result.filter((message,index) => {
-  //     return (
-  //       message.sender.usersRef
-  //       === paramsId
-  //     ) || (
-  //       message.accept.usersRef
-  //       === paramsId
-  //     )
-  //   })
-  //   var index = JSONMessages.indexOf(
-  //     JSON.stringify(filter)
-  //   )
-  //   result[index] = {
-  //     ...newMessage,
-  //     sender:filter.sender,
-  //     accept:filter.accept,
-  //     unreadCounter:0,
-  //   }
-  //   setTimeout(() => {
-  //     this.fetchState.update(current => {
-  //       return {
-  //         ...current,
-  //         result
-  //       }
-  //     })
-  //   })
-
-  //   /*
-  //   if(filter){
-  //     if(filter.sender.usersRef === paramsId){
-  //       var index = JSONMessages.indexOf(
-  //         JSON.stringify(filter)
-  //       )
-
-  //       result[index] = {
-  //         ...newMessage,
-  //         sender:filter.sender,
-  //         accept:filter.accept,
-  //         unreadCounter:0,
-  //       }
-  //       setTimeout(() => {
-  //         this.fetchState.update(current => {
-  //           return {
-  //             ...current,
-  //             result
-  //           }
-  //         })
-  //       })
-       
-  //     }
-
-  //     if(filter.sender.usersRef !== paramsId){
-  //       var index = JSONMessages.indexOf(
-  //         JSON.stringify(filter)
-  //       )
-
-  //       result[index] = {
-  //         ...newMessage,
-  //         sender:filter.accept,
-  //         accept:filter.sender,
-  //         unreadCounter:0
-  //       }
-
-  //       setTimeout(() => {
-  //         this.fetchState.update(current => {
-  //           return {
-  //             ...current,
-  //             result
-  //           }
-  //         })
-  //       })
-       
-  //     }
-  //   }
-  //   */
-  // }
-
   showUnreadCounter(message:Message.Last):boolean{
     return (
       message.sender.usersRef !== this.user._id 
@@ -306,6 +227,36 @@ export class HistoryComponent implements OnInit {
             : false 
         : false
     )
+  }
+
+  onFailedSend(_id:string){
+    var result = this.fetchState().result
+    var JSONResult = result.map(m => {
+      return JSON.stringify(m)
+    })
+
+    var [filter] = result.filter(m => {
+      return m._id === _id
+    })
+
+    var index = JSONResult.indexOf(
+      JSON.stringify(filter)
+    )
+
+    result[index] = {
+      ...filter,
+      sent:false,
+      failed:true
+    }
+
+    setTimeout(() => {
+      this.fetchState.update(current => {
+        return {
+          ...current,
+          result
+        }
+      })
+    })
   }
 
   ngOnInit(){

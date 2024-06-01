@@ -1,8 +1,5 @@
-import { Store } from '@ngrx/store'
-import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
-import { Component,signal,effect,inject } from '@angular/core';
-import { Ngrx } from '../index.d'
+import { Component,inject } from '@angular/core';
 import { CommonModule } from '@angular/common'
 import { StoreService } from './services/store/store.service'
 

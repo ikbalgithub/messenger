@@ -46,6 +46,7 @@
             <i *ngIf="message?.sent && !message.read" class="pi pi-check text-red-900 text-[1rem]"></i>
             <i *ngIf="message?.sent && message?.read" class="pi pi-check text-yellow-900 text-[1rem]"></i> 
             <i *ngIf="message?.sent && message?.read" class="pi pi-check text-blue-900 text-[1rem]"></i> 
+            <i *ngIf="message?.failed" class="pi pi-exclamation-circle text-red-900 text-[1rem]"></i> 
           </span>
         </span>
         <div class="flex flex-row items-center gap-2" *ngIf="message.contentType === 'image'">

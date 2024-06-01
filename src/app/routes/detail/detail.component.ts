@@ -104,6 +104,8 @@ export class DetailComponent implements OnInit,OnDestroy {
         JSON.stringify(filter)
       )
 
+      this.history.onFailedSend(postObject._id)
+
       result[index] = {
         ...filter,
         failed:true
@@ -125,7 +127,8 @@ export class DetailComponent implements OnInit,OnDestroy {
 
       result[index] = {
         ...filter,
-        sent:true
+        sent:true,
+        failed:false
       }
 
       this.history.onSuccessSend(
@@ -305,7 +308,8 @@ export class DetailComponent implements OnInit,OnDestroy {
     var sendObject = {
       ...message,
       sender:message.sender.usersRef,
-      accept:message.accept.usersRef as string
+      accept:message.accept.usersRef as string,
+      groupId:this.routeState.groupId
     }
 
     this.sendRequest(
