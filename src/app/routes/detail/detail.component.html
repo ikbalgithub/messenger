@@ -15,7 +15,7 @@
           class="flex flex-col"
         />
         <span class="font-semibold text-lg">
-          {{routeState.profile.firstName}} {{routeState.profile.surname}} {{connected ? '(connected)':'(disconnected)'}}
+          {{routeState.profile.firstName}} {{routeState.profile.surname}} {{connected ? '(connected...)':'(disconnected)'}}
         </span>
       </div>
 			<div class="flex-1 flex flex-col gap-3 p-6">
@@ -35,7 +35,7 @@
                 <i *ngIf="message?.sent && !message.read" class="pi pi-check text-white text-[1rem]"></i>
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
-                <i *ngIf="message?.failed" class="pi pi-replay text-white text-[1rem]"></i>
+                <i *ngIf="message?.failed" (click)="resend(message,authorization)" class="pi pi-replay text-white text-[1rem] cursor-pointer"></i>
               </span>
             </div>
           </div>
