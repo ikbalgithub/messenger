@@ -6,7 +6,7 @@ import { CommonModule,ViewportScroller } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Component,ViewChild,inject,OnInit,OnDestroy,OnChanges,Input,signal,effect } from '@angular/core';
+import { Component,ViewChild,inject,OnInit,OnDestroy,HostListener } from '@angular/core';
 import { HistoryComponent } from '../../components/history/history.component'
 import { CommonService } from '../../services/common/common.service'
 import { StoreService } from '../../services/store/store.service'
@@ -19,7 +19,6 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-detail',
@@ -45,6 +44,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   connected       = false
   uploading       = false
 	isValid         = /^\s*$/
+  internetConnected = true
   routeState      = window.history.state
   scroller        = inject(ViewportScroller)
   route           = inject(ActivatedRoute)
@@ -345,6 +345,14 @@ export class DetailComponent implements OnInit,OnDestroy {
       sendObject,
       {headers}
     )
+  }
+
+  @HostListener('window:offline',['$event']) onDisconnect(event:Event){
+  	this.internetConnected = false
+  }
+
+  @HostListener('window:online',['$event']) onConnected(event:Event){
+  	this.internetConnected = true
   }
 
   ngOnInit(){

@@ -59,7 +59,6 @@
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
                 <i *ngIf="message?.failed" (click)="resend(message,authorization)" class="pi pi-replay text-white text-[1rem] cursor-pointer"></i>
-
               </span>
             </div>
           </div>
@@ -145,8 +144,9 @@
           <input 
             type="text" 
             pInputText 
-            placeholder="Keyword"
-            class="flex-1 px-3 outline-none"
+            [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
+            [readonly]="internetConnected ? false : true"
+            class="flex-1 px-3 outline-none {{internetConnected ? '' : 'bg-slate-400'}}"
             formControlName="value"
           />
           <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'">
@@ -156,7 +156,7 @@
               (change)="onFileChange($event,imageForm)"
             />
           </button>
-          <button type="submit" (click)="reset()" [disabled]="isValid.test(messageForm.value.value) || sendState().running || uploading || preview" pButton icon="pi pi-arrow-up"></button>
+          <button type="submit" [disabled]="isValid.test(messageForm.value.value) || sendState().running || uploading || preview || internetConnected" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
     </div>
