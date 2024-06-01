@@ -156,7 +156,7 @@
               (change)="onFileChange($event,imageForm)"
             />
           </button>
-          <button type="submit" [disabled]="isValid.test(messageForm.value.value) || sendState().running || uploading || preview || !internetConnected" pButton icon="pi pi-arrow-up"></button>
+          <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview) || !internetConnected" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
     </div>
