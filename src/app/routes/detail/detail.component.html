@@ -149,7 +149,7 @@
             class="flex-1 px-3 outline-none {{internetConnected ? '' : 'bg-slate-400'}}"
             formControlName="value"
           />
-          <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'">
+          <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
             <input 
               type="file" 
               class="opacity-0 absolute"
