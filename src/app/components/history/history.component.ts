@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component,OnInit,inject,Input } from '@angular/core';
 import { RequestService } from '../../services/request/request.service'
 import { StoreService } from '../../services/store/store.service'
-import { Message,Ngrx, } from '../../../index.d'
+import { Common, Message,Ngrx, } from '../../../index.d'
 import { HttpHeaders } from '@angular/common/http';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
@@ -116,7 +116,7 @@ export class HistoryComponent implements OnInit {
     })
 
     if(!filter){
-      alert(JSON.stringify(filter))
+      console.log(newMessage)
     }
   }
 
@@ -143,9 +143,10 @@ export class HistoryComponent implements OnInit {
     })
   }
 
-  onSendMessage(newMessage:Message.One,paramsId:string){
+  onSendMessage(newMessage:Message.One,paramsId:string,profile:Common.Profile){
     var result = this.fetchState().result
     var JSONMessages = result.map(m => JSON.stringify(m))
+    var sender = {...this.user.profile,usersRef:this.user._id}
 
     var [filter] = result.filter((message,index) => {
       return (
@@ -159,24 +160,34 @@ export class HistoryComponent implements OnInit {
 
     var index = JSONMessages.indexOf(JSON.stringify(filter))
 
-    if(filter.sender.usersRef === this.user._id){
-      result[index] = {
-        ...newMessage,
-        sender:filter.sender,
-        accept:filter.accept,
-        unreadCounter:0
+    if(filter){
+      if(filter.sender.usersRef === this.user._id){
+        result[index] = {
+          ...newMessage,
+          sender:filter.sender,
+          accept:filter.accept,
+          unreadCounter:0
+        }
       }
-    }
 
-    if(filter.sender.usersRef !== this.user._id){
-      result[index] = {
-        ...newMessage,
-        sender:filter.accept,
-        accept:filter.sender,
-        unreadCounter:0
+      if(filter.sender.usersRef !== this.user._id){
+        result[index] = {
+          ...newMessage,
+          sender:filter.accept,
+          accept:filter.sender,
+          unreadCounter:0
+        }
       }
     }
-    
+		else{
+			result[result.length] = {
+				...newMessage,
+				sender:sender,
+        accept:profile,
+				unreadCounter:0
+			}
+		}
+
     setTimeout(() => {
       this.fetchState.update(current => {
         return {

@@ -256,11 +256,10 @@ export class DetailComponent implements OnInit,OnDestroy {
       setTimeout(() => this.toAnchor("anchor"))
 		})
 
-
-   
     this.history.onSendMessage(
 			newMessage,
-			this.route.snapshot.params['_id']
+			this.route.snapshot.params['_id'],
+      this.routeState.profile
 	  )
 
     this.sendRequest(

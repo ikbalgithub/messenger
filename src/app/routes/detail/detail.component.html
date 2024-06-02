@@ -19,7 +19,7 @@
         </span>
       </div>
 			<div class="flex-1 flex flex-col gap-3 p-6">
-				<div *ngIf="fetchState().running" class="flex flex-col flex-1 justify-center items-center">
+				<div *ngIf="fetchState().running; else next" class="flex flex-col flex-1 justify-center items-center">
 					<p-progressSpinner/>
 				</div>
 
@@ -90,54 +90,67 @@
             </div>
           </div>
         </ng-template>
+
+        <ng-template #empty>
+          <div class="flex-1 flex-flex-col justify-center items-center">
+            <span>No message</span>
+          </div>
+        </ng-template>
 				
 				<ng-template #error>
           <div class="flex flex-col flex-1 justify-center items-center">
-						reload aja dulu
+						Reload aja dulu
 					</div>
 			  </ng-template>
 
-				@if(fetchState().isError){
-					<ng-container
-						*ngTemplateOutlet="error"
-					/>
-				}
-				@else{
-					@for(x of fetchState().result; track x._id; let last = $last){
-						@if(x.sender.usersRef === user._id){
-							@if(x.contentType === "text"){
-								<ng-container
-									*ngTemplateOutlet="textSent;context:{
+        <ng-template #next>
+				  @if(fetchState().isError){
+					  <ng-container
+						  *ngTemplateOutlet="error"
+					  />
+				  }
+				  @else{
+					  @for(x of fetchState().result; track x._id; let last = $last){
+						  @if(x.sender.usersRef === user._id){
+							  @if(x.contentType === "text"){
+								  <ng-container
+									  *ngTemplateOutlet="textSent;context:{
+										  message:x,last:last
+									  }"
+								  />
+							  }
+							  @else{
+								  <ng-container
+									  *ngTemplateOutlet="imageSent;context:{
 										message:x,last:last
-									}"
-								/>
-							}
-							@else{
-								<ng-container
-									*ngTemplateOutlet="imageSent;context:{
-										message:x,last:last
-									}"
-								/>
-							}
-						}
-						@else{
-							@if(x.contentType === "text"){
-								<ng-container
-									*ngTemplateOutlet="textMessage;context:{
-										message:x,last:last
-									}"
-								/>
-							}
-							@else{
-								<ng-container
-									*ngTemplateOutlet="imageMessage;context:{
-										message:x,last:last
-									}"
-								/>
-							}
-						}
-					}
-				}
+									  }"
+								  />
+							  }
+						  }
+						  @else{
+							  @if(x.contentType === "text"){
+								  <ng-container
+									  *ngTemplateOutlet="textMessage;context:{
+										  message:x,last:last
+									  }"
+								  />
+							  }
+							  @else{
+								  <ng-container
+									  *ngTemplateOutlet="imageMessage;context:{
+										  message:x,last:last
+									  }"
+								  />
+							  }
+						  }
+					  }
+            @empty{
+              <ng-container
+                *ngTemplateOutlet="empty"
+              />
+            }
+				  }
+        </ng-template>
 			</div>
       <form [formGroup]="messageForm" (submit)="sendMessage(messageForm,authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
         <p-inputGroup class="flex flex-row">
