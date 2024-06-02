@@ -26,7 +26,7 @@
 
     
     <ng-template #message let-message="message" let-profile="profile" let-counter="unreadCounter" let-showCounter="showCounter" let-groupId="groupId">
-    <a routerLink="/profile/{{profile.usersRef}}" [state]="{profile,groupId}">
+    <a routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId}">
       <div class="bg-white p-3 shadow-lg rounded flex flex-row items-center gap-3 w-full">
         <p-avatar
           [image]="profile.profileImage" 
