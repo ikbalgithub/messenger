@@ -105,9 +105,6 @@ export class HistoryComponent implements OnInit {
 
   onMessage(newMessage:Message.Populated){
     var result = this.fetchState().result
-    var JSONResult = result.map(m => {
-      return JSON.stringify(m)
-    })
 
     var [filter] = result.filter(m => {
       return m.sender.usersRef ===
@@ -116,8 +113,20 @@ export class HistoryComponent implements OnInit {
     })
 
     if(!filter){
-      console.log(newMessage)
+      result[result.length] = {
+        ...newMessage,
+        unreadCounter:1
+      }
     }
+
+    setTimeout(() => {
+      this.fetchState.update(current => {
+        return {
+          ...current,
+          result
+        }
+      })
+    })
   }
 
   onAfterFetch(_id:string){
