@@ -2,8 +2,8 @@ import { HttpHeaders } from '@angular/common/http';
 import { Component,inject,signal,effect,Input } from '@angular/core';
 import { InputTextModule } from 'primeng/inputtext';
 import { Location,CommonModule } from '@angular/common';
-import { Router } from '@angular/router'
-import { Ngrx,Search } from '../../../index.d'
+import { RouterLink, RouterOutlet } from '@angular/router'
+import { Search } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,8 @@ import { LastMessageComponent } from '../../components/last-message/last-message
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { Types } from 'mongoose';
+import { AvatarModule } from 'primeng/avatar';
+import { BadgeModule } from 'primeng/badge';
 
 @Component({
   selector: 'app-search',
@@ -27,7 +29,11 @@ import { Types } from 'mongoose';
     CommonModule,
     FormsModule,
     ProfilePipe,
-    ToStringPipe
+    ToStringPipe,
+    RouterLink,
+    RouterOutlet,
+    AvatarModule,
+    BadgeModule
   ],
 
 })

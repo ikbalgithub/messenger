@@ -34,7 +34,7 @@ import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
     InputGroupModule,
     ButtonModule,
     ReactiveFormsModule,
-    DialogModule
+    DialogModule,
   ]
 })
 export class DetailComponent implements OnInit,OnDestroy {
@@ -45,6 +45,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   uploading       = false
 	isValid         = /^\s*$/
   internetConnected = true
+  
   routeState      = window.history.state
   scroller        = inject(ViewportScroller)
   route           = inject(ActivatedRoute)
