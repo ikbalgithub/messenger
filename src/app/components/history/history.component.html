@@ -17,9 +17,16 @@
   />
 </div>
 <div class="flex-1 flex flex-col p-3 gap-5">
-  <div *ngIf="fetchState().running" class="flex flex-col flex-1 justify-center items-center">
+  <div *ngIf="fetchState().running; else next" class="flex flex-col flex-1 justify-center items-center">
     <p-progressSpinner/>
   </div>
+
+  <ng-template #empty>
+    <div class="flex-1 flex flex-col items-center justify-center">
+      <span>no messages</span>
+    </div>
+  </ng-template>
+
   <ng-template #message let-profile="profile" let-message="message">
     <a [class]="disabled ? 'pointer-events-none':''" routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId:message.groupId}">
     <div class="flex flex-row p-3 gap-3 bg-white shadow-md rounded-md items-center">
@@ -68,26 +75,30 @@
     <span>reload aja dulu...</span>
   </div>
   </ng-template>
-  <ng-template #success>
-    @for(x of fetchState().result; track x._id){
-      <ng-container
-        *ngTemplateOutlet="message; context:{
-          profile:x|profile:user._id:'home',
-          message:x
-        }"
+
+
+  <ng-template #next>
+    @if(fetchState().isError){
+      <ng-container 
+        *ngTemplateOutlet="error"
       />
     }
+    @else{
+      @for(x of fetchState().result; track x._id){
+        <ng-container
+          *ngTemplateOutlet="message; context:{
+            profile:x|profile:user._id:'home',
+            message:x
+          }"
+        />
+      }
+      @empty{
+        <ng-container 
+          *ngTemplateOutlet="empty"
+        />
+      }
+    }
   </ng-template>
-  @if(fetchState().isError){
-    <ng-container 
-      *ngTemplateOutlet="error"
-    />
-  }
-  @else{
-    <ng-container 
-      *ngTemplateOutlet="success"
-    />
-  }
 </div>
 
 

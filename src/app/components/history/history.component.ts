@@ -104,7 +104,20 @@ export class HistoryComponent implements OnInit {
   }
 
   onMessage(newMessage:Message.Populated){
-    
+    var result = this.fetchState().result
+    var JSONResult = result.map(m => {
+      return JSON.stringify(m)
+    })
+
+    var [filter] = result.filter(m => {
+      return m.sender.usersRef ===
+      newMessage.sender.usersRef || m.accept.usersRef
+      === newMessage.sender.usersRef
+    })
+
+    if(!filter){
+      alert(JSON.stringify(filter))
+    }
   }
 
   onAfterFetch(_id:string){
