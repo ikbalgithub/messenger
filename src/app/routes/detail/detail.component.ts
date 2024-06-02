@@ -165,8 +165,9 @@ export class DetailComponent implements OnInit,OnDestroy {
         return p.usersRef === paramsId
       })
 
-      this.routeState.groupId = result[0].groupId
-      this.routeState.profile = filter
+      if(result.length > 0) this.routeState.groupId = result[0].groupId
+      
+      if(filter) this.routeState.profile = filter
 
 			this.credentialForm.patchValue({
 				...this.credentialForm.value,
@@ -174,19 +175,22 @@ export class DetailComponent implements OnInit,OnDestroy {
 				groupId:this.routeState.groupId
 			})
 
-      this.updateRequest(
-        {
-          groupId:this.routeState.groupId,
-          _id:paramsId
-        },
-        {
-          headers:new HttpHeaders({
-            authorization
-          })
-        }
-      )
-
-      this.history.onAfterFetch(this.route.snapshot.params['_id'])
+      if(result.length > 0){
+        this.updateRequest(
+          {
+            groupId:this.routeState.groupId,
+            _id:paramsId
+          },
+          {
+            headers:new HttpHeaders({
+              authorization
+            })
+          }
+        )
+				this.history.onAfterFetch(
+					this.route.snapshot.params['_id']
+				)
+      }
       
       setTimeout(() => {
         this.fetchState.update((current) => {
