@@ -256,6 +256,16 @@ export class DetailComponent implements OnInit,OnDestroy {
       setTimeout(() => this.toAnchor("anchor"))
 		})
 
+    this.imageForm.patchValue({
+      ...this.imageForm.value,
+      value:'',
+    })
+
+    this.messageForm.patchValue({
+      ...this.messageForm.value,
+      value:''
+    })
+
     this.history.onSendMessage(
 			newMessage,
 			this.route.snapshot.params['_id'],
