@@ -164,7 +164,8 @@
           />
           <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
             <input 
-              type="file" 
+              type="file"
+              accept="image/*"
               class="opacity-0 absolute"
               (change)="onFileChange($event,imageForm)"
             />
