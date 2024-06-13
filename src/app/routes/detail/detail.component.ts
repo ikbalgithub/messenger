@@ -485,22 +485,23 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
           })
         )
       }
-      
-      result[result.length] = {
-        ...m,
-        sent:true,
-        read:true
-      }
-      
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
-          }
+      else{
+        result[result.length] = {
+          ...m,
+          sent:true,
+          read:true
+        }
+        
+        setTimeout(() => {
+          this.fetchState.update(current => {
+            return {
+              ...current,
+              result
+            }
+          })
+          setTimeout(() => this.toAnchor("anchor"),2000)
         })
-        setTimeout(() => this.toAnchor("anchor"),2000)
-      })
+      }
     })
     
     this.socket.on('history/message',m => {
