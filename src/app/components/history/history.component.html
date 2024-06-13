@@ -48,7 +48,7 @@
         </div>
         <span class="truncate flex flex-row gap-2" *ngIf="message.contentType === 'text'">
           {{message.value}}
-          <span *ngIf="message.sender.usersRef === user._id">
+          <span *ngIf="message.sender.usersRef === user?._id">
             <i *ngIf="!message?.sent && !message?.failed" class="pi pi-check text-[1rem]"></i>
             <i *ngIf="message?.sent && !message.read" class="pi pi-check text-red-900 text-[1rem]"></i>
             <i *ngIf="message?.sent && message?.read" class="pi pi-check text-yellow-900 text-[1rem]"></i> 
@@ -59,7 +59,7 @@
         <div class="flex flex-row items-center gap-2" *ngIf="message.contentType === 'image'">
           <i class="pi pi-image text-[1rem]"></i>
           <span class="text-slate-600">photo</span>
-          <span *ngIf="message.sender.usersRef === user._id">
+          <span *ngIf="message.sender.usersRef === user?._id">
             <i *ngIf="!message?.sent && !message?.failed" class="pi pi-check text-[1rem]"></i>
             <i *ngIf="message?.sent && !message.read" class="pi pi-check text-red-900 text-[1rem]"></i>
             <i *ngIf="message?.sent && message?.read" class="pi pi-check text-yellow-900 text-[1rem]"></i> 
