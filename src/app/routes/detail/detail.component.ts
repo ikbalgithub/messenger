@@ -387,7 +387,7 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
 
   ngOnInit(){
     this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
-      if(this.route.snapshot.params['_id'] !== this.route.snapshot.params['_id']){
+      if(this.route.snapshot.params['_id'] !== this.previousUser){
         var _h = this._history() as Ngrx.History[]
 
         var [filter] = _h.filter(m => {
