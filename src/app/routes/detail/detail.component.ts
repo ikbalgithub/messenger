@@ -452,7 +452,6 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
     })
     
     this.socket.on('incomingMessage',m => {
-      alert('alert 3')
       var authorization = this.authorization as string
       
       this.updateRequest(
@@ -487,12 +486,10 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
     })
     
     this.socket.on('history/message',m => {
-      alert('alert 2')
       this.history.onMessage(m)
     })
 
     this.socket.on('history/newMessage',m => {
-      alert('alert 1')
       this.history.onNewMessage(m)
     })
 
@@ -517,10 +514,6 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
         'join',
          `${this.routeState.groupId}/${this.user?._id}`
       )
-    })
-
-    this.socket.on('startedConsume',consumerTag => {
-      console.log(`connect to rabbitmq with consumer tag:${consumerTag}`)
     })
   }
 

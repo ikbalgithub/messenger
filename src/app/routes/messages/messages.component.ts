@@ -33,10 +33,6 @@ export class MessagesComponent implements OnInit, OnDestroy,CanComponentDeactiva
       )
     })
 
-    this.socket.on('startedConsume',consumerTag => {
-      this.consumerTag = consumerTag
-    })
-
     this.socket.on('history/updated',_id => {
       this.history.onUpdated(_id)
     })
