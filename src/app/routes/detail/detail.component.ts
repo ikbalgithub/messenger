@@ -253,8 +253,6 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
 
   sendMessage(form:FormGroup,authorization:string|undefined){
     var now = Date.now()
-    var accept = {usersRef:_id}
-    var sender = {usersRef:this.user?._id}
     var _id = this.route.snapshot.params['_id']
     var newId = new Types.ObjectId().toString()
     var _h = this._history() as Ngrx.History[]
@@ -263,6 +261,13 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
     var headers = new HttpHeaders({
       authorization:authorization as string
     })
+
+    var sender = {
+      ...this.user?.profile,
+      usersRef:this.user?._id
+    }
+
+    var accept = this.routeState.profile
     
 		var newMessage = {
       ...form.value,
