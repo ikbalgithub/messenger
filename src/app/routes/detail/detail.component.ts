@@ -23,7 +23,7 @@ import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 import { Store } from '@ngrx/store';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 import { CanComponentDeactivate } from '../../guards/canDeactivate/can-deactivate.guard';
-import { add, incomingMessage } from '../../ngrx/actions/history.actions';
+import { add,incomingMessage,failedSend,successSend,seen } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-detail',
@@ -100,6 +100,10 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
 
 	sendRequest = this.requestService.post<Message.New,Message.One>({
     failedCb:(err,body) => {
+      var _id = this.route.snapshot.params['_id']
+      var _h = this._history() as Ngrx.History[]
+      var [hFilter] = _h.filter(m => m._id === _id)
+      var hIndex = _h.findIndex(m => m._id === _id)
       var postObject = body as Message.New
       var result = this.fetchState().result
       var JSONResult = result.map(m => {
@@ -116,12 +120,26 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
 
       this.history.onFailedSend(postObject._id)
 
-      result[index] = {
-        ...filter,
-        failed:true
+      if(hFilter){
+        this.store.dispatch(
+          failedSend({
+            index:hIndex,
+            _id:postObject._id
+          })
+        )
+      }
+      else{
+        result[index] = {
+          ...filter,
+          failed:true
+        }
       }
     },
     cb:r => {
+      var _id = this.route.snapshot.params['_id']
+      var _h = this._history() as Ngrx.History[]
+      var [hFilter] = _h.filter(m => m._id === _id)
+      var hIndex = _h.findIndex(m => m._id === _id)
       var result = this.fetchState().result
       var JSONResult = result.map(m => {
         return JSON.stringify(m)
@@ -144,15 +162,24 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
       this.history.onSuccessSend(
         r._id
       )
-
-      setTimeout(() => {
-        this.fetchState.update(c => {
-          return {
-            ...c,
-            result
-          }
+      if(hFilter){
+        this.store.dispatch(
+          successSend({
+            index:hIndex,
+            _id:r._id
+          })
+        )
+      }
+      else{
+        setTimeout(() => {
+          this.fetchState.update(c => {
+            return {
+              ...c,
+              result
+            }
+          })
         })
-      })
+      }
     },
     state:this.sendState,
     path:'message'
@@ -226,9 +253,13 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
 
   sendMessage(form:FormGroup,authorization:string|undefined){
     var now = Date.now()
+    var accept = {usersRef:_id}
     var sender = {usersRef:this.user?._id}
-    var accept = {usersRef:this.route.snapshot.params['_id']}
-    var _id = new Types.ObjectId().toString()
+    var _id = this.route.snapshot.params['_id']
+    var newId = new Types.ObjectId().toString()
+    var _h = this._history() as Ngrx.History[]
+    var [filter] = _h.filter(m => m._id === _id)
+    var index = _h.findIndex(m => m._id === _id)
     var headers = new HttpHeaders({
       authorization:authorization as string
     })
@@ -238,35 +269,51 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
       sendAt:now,
       sent:false,
       read:false,
+      _id:newId,
       sender,
       accept,
-      _id,
     }
 
     var sendObject = {
       ...form.value,
       ...this.credentialForm.value,
       sendAt:now,
-      _id
+      _id:newId
+    }
+
+    if(filter){
+      this.store.dispatch(
+        incomingMessage({
+          index,
+          message:newMessage
+        })
+      )
+
+      setTimeout(() => {
+        this.toAnchor("anchor")
+      })
+    }
+    else{
+      setTimeout(() => {
+        this.fetchState.update(current => {
+          var result = [
+            ...current.result,
+            newMessage
+          ]
+  
+          return {
+            ...current,
+            result
+          }
+        })
+  
+        this.preview = false
+        setTimeout(() => this.toAnchor("anchor"))
+      })
+  
     }
     
-    setTimeout(() => {
-			this.fetchState.update(current => {
-        var result = [
-          ...current.result,
-          newMessage
-        ]
-
-        return {
-          ...current,
-          result
-        }
-      })
-
-      this.preview = false
-      setTimeout(() => this.toAnchor("anchor"))
-		})
-
+    
     this.imageForm.patchValue({
       ...this.imageForm.value,
       value:'',
@@ -424,32 +471,52 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
     
 
     this.socket.on('updated',(_id:string) => {
+      var _hId = this.route.snapshot.params['_id']
+      var _h = this._history() as Ngrx.History[]
+      var [filter] = _h.filter(m => m._id === _hId)
+      var index = _h.findIndex(m => m._id === _hId)
+   
       var result = this.fetchState().result
-
-      var modifiedResult = result.map(m => {
-        if(m.sender.usersRef === this.user?._id){
-          return {
-            ...m,
-            read:true
+     
+      if(filter){
+        this.store.dispatch(
+          seen({
+            index,
+            _id:this.user?._id as string
+          })
+        )
+      }
+      else{
+        var modifiedResult = result.map(m => {
+          if(m.sender.usersRef === this.user?._id){
+            return {
+              ...m,
+              read:true
+            }
           }
-        }
-        else{
-          return m
-        }
-      })
-
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result:modifiedResult
+          else{
+            return m
           }
         })
-      })
+  
+        setTimeout(() => {
+          this.fetchState.update(current => {
+            return {
+              ...current,
+              result:modifiedResult
+            }
+          })
+        })
+      }
+      
 
       this.history.onUpdated(_id)
     })
     
+    // on incomingMessage
+    // if localState is not empty
+    // add new message to local State
+    // if localState is empty, update fetch result
     this.socket.on('incomingMessage',m => {
       var _id = this.route.snapshot.params['_id']
       var authorization = this.authorization as string
@@ -484,6 +551,7 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
             message
           })
         )
+        setTimeout(() => this.toAnchor("anchor"),2000)
       }
       else{
         result[result.length] = {

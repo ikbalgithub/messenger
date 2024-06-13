@@ -1,6 +1,6 @@
 import { createReducer,on } from "@ngrx/store";
 import { Ngrx } from "../../..";
-import { add,incomingMessage } from "../actions/history.actions";
+import { add,incomingMessage,failedSend,successSend,seen } from "../actions/history.actions";
 
 export const historyReducer = createReducer<Ngrx.History[]>(
   [],
@@ -9,6 +9,80 @@ export const historyReducer = createReducer<Ngrx.History[]>(
     state[payload.index].messages.push(
       payload.message
     )
+    return state
+  }),
+  on(seen,(state,payload) => {
+    var {_id,messages} = state[
+      payload.index
+    ]
+    
+    var modifiedResult = messages.map(m => {
+      if(m.sender.usersRef === payload._id){
+        if(!m.failed){
+          return {
+            ...m,
+            read:true
+          }
+        }
+        else{
+          return m
+        }
+      }
+      else{
+        return m
+      }
+    })
+
+    state[payload.index] = {
+      _id,
+      messages:modifiedResult
+    }
+    
+    return state
+  }),
+  on(successSend,(state,payload) => {
+    var {_id,messages} = state[
+      payload.index
+    ]
+    
+    var [filter] = messages.filter(
+      m => m._id === payload._id
+    )
+
+    var index = messages.findIndex(
+      m => m._id === payload._id
+    )
+
+    messages[index] = {
+      ...filter,
+      sent:true,
+      failed:false
+    }
+
+    return state
+  }),
+  on(failedSend,(state,payload) => {
+    var {_id,messages} = state[
+      payload.index
+    ]
+    
+    var [filter] = messages.filter(
+      m => m._id === payload._id
+    )
+
+    var index = messages.findIndex(
+      m => m._id === payload._id
+    )
+
+    messages[index] = {
+      ...filter,
+      failed:true
+    }
+
+    state[payload.index] = {
+      _id,
+      messages
+    }
 
     return state
   })
