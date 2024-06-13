@@ -20,11 +20,10 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
-import { Signal } from '@ngrx/signals/src/deep-signal';
 import { Store } from '@ngrx/store';
-import { add } from '../../ngrx/actions/history.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 import { CanComponentDeactivate } from '../../guards/canDeactivate/can-deactivate.guard';
+import { add } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-detail',
@@ -401,6 +400,8 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
             _id:this.previousUser,
             messages:this.fetchState().result
           }
+
+          this.store.dispatch(add(toAdd))
         }
         
         
