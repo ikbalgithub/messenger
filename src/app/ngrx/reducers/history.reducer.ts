@@ -17,15 +17,9 @@ export const historyReducer = createReducer<Ngrx.History[]>(
     ]
     
     var modifiedResult = messages.map(m => {
-        if(!m.failed){
-          return {
-            ...m,
-            read:true
-          }
-        }
-        else{
-          return m
-        }
+      if(!m.failed) m.read = true
+
+      return m
     })
 
     state[payload.index] = {
