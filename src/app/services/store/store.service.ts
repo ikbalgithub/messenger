@@ -10,9 +10,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class StoreService {
   rootInit = false
   store = inject(Store<Ngrx.State>)
-  user = toSignal(this.store.select('user'))
-  authorization = toSignal(this.store.select('authorization'))
-  authentication = toSignal(this.store.select('authentication'))
+  history = toSignal<Ngrx.History[]>(this.store.select('history'))
+  user = toSignal<Ngrx.User>(this.store.select('user'))
+  authorization = toSignal<string>(this.store.select('authorization'))
+  authentication = toSignal<Ngrx.Authentication>(this.store.select('authentication'))
 
   synchWithLocalStorage = effect(() => {
     if(this.rootInit){

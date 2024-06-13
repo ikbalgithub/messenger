@@ -11,6 +11,7 @@ import { ProfileComponent } from './routes/profile/profile.component'
 import { AccountComponent } from './routes/account/account.component'
 import { VerificationComponent } from './routes/verification/verification.component'
 import { authGuard } from './guards/auth/auth.guard'
+import { canDeactivateGuard } from './guards/canDeactivate/can-deactivate.guard';
 
 export const routes: Routes = [
   {
@@ -50,11 +51,13 @@ export const routes: Routes = [
   },
   {
     path:'messages',
-    component:MessagesComponent
+    component:MessagesComponent,
+    canDeactivate:[canDeactivateGuard]
   },
   {
     path:'messages/:_id',
-    component:DetailComponent
+    component:DetailComponent,
+    canDeactivate:[canDeactivateGuard]
   },
   {
     path:"**",

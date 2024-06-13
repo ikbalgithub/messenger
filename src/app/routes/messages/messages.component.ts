@@ -4,9 +4,10 @@ import { Component,OnInit,OnDestroy,inject,ViewChild } from '@angular/core';
 import { StoreService } from '../../services/store/store.service'
 import { HistoryComponent } from '../../components/history/history.component'
 import { RequestService } from '../../services/request/request.service';
-import { Search } from '../../..';
+import { Ngrx, Search } from '../../..';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CanComponentDeactivate } from '../../guards/canDeactivate/can-deactivate.guard';
 
 @Component({
   selector: 'app-messages',
@@ -15,9 +16,9 @@ import { Router } from '@angular/router';
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.css'
 })
-export class MessagesComponent implements OnInit, OnDestroy {
+export class MessagesComponent implements OnInit, OnDestroy,CanComponentDeactivate {
   @ViewChild('history') history !:HistoryComponent
-
+  consumerTag    = ''
   socket         = io(import.meta.env.NG_APP_SERVER)
   storeService   = inject(StoreService)
   user           = this.storeService.user()
@@ -27,9 +28,18 @@ export class MessagesComponent implements OnInit, OnDestroy {
   ngOnInit(){
     this.socket.on('connect',() => {
       this.socket.emit(
-        'join',
-        `history/${this.user._id}`
+        'consume',
+        `messages/${this.user?._id}`
       )
+      
+      this.socket.emit(
+        'join',
+        `history/${this.user?._id}`
+      )
+    })
+
+    this.socket.on('startedConsume',consumerTag => {
+      this.consumerTag = consumerTag
     })
 
     this.socket.on('history/updated',_id => {
@@ -45,6 +55,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
     })
   }
 
+  canDeactivate(){
+    this.socket.disconnect()
+    return true
+  }
 
   ngOnDestroy(){
     this.socket.disconnect()

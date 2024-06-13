@@ -2,6 +2,7 @@
   <div class="flex-1 flex flex-row">
     <app-history
       #history
+      [consumerTag]="consumerTag"
       [disabled]="sendState().running" 
       [counterId]="route.snapshot.params['_id']" 
       class="xs:hidden md:flex overflow-y-scroll flex-1 flex flex-col sticky top-0 h-screen"
@@ -19,9 +20,31 @@
         </span>
       </div>
 			<div class="flex-1 flex flex-col gap-3 p-6">
-				<div *ngIf="fetchState().running; else next" class="flex flex-col flex-1 justify-center items-center">
+				<div *ngIf="fetchState().running; else flow" class="flex flex-col flex-1 justify-center items-center">
 					<p-progressSpinner/>
 				</div>
+
+        <ng-template #flow>
+          @if(fetchState().isError){
+            <ng-container
+              *ngTemplateOutlet="error"
+            />
+          }
+          @else{
+            @if(existInMessages().length > 0){
+              <ng-container
+                *ngTemplateOutlet="__history;context:{
+                  messages:_history()|filter:this.route.snapshot.params['_id']
+                }"
+              />
+            }
+            @else{
+              <ng-container
+                *ngTemplateOutlet="next"
+              />
+            }
+          }
+        </ng-template>
 
 				<ng-template #textSent let-message="message" let-last="last">
           <div [id]="last ? 'anchor':''" class="bg-blue-500 self-end rounded-br rounded-tl-2xl rounded-bl-2xl rounded-tr-2xl flex flex-col gap-1 p-3 max-w-[50%]">
@@ -103,6 +126,48 @@
 					</div>
 			  </ng-template>
 
+        <ng-template #__history let-messages="messages">
+					@for(x of messages; track x._id; let last = $last){
+						@if(x.sender.usersRef === user?._id){
+							@if(x.contentType === "text"){
+								<ng-container
+									*ngTemplateOutlet="textSent;context:{
+										message:x,last:last
+									}"
+								/>
+							}
+							@else{
+								<ng-container
+									*ngTemplateOutlet="imageSent;context:{
+									message:x,last:last
+									}"
+								/>
+							}
+						}
+						@else{
+							@if(x.contentType === "text"){
+								<ng-container
+									*ngTemplateOutlet="textMessage;context:{
+										message:x,last:last
+									}"
+								/>
+							}
+							@else{
+								<ng-container
+									*ngTemplateOutlet="imageMessage;context:{
+										message:x,last:last
+									}"
+								/>
+							}
+						}
+					}
+					@empty{
+						<ng-container
+							*ngTemplateOutlet="empty"
+						/>
+					}
+        </ng-template>
+
         <ng-template #next>
 				  @if(fetchState().isError){
 					  <ng-container
@@ -111,7 +176,7 @@
 				  }
 				  @else{
 					  @for(x of fetchState().result; track x._id; let last = $last){
-						  @if(x.sender.usersRef === user._id){
+						  @if(x.sender.usersRef === user?._id){
 							  @if(x.contentType === "text"){
 								  <ng-container
 									  *ngTemplateOutlet="textSent;context:{

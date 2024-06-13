@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client'
+import { Ngrx } from '../../../index.d';
 import { Types } from 'mongoose';
 import { Subscription } from 'rxjs'
 import { ImageModule } from 'primeng/image';
@@ -19,6 +20,11 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
+import { Signal } from '@ngrx/signals/src/deep-signal';
+import { Store } from '@ngrx/store';
+import { add } from '../../ngrx/actions/history.actions';
+import { FilterPipe } from '../../pipes/filter/filter.pipe';
+import { CanComponentDeactivate } from '../../guards/canDeactivate/can-deactivate.guard';
 
 @Component({
   selector: 'app-detail',
@@ -35,18 +41,20 @@ import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
     ButtonModule,
     ReactiveFormsModule,
     DialogModule,
+    FilterPipe
   ]
 })
-export class DetailComponent implements OnInit,OnDestroy {
+export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate {
   @ViewChild('history') history !:HistoryComponent
   
+  consumerTag     = ''
   preview         = false
   connected       = false
   uploading       = false
 	isValid         = /^\s*$/
   internetConnected = true
-  
   routeState      = window.history.state
+  store           = inject(Store<Ngrx.State>)
   scroller        = inject(ViewportScroller)
   route           = inject(ActivatedRoute)
   firebaseService = inject(FirebaseService)
@@ -54,8 +62,10 @@ export class DetailComponent implements OnInit,OnDestroy {
   storeService    = inject(StoreService)
   commonService   = inject(CommonService)
   storage         = this.firebaseService.storage
+  _history        = this.storeService.history
   user            = this.storeService.user()
   authorization   = this.storeService.authorization()
+  previousUser    = this.route.snapshot.params['_id']
   socket          = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
 
   routeUrlSubscription !: Subscription
@@ -65,7 +75,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 	sendState = this.requestService.createInitialState<Message.One>()
 
   credentialForm = new FormGroup({
-    sender: new FormControl<string>(this.user._id),
+    sender: new FormControl<string|null|undefined>(this.user?._id),
     accept: new FormControl<string>(this.route.snapshot.params['_id']),
     groupId: new FormControl<string>(this.routeState.groupId)
   })
@@ -153,7 +163,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   fetchRequest = this.requestService.get<Message.All>({
     failedCb:r => alert(JSON.stringify(r)),
     cb: result => {
-      var authorization = this.authorization
+      var authorization = this.authorization as string
       var snapshot = this.route.snapshot
       var paramsId = snapshot.params['_id']
       
@@ -215,12 +225,14 @@ export class DetailComponent implements OnInit,OnDestroy {
     state:this.fetchState,
   })
 
-  sendMessage(form:FormGroup,authorization:string){
+  sendMessage(form:FormGroup,authorization:string|undefined){
     var now = Date.now()
-    var sender = {usersRef:this.user._id}
+    var sender = {usersRef:this.user?._id}
     var accept = {usersRef:this.route.snapshot.params['_id']}
     var _id = new Types.ObjectId().toString()
-    var headers = new HttpHeaders({authorization})
+    var headers = new HttpHeaders({
+      authorization:authorization as string
+    })
     
 		var newMessage = {
       ...form.value,
@@ -316,8 +328,8 @@ export class DetailComponent implements OnInit,OnDestroy {
     )
   }
 
-  resend({read,failed,sent,...message}:Message.One,authorization:string){
-    var headers = new HttpHeaders({authorization})
+  resend({read,failed,sent,...message}:Message.One,authorization:string|undefined){
+    var headers = new HttpHeaders({authorization:authorization as string})
 
     var result = this.fetchState().result
     var JSONResult = result.map(m => {
@@ -369,9 +381,33 @@ export class DetailComponent implements OnInit,OnDestroy {
   	this.internetConnected = true
   }
 
+  existInMessages():Ngrx.History[]{
+    var h = this._history() as Ngrx.History[]
+    return h.filter(m => m._id === this.route.snapshot.params['_id'])
+  }
+
   ngOnInit(){
     this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
-      var headers = new HttpHeaders({authorization:this.authorization})
+      var currentId = this.route.snapshot.params['_id']
+      if(this.route.snapshot.params['_id'] !== currentId){
+        var _h = this._history() as Ngrx.History[]
+
+        var [filter] = _h.filter(m => {
+          return m._id === this.previousUser
+        })
+
+        if(!filter){
+          var toAdd = {
+            _id:this.previousUser,
+            messages:this.fetchState().result
+          }
+        }
+        
+        
+        this.previousUser = currentId
+      }
+      
+      var headers = new HttpHeaders({authorization:this.authorization as string})
       var path = `message/all/${this.route.snapshot.params['_id']}`
 
       if(this.connected) this.socket.disconnect()
@@ -391,7 +427,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       var result = this.fetchState().result
 
       var modifiedResult = result.map(m => {
-        if(m.sender.usersRef === this.user._id){
+        if(m.sender.usersRef === this.user?._id){
           return {
             ...m,
             read:true
@@ -415,7 +451,8 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
     
     this.socket.on('incomingMessage',m => {
-      var authorization = this.authorization
+      alert('alert 3')
+      var authorization = this.authorization as string
       
       this.updateRequest(
         {
@@ -449,10 +486,12 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
     
     this.socket.on('history/message',m => {
+      alert('alert 2')
       this.history.onMessage(m)
     })
 
     this.socket.on('history/newMessage',m => {
+      alert('alert 1')
       this.history.onNewMessage(m)
     })
 
@@ -464,20 +503,34 @@ export class DetailComponent implements OnInit,OnDestroy {
       this.connected = true
 
       this.socket.emit(
+        'consume',
+       `detail/${this.user?._id}`,
+      )
+
+      this.socket.emit(
         'join',
-        `history/${this.user._id}`
+        `history/${this.user?._id}`
       )
       
       this.socket.emit(
         'join',
-        `chat/${this.user._id}/${this.route.snapshot.params['_id']}`
+        `chat/${this.user?._id}/${this.route.snapshot.params['_id']}`
       )
       
       this.socket.emit(
         'join',
-         `${this.routeState.groupId}/${this.user._id}`
+         `${this.routeState.groupId}/${this.user?._id}`
       )
     })
+
+    this.socket.on('startedConsume',consumerTag => {
+      this.consumerTag = consumerTag
+    })
+  }
+
+  canDeactivate(){
+    this.socket.disconnect()
+    return true
   }
 
   ngOnDestroy(){

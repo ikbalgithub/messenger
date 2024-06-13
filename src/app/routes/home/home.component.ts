@@ -133,7 +133,7 @@ export class HomeComponent implements OnInit,OnDestroy{
   onConnect = this.socket.on('connect',() => {
     this.socket.emit(
       'join',
-      `history/${this.user()._id}`
+      `history/${this.user()?._id}`
     )
   })
 
@@ -152,7 +152,7 @@ export class HomeComponent implements OnInit,OnDestroy{
   ngOnInit(){
     var path = `message/recently`
     var headers = new HttpHeaders({
-      authorization:this.hAuth()
+      authorization:this.hAuth() as string
     })
 
     this.fetchMessage(

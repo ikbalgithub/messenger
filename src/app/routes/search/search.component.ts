@@ -59,7 +59,7 @@ export class SearchComponent {
 
   onChange(value:string){
     var headers = new HttpHeaders({
-      authorization:this.hAuth()
+      authorization:this.hAuth() as string
     })
 
     if(value.length > 0) this.searchFn(

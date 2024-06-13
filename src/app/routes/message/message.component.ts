@@ -148,7 +148,7 @@ export class MessageComponent implements OnInit,OnDestroy {
 
   ngOnInit(path = `message/all/${this._id}`){
     var headers = new HttpHeaders({
-      authorization:this.hAuth()
+      authorization:this.hAuth() as string
     })
 
     this.requestFetch(
@@ -164,7 +164,7 @@ export class MessageComponent implements OnInit,OnDestroy {
   sendImage(form:FormGroup,now = Date.now(),_id = new Types.ObjectId()){
     var newMessage:Message.One = {
       ...form.value,
-      sender:this.user()._id,
+      sender:this.user()?._id,
       _id:_id.toString(),
       sendAt:now,
       sent:false,
@@ -196,7 +196,7 @@ export class MessageComponent implements OnInit,OnDestroy {
     })
     
     var headers = new HttpHeaders({
-      authorization:this.hAuth()
+      authorization:this.hAuth() as string
     })
 
     this.requestSend(
@@ -211,7 +211,7 @@ export class MessageComponent implements OnInit,OnDestroy {
   send(form:FormGroup,now = Date.now(),_id = new Types.ObjectId()){
     var newMessage:Message.One = {
       ...form.value,
-      sender:this.user()._id,
+      sender:this.user()?._id,
       _id:_id.toString(),
       sendAt:now,
       sent:false,
@@ -248,7 +248,7 @@ export class MessageComponent implements OnInit,OnDestroy {
   
 
     var headers = new HttpHeaders({
-      authorization:this.hAuth()
+      authorization:this.hAuth() as string
     })
 
     this.requestSend(
@@ -371,12 +371,12 @@ export class MessageComponent implements OnInit,OnDestroy {
   onConnect = this.socket.on('connect',() => {
     this.socket.emit(
       'join',
-      `${this.routeState.groupId}/${this.user()._id}`
+      `${this.routeState.groupId}/${this.user()?._id}`
     )
     
     this.socket.emit(
       'join',
-      `chat/${this.user()._id}/${this.route.snapshot.params['_id']}`
+      `chat/${this.user()?._id}/${this.route.snapshot.params['_id']}`
     )
   })
 
@@ -413,7 +413,7 @@ export class MessageComponent implements OnInit,OnDestroy {
 
   resend({read,...message}:Message.One){
     var headers = new HttpHeaders({
-      authorization:this.hAuth()
+      authorization:this.hAuth() as string
     })
 
     // this.requestSend(

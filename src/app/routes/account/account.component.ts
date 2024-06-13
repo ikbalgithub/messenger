@@ -33,13 +33,6 @@ export class AccountComponent {
 
   updateUsernameFn = this.requestService.put<{username:string},{username:string}>({
     cb:r => {
-      this.store.dispatch(
-        setUser({
-          ...this.storeService.user(),
-          ...r,
-        }) 
-      )
-
       this.showEditUsername = false
     },
     failedCb:err => console.log(err),
@@ -50,7 +43,7 @@ export class AccountComponent {
   updateUsername(form:FormGroup){
 
     var headers = new HttpHeaders({
-      authorization:this.hAuth()
+      authorization:this.hAuth() as string
     })
     
     this.updateUsernameFn(

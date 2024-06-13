@@ -13,12 +13,14 @@ import { userReducer } from './ngrx/reducers/user.reducer'
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
+import { historyReducer } from './ngrx/reducers/history.reducer';
 
 
 
 const storage = {
   authentication:authenticationReducer,
   authorization:authorizationReducer,
+  history:historyReducer,
   user:userReducer
 }
 

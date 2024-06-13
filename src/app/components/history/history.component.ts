@@ -29,6 +29,7 @@ export class HistoryComponent implements OnInit {
   
   @Input() counterId!:string
   @Input() disabled!:boolean
+  @Input() consumerTag!:string
 
   storeService   = inject(StoreService)
   user           = this.storeService.user()
@@ -155,7 +156,7 @@ export class HistoryComponent implements OnInit {
   onSendMessage(newMessage:Message.One,paramsId:string,profile:Common.Profile){
     var result = this.fetchState().result
     var JSONMessages = result.map(m => JSON.stringify(m))
-    var sender = {...this.user.profile,usersRef:this.user._id}
+    var sender = {...this.user?.profile,usersRef:this.user?._id}
 
     var [filter] = result.filter((message,index) => {
       return (
@@ -170,7 +171,7 @@ export class HistoryComponent implements OnInit {
     var index = JSONMessages.indexOf(JSON.stringify(filter))
 
     if(filter){
-      if(filter.sender.usersRef === this.user._id){
+      if(filter.sender.usersRef === this.user?._id){
         result[index] = {
           ...newMessage,
           sender:filter.sender,
@@ -179,7 +180,7 @@ export class HistoryComponent implements OnInit {
         }
       }
 
-      if(filter.sender.usersRef !== this.user._id){
+      if(filter.sender.usersRef !== this.user?._id){
         result[index] = {
           ...newMessage,
           sender:filter.accept,
@@ -191,7 +192,7 @@ export class HistoryComponent implements OnInit {
 		else{
 			result[result.length] = {
 				...newMessage,
-				sender:sender,
+				sender:sender as Common.Profile,
         accept:profile,
 				unreadCounter:0
 			}
@@ -252,7 +253,7 @@ export class HistoryComponent implements OnInit {
 
   showUnreadCounter(message:Message.Last):boolean{
     return (
-      message.sender.usersRef !== this.user._id 
+      message.sender.usersRef !== this.user?._id 
         ? message.sender.usersRef !== this.counterId 
             ? message.unreadCounter > 0 
               ? true 
@@ -322,7 +323,7 @@ export class HistoryComponent implements OnInit {
   }
 
   ngOnInit(){
-    var authorization = this.authorization
+    var authorization = this.authorization as string
     var headers = new HttpHeaders({authorization})
 
     this.fetchRequest(

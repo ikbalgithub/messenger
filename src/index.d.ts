@@ -102,6 +102,11 @@ export namespace Ngrx{
     authorization:string,
     user:User
   }
+
+  export interface History{
+    _id:string,
+    messages:Message.All
+  }
 }
 
 export namespace Request{
