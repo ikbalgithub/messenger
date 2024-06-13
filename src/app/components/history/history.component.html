@@ -87,7 +87,7 @@
       @for(x of fetchState().result; track x._id){
         <ng-container
           *ngTemplateOutlet="message; context:{
-            profile:x|profile:user._id:'home',
+            profile:x|profile:user?._id:'home',
             message:x
           }"
         />

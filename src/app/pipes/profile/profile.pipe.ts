@@ -7,11 +7,11 @@ import { Message,Search } from '../../../index.d'
 })
 export class ProfilePipe implements PipeTransform {
 
-  transform(value:Message.Last|Search.Result,_id:string,pages:string):any {
+  transform(value:Message.Last|Search.Result,_id:string|null|undefined,pages:string):any {
     if(pages === 'home'){
       var v = value as Message.Last
 
-      if(v.sender.usersRef === _id){
+      if(v.sender.usersRef === _id as string){
         return v.accept
       }
       else{
