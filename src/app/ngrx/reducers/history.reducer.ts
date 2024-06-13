@@ -17,7 +17,6 @@ export const historyReducer = createReducer<Ngrx.History[]>(
     ]
     
     var modifiedResult = messages.map(m => {
-      if(m.sender.usersRef === payload._id){
         if(!m.failed){
           return {
             ...m,
@@ -27,10 +26,6 @@ export const historyReducer = createReducer<Ngrx.History[]>(
         else{
           return m
         }
-      }
-      else{
-        return m
-      }
     })
 
     state[payload.index] = {
