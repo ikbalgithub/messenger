@@ -23,7 +23,7 @@ import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 import { Store } from '@ngrx/store';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 import { CanComponentDeactivate } from '../../guards/canDeactivate/can-deactivate.guard';
-import { add } from '../../ngrx/actions/history.actions';
+import { add, incomingMessage } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-detail',
@@ -451,8 +451,12 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
     })
     
     this.socket.on('incomingMessage',m => {
+      var _id = this.route.snapshot.params['_id']
       var authorization = this.authorization as string
-      
+      var _h = this._history() as Ngrx.History[]
+      var [filter] = _h.filter(m => m._id === _id)
+      var index = _h.findIndex(m => m._id === _id)
+   
       this.updateRequest(
         {
           groupId:this.routeState.groupId,
@@ -466,6 +470,21 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
       )
       
       var result = this.fetchState().result
+
+      if(filter){
+        var message = {
+          ...m,
+          read:true,
+          sent:true
+        }
+
+        this.store.dispatch(
+          incomingMessage({
+            index,
+            message
+          })
+        )
+      }
       
       result[result.length] = {
         ...m,
