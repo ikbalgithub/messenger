@@ -504,11 +504,6 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
       this.connected = true
 
       this.socket.emit(
-        'consume',
-       `detail/${this.user?._id}`,
-      )
-
-      this.socket.emit(
         'join',
         `history/${this.user?._id}`
       )
@@ -525,7 +520,7 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
     })
 
     this.socket.on('startedConsume',consumerTag => {
-      this.consumerTag = consumerTag
+      console.log(`connect to rabbitmq with consumer tag:${consumerTag}`)
     })
   }
 

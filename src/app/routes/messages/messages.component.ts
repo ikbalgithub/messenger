@@ -28,11 +28,6 @@ export class MessagesComponent implements OnInit, OnDestroy,CanComponentDeactiva
   ngOnInit(){
     this.socket.on('connect',() => {
       this.socket.emit(
-        'consume',
-        `messages/${this.user?._id}`
-      )
-      
-      this.socket.emit(
         'join',
         `history/${this.user?._id}`
       )
