@@ -223,11 +223,9 @@
             pInputText
             type="text" 
             formControlName="value"
-            class="flex-1 px-3 outline-none {{internetConnected ? '' : 'bg-slate-400'}}"
-            [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
-            [readonly]="!internetConnected"
+            class="flex-1 px-3 outline-none"
           />
-          <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
+          <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'">
             <input 
               type="file" 
               class="opacity-0 absolute"
