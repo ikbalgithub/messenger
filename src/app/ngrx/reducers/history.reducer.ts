@@ -1,6 +1,6 @@
 import { createReducer,on } from "@ngrx/store";
 import { Ngrx } from "../../..";
-import { add,incomingMessage,failedSend,successSend,seen } from "../actions/history.actions";
+import { add,incomingMessage,failedSend,successSend,seen, resend } from "../actions/history.actions";
 
 export const historyReducer = createReducer<Ngrx.History[]>(
   [],
@@ -66,6 +66,31 @@ export const historyReducer = createReducer<Ngrx.History[]>(
     messages[index] = {
       ...filter,
       failed:true
+    }
+
+    state[payload.index] = {
+      _id,
+      messages
+    }
+
+    return state
+  }),
+  on(resend,(state,payload) => {
+    var {_id,messages} = state[
+      payload.index
+    ]
+    
+    var [filter] = messages.filter(
+      m => m._id === payload._id
+    )
+
+    var index = messages.findIndex(
+      m => m._id === payload._id
+    )
+
+    messages[index] = {
+      ...filter,
+      failed:false
     }
 
     state[payload.index] = {

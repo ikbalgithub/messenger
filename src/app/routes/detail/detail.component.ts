@@ -23,7 +23,7 @@ import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 import { Store } from '@ngrx/store';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 import { CanComponentDeactivate } from '../../guards/canDeactivate/can-deactivate.guard';
-import { add,incomingMessage,failedSend,successSend,seen } from '../../ngrx/actions/history.actions';
+import { add,incomingMessage,failedSend,successSend,seen,resend } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-detail',
@@ -381,7 +381,10 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
 
   resend({read,failed,sent,...message}:Message.One,authorization:string|undefined){
     var headers = new HttpHeaders({authorization:authorization as string})
-
+    var _id = this.route.snapshot.params['_id']
+    var _h = this._history() as Ngrx.History[]
+    var [hFilter] = _h.filter(m => m._id === _id)
+    var hIndex = _h.findIndex(m => m._id === _id)
     var result = this.fetchState().result
     var JSONResult = result.map(m => {
       return JSON.stringify(m)
@@ -394,22 +397,35 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
     var index = JSONResult.indexOf(
       JSON.stringify(filter)
     )
-
-    result[index] = {
-      ...filter,
-      failed:false
+    
+    if(hFilter){
+      this.store.dispatch(
+        resend(
+          {
+            index:hIndex,
+            _id:message._id
+          }
+        )
+      )
+    }
+    else{
+      result[index] = {
+        ...filter,
+        failed:false
+      }
+      
+      setTimeout(() => {
+        this.fetchState.update(current => {
+          return {
+            ...current,
+            result
+          }
+        })
+  
+        this.history.onResend(message._id)
+      })
     }
     
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-
-      this.history.onResend(message._id)
-    })
 
     var sendObject = {
       ...message,
