@@ -306,46 +306,46 @@ export class HistoryComponent implements OnInit {
   }
 
   onSuccessSend(_id:string){
-  //   var [previewFilter] = this.preview().filter(m => m._id === _id)
-  //   var previewIndex = this.preview().findIndex(m => m._id === _id)
+    var [previewFilter] = this.preview().filter(m => m._id === _id)
+    var previewIndex = this.preview().findIndex(m => m._id === _id)
     
-  //   var result = this.fetchState().result
-  //   var JSONMessages = result.map(m => JSON.stringify(m))
-  //   var [filter] = result.filter((message,index) => {
-  //     return message._id === _id
-  //   })
-  //   var index = JSONMessages.indexOf(
-  //     JSON.stringify(filter)
-  //   )
+    var result = this.fetchState().result
+    var JSONMessages = result.map(m => JSON.stringify(m))
+    var [filter] = result.filter((message,index) => {
+      return message._id === _id
+    })
+    var index = JSONMessages.indexOf(
+      JSON.stringify(filter)
+    )
     
-  //   if(this.preview().length > 0){
-  //     if(previewFilter){
-  //       this.storeService.store.dispatch(
-  //         successSend(
-  //           {
-  //             index:previewIndex
-  //           }
-  //         )
-  //       )
-  //     }
-  //   }
-  //   else{
-  //     if(filter){
-  //       result[index] = {
-  //         ...filter,
-  //         sent:true,
-  //         failed:false
-  //       }
-  //       setTimeout(() => {
-  //         this.fetchState.update(current => {
-  //           return {
-  //             ...current,
-  //             result
-  //           }
-  //         })
-  //       })
-  //     }
-  //   }
+    if(this.preview().length > 0){
+      if(previewFilter){
+        this.storeService.store.dispatch(
+          successSend(
+            {
+              index:previewIndex
+            }
+          )
+        )
+      }
+    }
+    else{
+      if(filter){
+        result[index] = {
+          ...filter,
+          sent:true,
+          failed:false
+        }
+        setTimeout(() => {
+          this.fetchState.update(current => {
+            return {
+              ...current,
+              result
+            }
+          })
+        })
+      }
+    }
   }
 
   onUpdated(_id:string){
