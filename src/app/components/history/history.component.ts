@@ -71,38 +71,92 @@ export class HistoryComponent implements OnInit {
       newMessage.sender || m.accept.usersRef
       === newMessage.sender
     })
-    
-    if(filter){
-      var index = JSONMessages.indexOf(
-        JSON.stringify(filter)
-      )
-      if(filter.sender.usersRef === newMessage.sender){
-        result[index] = {
-          ...newMessage,
-          sender:filter.sender,
-          accept:filter.accept,
-          unreadCounter:filter.unreadCounter+1
-        }
-      }
 
-      if(filter.sender.usersRef !== newMessage.sender){
-        result[index] = {
-          ...newMessage,
-          sender:filter.accept,
-          accept:filter.sender,
-          unreadCounter:1
-        }
-      }
+    var [previewFilter] = this.preview().filter(m => {
+      return m.sender.usersRef ===
+      newMessage.sender || m.accept.usersRef
+      === newMessage.sender
+    })
 
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
+     var previewIndex = this.preview().findIndex(m => {
+      return m.sender.usersRef ===
+      newMessage.sender || m.accept.usersRef
+      === newMessage.sender
+    })
+
+    if(this.preview().length > 0){
+      if(previewFilter){
+        if(previewFilter.sender.usersRef === newMessage.sender){
+          var message = {
+            ...newMessage,
+            sender:filter.sender,
+            accept:filter.accept,
+            unreadCounter:previewFilter.unreadCounter+1
           }
-        })
-      })
+
+          this.storeService.store.dispatch(
+            replace(
+              {
+                index:previewIndex,
+                message
+              }  
+            )
+          )
+        }
+        if(previewFilter.sender.usersRef !== newMessage.sender){
+          var _message = {
+            ...newMessage,
+            sender:filter.accept,
+            accept:filter.sender,
+            unreadCounter:1
+          }
+
+          this.storeService.store.dispatch(
+            replace(
+              {
+                index:previewIndex,
+                message:_message
+              }
+            )
+          )
+        }
+      }
     }
+    else{
+      if(filter){
+        var index = JSONMessages.indexOf(
+          JSON.stringify(filter)
+        )
+        if(filter.sender.usersRef === newMessage.sender){
+          result[index] = {
+            ...newMessage,
+            sender:filter.sender,
+            accept:filter.accept,
+            unreadCounter:filter.unreadCounter+1
+          }
+        }
+  
+        if(filter.sender.usersRef !== newMessage.sender){
+          result[index] = {
+            ...newMessage,
+            sender:filter.accept,
+            accept:filter.sender,
+            unreadCounter:1
+          }
+        }
+  
+        setTimeout(() => {
+          this.fetchState.update(current => {
+            return {
+              ...current,
+              result
+            }
+          })
+        })
+      }
+    }
+    
+   
     
   }
 
