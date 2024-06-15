@@ -9,7 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
-import { add, failedSend, message, replace, successSend } from '../../ngrx/actions/preview.action';
+import { add, failedSend, message, replace, resend, successSend } from '../../ngrx/actions/preview.action';
 
 @Component({
   selector: 'app-history',
@@ -449,7 +449,11 @@ export class HistoryComponent implements OnInit {
     if(this.preview().length > 0){
       if(previewFilter){
         this.storeService.store.dispatch(
-          resend(previewIndex)
+          resend(
+            {
+              index:previewIndex
+            }
+          )
         )
       }
     }
