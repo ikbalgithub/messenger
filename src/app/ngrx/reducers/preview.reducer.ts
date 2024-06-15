@@ -27,7 +27,7 @@ export const previewReducer = createReducer<Message.Last[]>(
   on(failedSend,(state,payload) => {
     state[payload.index] = {
       ...state[payload.index],
-      failed:false
+      failed:true
     }
 
     return state
