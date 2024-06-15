@@ -76,8 +76,32 @@
   </div>
   </ng-template>
 
-
   <ng-template #next>
+     @if(fetchState().isError){
+      <ng-container 
+        *ngTemplateOutlet="error"
+      />
+     }
+     @else{
+      @if(preview().length > 0){
+        @for(x of preview(); track x._id){
+          <ng-container
+            *ngTemplateOutlet="message; context:{
+              profile:x|profile:user?._id:'home',
+              message:x
+            }"
+          />
+        }
+      }
+      @else{
+        <ng-container
+          *ngTemplateOutlet="fromFetch"
+        />
+      }
+     }
+  </ng-template>
+
+  <ng-template #fromFetch>
     @if(fetchState().isError){
       <ng-container 
         *ngTemplateOutlet="error"
