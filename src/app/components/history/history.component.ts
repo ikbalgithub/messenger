@@ -198,7 +198,13 @@ export class HistoryComponent implements OnInit {
     })
 
     var previewIndex = this.preview().findIndex(message => {
-      return message?._id === previewFilter?._id
+      return (
+        message.sender.usersRef
+        === paramsId
+      ) || (
+        message.accept.usersRef
+        === paramsId
+      )
     })
 
     var index = JSONMessages.indexOf(JSON.stringify(filter))
