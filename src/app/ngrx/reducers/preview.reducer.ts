@@ -1,6 +1,6 @@
 import { createReducer,on } from "@ngrx/store";
 import { Message } from "../../..";
-import { add, failedSend, message, replace, resend, successSend } from "../actions/preview.action";
+import { add, failedSend, message, replace, resend, seen, successSend } from "../actions/preview.action";
 
 export const previewReducer = createReducer<Message.Last[]>(
   [],
@@ -37,6 +37,13 @@ export const previewReducer = createReducer<Message.Last[]>(
       failed:false
     }
 
+    return state
+  }),
+  on(seen,(state,payload) => {
+    state[payload.index] = {
+      ...state[payload.index],
+      read:true
+    }
     return state
   })
 )

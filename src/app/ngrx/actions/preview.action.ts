@@ -8,4 +8,4 @@ export const replace = createAction('Detail Component [Replace]',props<{index:nu
 export const successSend = createAction('Detail Component [Preview Success Send]',props<{index:number}>())
 export const failedSend = createAction('Detail Component [Preview Failed Send]',props<{index:number}>())
 export const resend = createAction('Detail Component [Preview Resend]',props<{index:number}>())
-
+export const seen = createAction('Any Component [Preview Seen]',props<{index:number}>())

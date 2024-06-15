@@ -223,9 +223,6 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
             })
           }
         )
-				this.history.onAfterFetch(
-					this.route.snapshot.params['_id']
-				)
       }
       
       setTimeout(() => {
@@ -512,7 +509,7 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
           if(m.sender.usersRef === this.user?._id){
             return {
               ...m,
-              read:true
+              read:m.failed ? false : true
             }
           }
           else{

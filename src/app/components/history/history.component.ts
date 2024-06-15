@@ -9,7 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
-import { add, failedSend, message, replace, resend, successSend } from '../../ngrx/actions/preview.action';
+import { add, failedSend, message, replace, resend, seen, successSend } from '../../ngrx/actions/preview.action';
 
 @Component({
   selector: 'app-history',
@@ -409,19 +409,35 @@ export class HistoryComponent implements OnInit {
     var result = this.fetchState().result
     var JSONMessages = result.map(m => JSON.stringify(m))
     var [filter] = result.filter(m => m.sender.usersRef === _id || m.accept.usersRef === _id)
+    var [previewFilter] = this.preview().filter(m => m.sender.usersRef === _id || m.accept.usersRef === _id)
+    var previewIndex = this.preview().findIndex(m => m.sender.usersRef === _id || m.accept.usersRef === _id)
+
 
     var index = JSONMessages.indexOf(JSON.stringify(filter))
 
-    result[index] = {...filter,read:true}
-
-    setTimeout(() => {
-      this.fetchState.update((current) => {
-        return {
-          ...current,
-          result
+    if(this.preview().length > 0){
+      if(previewFilter){
+        if(!previewFilter.failed){
+          this.storeService.store.dispatch(
+            seen({index:previewIndex})
+          )
         }
-      })
-    })
+      }
+    }
+    else{
+      if(filter){
+        result[index] = {...filter,read:filter.failed ? false : true}
+
+        setTimeout(() => {
+          this.fetchState.update((current) => {
+            return {
+              ...current,
+              result
+            }
+          })
+        })
+      }
+    }
   }
 
   showUnreadCounter(message:Message.Last):boolean{
