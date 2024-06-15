@@ -59,7 +59,7 @@ export class HistoryComponent implements OnInit {
         })
       })
     },
-    failedCb:err => console.log(err),
+    failedCb:err => console.log(err), 
     state:this.fetchState
   })
 
@@ -127,12 +127,15 @@ export class HistoryComponent implements OnInit {
         var index = JSONMessages.indexOf(
           JSON.stringify(filter)
         )
+       
         if(filter.sender.usersRef === newMessage.sender){
-          result[index] = {
-            ...newMessage,
-            sender:filter.sender,
-            accept:filter.accept,
-            unreadCounter:filter.unreadCounter+1
+          if(result[index]?._id !== newMessage._id){
+            result[index] = {
+              ...newMessage,
+              sender:filter.sender,
+              accept:filter.accept,
+              unreadCounter:filter.unreadCounter+1
+            }
           }
         }
   
