@@ -9,7 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
-import { add, message, replace } from '../../ngrx/actions/preview.action';
+import { add, message, replace, successSend } from '../../ngrx/actions/preview.action';
 
 @Component({
   selector: 'app-history',
@@ -300,6 +300,9 @@ export class HistoryComponent implements OnInit {
   }
 
   onSuccessSend(_id:string){
+    var [previewFilter] = this.preview().filter(m => m._id === _id)
+    var previewIndex = this.preview().findIndex(m => m._id === _id)
+    
     var result = this.fetchState().result
     var JSONMessages = result.map(m => JSON.stringify(m))
     var [filter] = result.filter((message,index) => {
@@ -308,19 +311,35 @@ export class HistoryComponent implements OnInit {
     var index = JSONMessages.indexOf(
       JSON.stringify(filter)
     )
-    result[index] = {
-      ...filter,
-      sent:true,
-      failed:false
+    
+    if(this.preview().length > 0){
+      if(previewFilter){
+        this.storeService.store.dispatch(
+          successSend(
+            {
+              index:previewIndex
+            }
+          )
+        )
+      }
     }
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
+    else{
+      if(filter){
+        result[index] = {
+          ...filter,
+          sent:true,
+          failed:false
         }
-      })
-    })
+        setTimeout(() => {
+          this.fetchState.update(current => {
+            return {
+              ...current,
+              result
+            }
+          })
+        })
+      }
+    }
   }
 
   onUpdated(_id:string){
