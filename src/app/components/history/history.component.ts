@@ -340,25 +340,25 @@ export class HistoryComponent implements OnInit {
   //       })
   //     }
   //   }
-  // }
+  }
 
-  // onUpdated(_id:string){
-  //   var result = this.fetchState().result
-  //   var JSONMessages = result.map(m => JSON.stringify(m))
-  //   var [filter] = result.filter(m => m.sender.usersRef === _id || m.accept.usersRef === _id)
+  onUpdated(_id:string){
+    var result = this.fetchState().result
+    var JSONMessages = result.map(m => JSON.stringify(m))
+    var [filter] = result.filter(m => m.sender.usersRef === _id || m.accept.usersRef === _id)
 
-  //   var index = JSONMessages.indexOf(JSON.stringify(filter))
+    var index = JSONMessages.indexOf(JSON.stringify(filter))
 
-  //   result[index] = {...filter,read:true}
+    result[index] = {...filter,read:true}
 
-  //   setTimeout(() => {
-  //     this.fetchState.update((current) => {
-  //       return {
-  //         ...current,
-  //         result
-  //       }
-  //     })
-  //   })
+    setTimeout(() => {
+      this.fetchState.update((current) => {
+        return {
+          ...current,
+          result
+        }
+      })
+    })
   }
 
   showUnreadCounter(message:Message.Last):boolean{
