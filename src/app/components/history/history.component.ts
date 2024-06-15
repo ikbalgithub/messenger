@@ -438,27 +438,46 @@ export class HistoryComponent implements OnInit {
       return JSON.stringify(m)
     })
 
-    var [filter] = result.filter(m => {
+    var [previewFilter] = this.preview().filter(m => {
       return m._id === _id
     })
 
-    var index = JSONResult.indexOf(
-      JSON.stringify(filter)
-    )
+    var previewIndex = this.preview().findIndex(m => {
+      return m._id === _id
+    })
 
-    result[index] = {
-      ...filter,
-      failed:false
+    if(this.preview().length > 0){
+      if(previewFilter){
+        this.storeService.store.dispatch(
+          resend(previewIndex)
+        )
+      }
+    }
+    else{
+      var [filter] = result.filter(m => {
+        return m._id === _id
+      })
+  
+      var index = JSONResult.indexOf(
+        JSON.stringify(filter)
+      )
+  
+      result[index] = {
+        ...filter,
+        failed:false
+      }
+  
+      setTimeout(() => {
+        this.fetchState.update(current => {
+          return {
+            ...current,
+            result
+          }
+        })
+      })
     }
 
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
+    
   }
 
   ngOnInit(){
