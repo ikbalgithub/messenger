@@ -9,6 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
+import { add, message, replace } from '../../ngrx/actions/preview.action';
 
 @Component({
   selector: 'app-history',
@@ -32,6 +33,7 @@ export class HistoryComponent implements OnInit {
   @Input() consumerTag!:string
 
   storeService   = inject(StoreService)
+  preview        = this.storeService.preview
   user           = this.storeService.user()
   requestService = inject(RequestService)
   route          = inject(ActivatedRoute)
@@ -113,21 +115,38 @@ export class HistoryComponent implements OnInit {
       === newMessage.sender.usersRef
     })
 
-    if(!filter){
-      result[result.length] = {
-        ...newMessage,
-        unreadCounter:1
-      }
-    }
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
+    var [previewFilter] = this.preview().filter(m => {
+      return m.sender.usersRef ===
+      newMessage.sender.usersRef || m.accept.usersRef
+      === newMessage.sender.usersRef
     })
+
+    if(this.preview().length > 0 && !previewFilter){
+      this.storeService.store.dispatch(
+        message({
+          ...newMessage,
+          unreadCounter:1
+        })
+      )
+    }
+    else{
+      if(!filter){
+        result[result.length] = {
+          ...newMessage,
+          unreadCounter:1
+        }
+      }
+    
+      setTimeout(() => {
+        this.fetchState.update(current => {
+          return {
+            ...current,
+            result
+          }
+        })
+      })
+    }
+    
   }
 
   onAfterFetch(_id:string){
@@ -168,44 +187,116 @@ export class HistoryComponent implements OnInit {
       )
     })
 
+    var [previewFilter] = this.preview().filter(message => {
+      return (
+        message.sender.usersRef
+        === paramsId
+      ) || (
+        message.accept.usersRef
+        === paramsId
+      )
+    })
+
+    var previewIndex = this.preview().findIndex(message => {
+      return message?._id === previewFilter?._id
+    })
+
     var index = JSONMessages.indexOf(JSON.stringify(filter))
 
-    if(filter){
-      if(filter.sender.usersRef === this.user?._id){
-        result[index] = {
-          ...newMessage,
-          sender:filter.sender,
-          accept:filter.accept,
-          unreadCounter:0
+    if(this.preview().length > 0){
+      if(previewFilter){
+        if(previewFilter.sender.usersRef === this.user?._id){
+          var message = {
+            ...newMessage,
+            sender:filter.sender,
+            accept:filter.accept,
+            unreadCounter:0
+          }
+
+          this.storeService.store.dispatch(
+            replace(
+              {
+                index:previewIndex,
+                message,
+              }
+            )
+          )          
+        }
+        if(previewFilter.sender.usersRef !== this.user?._id){
+          var _message = {
+            ...newMessage,
+            sender:previewFilter.accept,
+            accept:filter.sender,
+            unreadCounter:0
+          }
+
+          this.storeService.store.dispatch(
+            replace(
+              {
+                index:previewIndex,
+                message:_message
+              }
+            )
+          )
         }
       }
-
-      if(filter.sender.usersRef !== this.user?._id){
-        result[index] = {
+      else{
+        var __message = {
           ...newMessage,
-          sender:filter.accept,
-          accept:filter.sender,
+          sender:sender as Common.Profile,
+          accept:profile,
           unreadCounter:0
         }
+        
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index:this.preview().length,
+              message:__message
+            }
+          )
+        )
       }
     }
-		else{
-			result[result.length] = {
-				...newMessage,
-				sender:sender as Common.Profile,
-        accept:profile,
-				unreadCounter:0
-			}
-		}
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
+    else{
+      if(filter){
+        if(filter.sender.usersRef === this.user?._id){
+          result[index] = {
+            ...newMessage,
+            sender:filter.sender,
+            accept:filter.accept,
+            unreadCounter:0
+          }
         }
+  
+        if(filter.sender.usersRef !== this.user?._id){
+          result[index] = {
+            ...newMessage,
+            sender:filter.accept,
+            accept:filter.sender,
+            unreadCounter:0
+          }
+        }
+      }
+      else{
+        result[result.length] = {
+          ...newMessage,
+          sender:sender as Common.Profile,
+          accept:profile,
+          unreadCounter:0
+        }
+      }
+  
+      setTimeout(() => {
+        this.fetchState.update(current => {
+          return {
+            ...current,
+            result
+          }
+        })
       })
-    })
+    }
+    
   }
 
   onSuccessSend(_id:string){
@@ -330,5 +421,11 @@ export class HistoryComponent implements OnInit {
       'message/recently',
       {headers}
     )
+  }
+
+  ngOnDestroy(){
+    if(this.preview().length < 1 && this.fetchState().result.length > 0){
+      this.storeService.store.dispatch(add({value:this.fetchState().result}))
+    }
   }
 }

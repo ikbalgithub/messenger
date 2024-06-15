@@ -14,6 +14,7 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
 import { historyReducer } from './ngrx/reducers/history.reducer';
+import { previewReducer } from './ngrx/reducers/preview.reducer';
 
 
 
@@ -21,7 +22,8 @@ const storage = {
   authentication:authenticationReducer,
   authorization:authorizationReducer,
   history:historyReducer,
-  user:userReducer
+  user:userReducer,
+  preview:previewReducer
 }
 
 export const appConfig: ApplicationConfig = {
