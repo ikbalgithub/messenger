@@ -501,6 +501,9 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
           )
         )
       }
+      else{
+        alert('not in filter')
+      }
     })
     
 
