@@ -1,6 +1,6 @@
 <div class="p-6 flex flex-row">
   <span class="font-bold text-xl">
-    Messages ({{consumerTag}})
+    Messages
   </span>
   <div class="flex flex-row flex-1 justify-end items-center gap-3">
     <i class="pi pi-cog"></i>
@@ -17,10 +17,6 @@
   />
 </div>
 <div class="flex-1 flex flex-col p-3 gap-5">
-  <div *ngIf="fetchState().running; else next" class="flex flex-col flex-1 justify-center items-center">
-    <p-progressSpinner/>
-  </div>
-
   <ng-template #empty>
     <div class="flex-1 flex flex-col items-center justify-center">
       <span>no messages</span>
@@ -28,7 +24,7 @@
   </ng-template>
 
   <ng-template #message let-profile="profile" let-message="message">
-    <a [class]="disabled ? 'pointer-events-none':''" routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId:message.groupId}">
+    <a routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId:message.groupId}">
     <div class="flex flex-row p-3 gap-3 bg-white shadow-md rounded-md items-center">
       <p-avatar
         [image]="profile.profileImage" 
@@ -70,59 +66,20 @@
     </div>
     </a>
   </ng-template>
-  <ng-template #error>
-  <div class="flex-1 flex flex-col items-center justify-center">
-    <span>reload aja dulu...</span>
-  </div>
-  </ng-template>
 
-  <ng-template #next>
-     @if(fetchState().isError){
-      <ng-container 
-        *ngTemplateOutlet="error"
-      />
-     }
-     @else{
-      @if(preview().length > 0){
-        @for(x of preview(); track x._id){
-          <ng-container
-            *ngTemplateOutlet="message; context:{
-              profile:x|profile:user?._id:'home',
-              message:x
-            }"
-          />
-        }
-      }
-      @else{
-        <ng-container
-          *ngTemplateOutlet="fromFetch"
-        />
-      }
-     }
-  </ng-template>
-
-  <ng-template #fromFetch>
-    @if(fetchState().isError){
-      <ng-container 
-        *ngTemplateOutlet="error"
-      />
-    }
-    @else{
-      @for(x of fetchState().result; track x._id){
-        <ng-container
-          *ngTemplateOutlet="message; context:{
-            profile:x|profile:user?._id:'home',
-            message:x
-          }"
-        />
-      }
-      @empty{
-        <ng-container 
-          *ngTemplateOutlet="empty"
-        />
-      }
-    }
-  </ng-template>
+  @for(x of preview(); track x._id){
+    <ng-container
+      *ngTemplateOutlet="message; context:{
+        profile:x|profile:user?._id:'home',
+        message:x
+      }"
+    /> 
+  }
+  @empty{
+    <ng-container
+      *ngTemplateOutlet="empty"
+    />
+  }
 </div>
 
 
@@ -201,4 +158,4 @@
     />
   }
 
--->
+--> -->

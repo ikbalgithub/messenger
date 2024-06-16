@@ -52,12 +52,10 @@ export const routes: Routes = [
   {
     path:'messages',
     component:MessagesComponent,
-    canDeactivate:[canDeactivateGuard]
   },
   {
     path:'messages/:_id',
     component:DetailComponent,
-    canDeactivate:[canDeactivateGuard]
   },
   {
     path:"**",
