@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { DetailComponent } from './routes/detail/detail.component'
 import { HomeComponent } from './routes/home/home.component'
 import { LoginComponent } from './routes/login/login.component'
 import { MessagesComponent } from './routes/messages/messages.component'
@@ -52,10 +51,6 @@ export const routes: Routes = [
   {
     path:'messages',
     component:MessagesComponent,
-  },
-  {
-    path:'messages/:_id',
-    component:DetailComponent,
   },
   {
     path:"**",
