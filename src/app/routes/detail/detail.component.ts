@@ -1,3 +1,413 @@
+import { Component, OnDestroy, OnInit, ViewChild, computed, inject, signal } from "@angular/core";
+import { HistoryComponent } from "../../components/history/history.component";
+import { AvatarModule } from "primeng/avatar";
+import { CommonModule, ViewportScroller } from "@angular/common";
+import { ImageModule } from "primeng/image";
+import { InputGroupModule } from "primeng/inputgroup";
+import { ButtonModule } from "primeng/button";
+import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { DialogModule } from "primeng/dialog";
+import { FilterPipe } from "../../pipes/filter/filter.pipe";
+import { Socket, io } from "socket.io-client";
+import { StoreService } from "../../services/store/store.service";
+import { ActivatedRoute } from "@angular/router";
+import { Subscription } from "rxjs";
+import { Common, Message } from "../../..";
+import { Types } from "mongoose";
+import { HttpErrorResponse, HttpHeaders } from "@angular/common/http";
+import { add, failedSend, incomingMessage, resend, seen, successSend } from "../../ngrx/actions/history.actions";
+import { RequestService } from "../../services/request/request.service";
+import { CommonService } from "../../services/common/common.service";
+import { getDownloadURL, uploadBytes } from "firebase/storage";
+
+@Component({
+  selector: 'app-detail',
+  standalone: true,
+  templateUrl: './detail.component.html',
+  styleUrl: './detail.component.css',
+  imports: [
+    HistoryComponent,
+    AvatarModule,
+    CommonModule,
+    ImageModule,
+    InputGroupModule,
+    ButtonModule,
+    ReactiveFormsModule,
+    DialogModule,
+    FilterPipe,
+  ]
+})
+
+export class DetailComponent implements OnInit{
+  @ViewChild('history') history !:HistoryComponent
+  state = signal<RouteState>(window.history.state)
+  socket:Socket = io(import.meta.env.NG_APP_SERVER)
+	commonService = inject(CommonService)
+  storeService = inject(StoreService)
+	route = inject(ActivatedRoute)
+  scroller = inject(ViewportScroller)
+  requestService = inject(RequestService)
+	user = this.storeService.user()
+  authorization = this.storeService.authorization()
+  path1 = `history/${this.user._id}`
+	path2 = `chat/${this.user._id}`
+	_id = this.route.snapshot.params['_id']
+	currentX = signal<string>(this._id)
+  historyStore = this.storeService.history
+  uploading = false
+  preview = false
+  isValid = /^\s*$/
+  paramMap !: Subscription
+
+  sendState = this.requestService.createInitialState<Message.One>()
+  updateState = this.requestService.createInitialState<Message.One>()
+
+  path2Computed = computed(() => {
+    var path = this.path2
+    return `${path}/${this.currentX()}`
+  })
+
+  path3 = computed(() => {
+    var {groupId} = this.state()
+    return `${groupId}/${this.user._id}`
+  })
+
+  messageForm:FormGroup = new FormGroup({
+    value: new FormControl<string>(''),
+    description: new FormControl<string>('none'),
+    contentType: new FormControl<string>('text'),
+    sender: new FormControl<string>(this.user._id as string),
+    accept: new FormControl<string>(computed(() => this.currentX())()),
+    groupId: new FormControl<string>(computed(() => this.state())().groupId)
+  })
+
+    imageForm = new FormGroup({
+    value: new FormControl<string>(''),
+    description: new FormControl<string>('none'),
+    contentType: new FormControl<string>('image'),
+    sender: new FormControl<string>(this.user._id as string),
+    accept: new FormControl<string>(computed(() => this.currentX())()),
+    groupId: new FormControl<string>(computed(() => this.state())().groupId)
+  })
+
+  sendRequest = this.requestService.post<Message.New,Message.One>({
+    failedCb:this.onFailedSend.bind(this),
+    cb:this.onSuccessSend.bind(this),
+    state:this.sendState,
+    path:'message'
+  })
+
+  updateRequest = this.requestService.put<Message.Update,Message.One>({
+    cb:r => console.log(r),
+    failedCb:r => console.log(r),
+    state:this.updateState,
+    path:'message'
+  })
+
+
+  sendMessage(form:FormGroup,authorization:string):void{
+    var now = Date.now()
+    var hStore = this.historyStore()
+    var usersRef = this.user._id
+    var accept = this.state().profile
+    var _id = this.route.snapshot.params['_id']
+    var newId = new Types.ObjectId().toString()
+    var [filter] = hStore.filter(m => m._id === _id)
+    var index = hStore.findIndex(m => m._id === _id)
+    var headers = new HttpHeaders({authorization})
+    var sender = {...this.user.profile,usersRef}
+    
+		var newMessage:Message.One = {
+      ...form.value,
+      sendAt:now,
+      sent:false,
+      read:false,
+      _id:newId,
+      sender,
+      accept,
+    }
+
+    var sendObject:Message.New = {
+      ...form.value,
+      sendAt:now, 
+      _id:newId
+    }
+
+    if(filter){
+      this.storeService.store.dispatch(
+        incomingMessage({
+          index,
+          message:newMessage
+        })
+      )
+
+      setTimeout(() => {
+        this.toAnchor(
+          "anchor"
+        )
+      })
+    }
+    else{
+      this.storeService.store.dispatch(
+        add(
+          {
+            _id:this.currentX(),
+            messages:[newMessage]
+          }
+        )
+      )
+    }
+    
+  
+    this.messageForm.patchValue({
+      ...this.messageForm.value,
+      value:''
+    })
+
+    this.history.onSendMessage(
+			newMessage,
+			this.currentX(),
+      this.state().profile
+	  )
+
+    this.sendRequest(
+      sendObject,
+      {headers}
+    )
+    
+  }
+	
+  toAnchor(anchor:string){
+    this.scroller.scrollToAnchor(anchor)
+  }
+
+  onSuccessSend(r:Message.One){
+    var [filter] = this.historyStore().filter(
+      m => m._id === r._id
+    )
+
+    var index = this.historyStore().findIndex(
+      m => m._id === r._id
+    )
+
+    this.storeService.store.dispatch(
+      successSend({
+        _id:r._id,
+        index
+      })
+    )
+
+    this.history.onSuccessSend(
+      r._id
+    )
+  }
+
+  onFailedSend(err:HttpErrorResponse,body:any){
+    var [filter] = this.historyStore().filter(
+      m => m._id === this.currentX()
+    )
+
+    var index = this.historyStore().findIndex(
+      m => m._id === this.currentX()
+    )
+
+    this.storeService.store.dispatch(
+      failedSend({
+        index:index,
+        _id:body._id
+      })
+    )
+
+    this.history.onFailedSend(
+      body._id
+    )
+  }
+
+  resend({read,failed,sent,...message}:Message.One,authorization:string){
+    var headers = new HttpHeaders({authorization})
+    var _id = this.route.snapshot.params['_id']
+    var hIndex = this.historyStore().findIndex(
+      m => m._id === _id
+    )
+    
+    var sendObject = {
+      ...message,
+      sender:message.sender.usersRef,
+      accept:message.accept.usersRef as string,
+      groupId:this.state().groupId
+    }
+
+    this.sendRequest(
+      sendObject,
+      {headers}
+    )
+
+    this.storeService.store.dispatch(
+      resend(
+        {
+          index:hIndex,
+          _id:message._id
+        }
+      )
+    )  
+  }
+
+  async onFileChange(event:any,form:FormGroup){
+    try{
+      this.uploading = true
+      var file = event.target.files[0]
+      var uploadRef = `send/${Date.now()}`
+      //var refs = ref(this.storage,uploadRef)
+      //var result = await uploadBytes(refs,file)
+      //var url = await getDownloadURL(result.ref)
+
+      // this.imageForm.patchValue({
+      //   ...form,
+      //   value:url
+      // })
+
+      // this.preview = true
+    }
+    catch(err:any){
+      console.log(err.message)
+    }
+    finally{
+      this.uploading = false
+    }
+  }
+  
+  ngOnInit(){
+    this.paramMap = this.route.paramMap.subscribe(p => {
+			if(this.currentX() != p.get('_id') as string){
+				
+			}
+    })
+
+    this.socket.on('updated',_id => {
+      var index = this.historyStore().findIndex(
+        m => m._id === _id
+      )
+
+      this.storeService.store.dispatch(
+        seen(
+          {
+            index:index,
+            _id:this.user._id
+          }
+        ) 
+      )
+
+      this.history.onUpdated(_id)
+    })
+
+    this.socket.on('incomingMessage',message => {
+      var authorization = this.authorization
+      var [f] = this.historyStore().filter(
+        m => m._id === message._id
+      )
+      
+      var idx = this.historyStore().findIndex(
+         m => m._id === message._id
+      )
+   
+      this.updateRequest(
+        {
+          groupId:this.state().groupId,
+          _id:this.currentX()
+        },
+        {
+          headers:new HttpHeaders({
+            authorization
+          })
+        }
+      )
+      
+      if(f){
+        message = {
+          ...f,
+          read:true,
+          sent:true
+        }
+
+        this.storeService.store.dispatch(
+          incomingMessage({
+            index:idx,
+            message
+          })
+        )
+        setTimeout(() => 
+          {
+            this.toAnchor("anchor")
+          },
+          2000
+        )
+      }
+      else{
+        this.storeService.store.dispatch(
+          add(
+            {
+              _id:this.currentX(),
+              messages:[message]
+            }
+          )
+        )
+      }
+    })
+
+		this.socket.on('history/updated',_id => {
+      // var index = this.historyStore().findIndex(
+      //   m => m._id === _id
+      // )
+
+      // this.storeService.store.dispatch(
+      //   seen(
+      //     {
+      //       index:index,
+      //       _id:this.user._id
+      //     }
+      //   ) 
+      // )
+
+      this.history.onUpdated(_id)
+
+    })
+
+    this.socket.on('history/newMessage',message => {
+      this.history.onNewMessage(message)
+    })
+
+    this.socket.on('history/message',message => {
+      this.history.onMessage(message)
+    })
+    
+    this.socket.on('connect',() => {
+      this.socket.emit(
+        'join',
+        this.path1
+      )
+
+			this.socket.emit(
+				'join',
+				this.path2Computed()
+			)
+
+      this.socket.emit(
+        'join',
+        this.path3()
+      )
+    })
+  }
+
+  ngOnDestroy(){
+    this.paramMap.unsubscribe()
+    this.socket.disconnect()
+  }
+}
+
+interface RouteState{
+  profile:Common.Profile,
+  groupId:string
+}
 
 // import { io } from 'socket.io-client'
 // import { Ngrx } from '../../../index.d';
@@ -74,11 +484,11 @@
 //   fetchState     = this.requestService.createInitialState<Message.All>()
 // 	sendState = this.requestService.createInitialState<Message.One>()
 
-//   credentialForm = new FormGroup({
-//     sender: new FormControl<string|null|undefined>(this.user?._id),
-//     accept: new FormControl<string>(this.route.snapshot.params['_id']),
-//     groupId: new FormControl<string>(this.routeState.groupId)
-//   })
+  // credentialForm = new FormGroup({
+  //   sender: new FormControl<string|null|undefined>(this.user?._id),
+  //   accept: new FormControl<string>(this.route.snapshot.params['_id']),
+  //   groupId: new FormControl<string>(this.routeState.groupId)
+  // })
 
 //   messageForm:FormGroup = new FormGroup({
 //     value: new FormControl<string>(''),
@@ -122,12 +532,12 @@
 //       this.history.onFailedSend(postObject._id)
 
 //       if(hFilter){
-//         this.store.dispatch(
-//           failedSend({
-//             index:hIndex,
-//             _id:postObject._id
-//           })
-//         )
+        // this.store.dispatch(
+        //   failedSend({
+        //     index:hIndex,
+        //     _id:postObject._id
+        //   })
+        // )
 //       }
 //       else{
 //         result[index] = {
@@ -163,14 +573,14 @@
 //       this.history.onSuccessSend(
 //         r._id
 //       )
-//       if(hFilter){
-//         this.store.dispatch(
-//           successSend({
-//             index:hIndex,
-//             _id:r._id
-//           })
-//         )
-//       }
+      // if(hFilter){
+      //   this.store.dispatch(
+      //     successSend({
+      //       index:hIndex,
+      //       _id:r._id
+      //     })
+      //   )
+      // }
 //       else{
 //         setTimeout(() => {
 //           this.fetchState.update(c => {
@@ -249,96 +659,96 @@
 //     state:this.fetchState,
 //   })
 
-//   sendMessage(form:FormGroup,authorization:string|undefined){
-//     var now = Date.now()
-//     var _id = this.route.snapshot.params['_id']
-//     var newId = new Types.ObjectId().toString()
-//     var _h = this._history() as Ngrx.History[]
-//     var [filter] = _h.filter(m => m._id === _id)
-//     var index = _h.findIndex(m => m._id === _id)
-//     var headers = new HttpHeaders({
-//       authorization:authorization as string
-//     })
+  // sendMessage(form:FormGroup,authorization:string|undefined){
+  //   var now = Date.now()
+  //   var _id = this.route.snapshot.params['_id']
+  //   var newId = new Types.ObjectId().toString()
+  //   var _h = this._history() as Ngrx.History[]
+  //   var [filter] = _h.filter(m => m._id === _id)
+  //   var index = _h.findIndex(m => m._id === _id)
+  //   var headers = new HttpHeaders({
+  //     authorization:authorization as string
+  //   })
 
-//     var sender = {
-//       ...this.user?.profile,
-//       usersRef:this.user?._id
-//     }
+  //   var sender = {
+  //     ...this.user?.profile,
+  //     usersRef:this.user?._id
+  //   }
 
-//     var accept = this.routeState.profile
+  //   var accept = this.routeState.profile
     
-// 		var newMessage = {
-//       ...form.value,
-//       sendAt:now,
-//       sent:false,
-//       read:false,
-//       _id:newId,
-//       sender,
-//       accept,
-//     }
+	// 	var newMessage = {
+  //     ...form.value,
+  //     sendAt:now,
+  //     sent:false,
+  //     read:false,
+  //     _id:newId,
+  //     sender,
+  //     accept,
+  //   }
 
-//     var sendObject = {
-//       ...form.value,
-//       ...this.credentialForm.value,
-//       sendAt:now,
-//       _id:newId
-//     }
+  //   var sendObject = {
+  //     ...form.value,
+  //     ...this.credentialForm.value,
+  //     sendAt:now,
+  //     _id:newId
+  //   }
 
-//     if(filter){
-//       this.store.dispatch(
-//         incomingMessage({
-//           index,
-//           message:newMessage
-//         })
-//       )
+  //   if(filter){
+  //     this.store.dispatch(
+  //       incomingMessage({
+  //         index,
+  //         message:newMessage
+  //       })
+  //     )
 
-//       setTimeout(() => {
-//         this.toAnchor("anchor")
-//       })
-//     }
-//     else{
-//       setTimeout(() => {
-//         this.fetchState.update(current => {
-//           var result = [
-//             ...current.result,
-//             newMessage
-//           ]
+  //     setTimeout(() => {
+  //       this.toAnchor("anchor")
+  //     })
+  //   }
+  //   else{
+  //     setTimeout(() => {
+  //       this.fetchState.update(current => {
+  //         var result = [
+  //           ...current.result,
+  //           newMessage
+  //         ]
   
-//           return {
-//             ...current,
-//             result
-//           }
-//         })
+  //         return {
+  //           ...current,
+  //           result
+  //         }
+  //       })
   
-//         this.preview = false
-//         setTimeout(() => this.toAnchor("anchor"))
-//       })
+  //       this.preview = false
+  //       setTimeout(() => this.toAnchor("anchor"))
+  //     })
   
-//     }
+  //   }
     
     
-//     this.imageForm.patchValue({
-//       ...this.imageForm.value,
-//       value:'',
-//     })
+  //   this.imageForm.patchValue({
+  //     ...this.imageForm.value,
+  //     value:'',
+  //   })
 
-//     this.messageForm.patchValue({
-//       ...this.messageForm.value,
-//       value:''
-//     })
+  //   this.messageForm.patchValue({
+  //     ...this.messageForm.value,
+  //     value:''
+  //   })
 
-//     this.history.onSendMessage(
-// 			newMessage,
-// 			this.route.snapshot.params['_id'],
-//       this.routeState.profile
-// 	  )
+  //   this.history.onSendMessage(
+	// 		newMessage,
+	// 		this.route.snapshot.params['_id'],
+  //     this.routeState.profile
+	//   )
 
-//     this.sendRequest(
-//       sendObject,
-//       {headers}
-//     )
+  //   this.sendRequest(
+  //     sendObject,
+  //     {headers}
+  //   )
     
-//   }
+  // }
 
 //   async onFileChange(event:any,form:FormGroup){
 //     try{
@@ -364,9 +774,9 @@
 //     }
 //   }
 
-//   toAnchor(anchor:string){
-//     this.scroller.scrollToAnchor(anchor)
-//   }
+  // toAnchor(anchor:string){
+  //   this.scroller.scrollToAnchor(anchor)
+  // }
 
 //   reset(){
 //     this.messageForm.patchValue(

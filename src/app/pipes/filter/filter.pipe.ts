@@ -7,8 +7,12 @@ import { Message, Ngrx } from '../../..';
 })
 export class FilterPipe implements PipeTransform {
 
-  transform(value:Ngrx.History[]|undefined,args:string):Message.All{
-    return (value as Ngrx.History[]).filter(m => m._id === args)[0].messages
+  transform(value:Ngrx.History[],args:string){
+    var [{messages}] = value.filter(m => {
+      return m._id === args
+    })
+    
+    return messages
   }
 
 }

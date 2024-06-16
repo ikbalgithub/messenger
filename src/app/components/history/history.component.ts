@@ -26,7 +26,7 @@ import { add, failedSend, message, replace, resend, seen, successSend } from '..
   ],
 
 })
-export class HistoryComponent implements OnInit {
+export class HistoryComponent {
   
   @Input() counterId!:string
   storeService = inject(StoreService)
@@ -126,8 +126,122 @@ export class HistoryComponent implements OnInit {
     )
   }
 
+  onSendMessage(newMessage:Message.One,paramsId:string,profile:Common.Profile){
+    var sender = {...this.user.profile,usersRef:this.user?._id}
 
+    var [previewFilter] = this.preview().filter(message => {
+      return (
+        message.sender.usersRef
+        === paramsId
+      ) || (
+        message.accept.usersRef
+        === paramsId
+      )
+    })
 
+    var previewIndex = this.preview().findIndex(message => {
+      return (
+        message.sender.usersRef
+        === paramsId
+      ) || (
+        message.accept.usersRef
+        === paramsId
+      )
+    })
+
+    if(previewFilter){
+      if(previewFilter.sender.usersRef === this.user?._id){
+        var message = {
+          ...newMessage,
+          sender:previewFilter.sender,
+          accept:previewFilter.accept,
+          unreadCounter:0
+        }
+
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index:previewIndex,
+              message,
+            }
+          )
+        )          
+      }
+      if(previewFilter.sender.usersRef !== this.user?._id){
+        var _message = {
+          ...newMessage,
+          sender:previewFilter.accept,
+          accept:previewFilter.sender,
+          unreadCounter:0
+        }
+
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index:previewIndex,
+              message:_message
+            }
+          )
+        )
+      }
+    }
+    else{
+      var __message = {
+        ...newMessage,
+        sender:sender as Common.Profile,
+        accept:profile,
+        unreadCounter:0
+      }
+      
+      this.storeService.store.dispatch(
+        replace(
+          {
+            index:this.preview().length,
+            message:__message
+          }
+        )
+      )
+    }
+  }
+
+  onSuccessSend(_id:string){
+    var [previewFilter] = this.preview().filter(m => m._id === _id)
+    var previewIndex = this.preview().findIndex(m => m._id === _id)
+        
+    this.storeService.store.dispatch(
+      successSend(
+        {index:previewIndex}
+      )
+    )
+  }
+
+  onFailedSend(_id:string){
+    
+    var [filter] = this.preview().filter(m => {
+      return m._id === _id
+    })
+
+    var index = this.preview().findIndex(m => {
+      return m._id === _id
+    })
+
+    this.storeService.store.dispatch(
+      failedSend(
+        {
+          index
+        }
+      )
+    )
+      
+  }
+
+  ngOnInit(){
+   
+  }
+
+  
+
+  
 
   // @Input() disabled!:boolean
   // @Input() consumerTag!:string
@@ -660,8 +774,4 @@ export class HistoryComponent implements OnInit {
   //     //this.storeService.store.dispatch(add({value:this.fetchState().result}))
   //   }
   // }
-
-  ngOnInit(){
-    
-  }
 }

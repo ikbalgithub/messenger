@@ -1,53 +1,24 @@
-this page is under maintenance
 
-<!-- <div class="fullscreen flex flex-col bg-slate-200">
+<div class="fullscreen flex flex-col bg-slate-200">
   <div class="flex-1 flex flex-row">
     <app-history
       #history
-      [consumerTag]="consumerTag"
-      [disabled]="sendState().running" 
-      [counterId]="route.snapshot.params['_id']" 
+      [counterId]="currentX()" 
       class="xs:hidden md:flex overflow-y-scroll flex-1 flex flex-col sticky top-0 h-screen"
     />
     <div class="xs:w-full lg:w-[583px] flex flex-col">
       <div class="sticky z-10 top-0 p-6 bg-slate-200 shadow-2xl flex flex-row gap-3 items-center">
         <p-avatar
-          [image]="routeState.profile.profileImage" 
+          [image]="state().profile.profileImage" 
           size="large" 
           shape="circle"
           class="flex flex-col"
         />
         <span class="font-semibold text-lg">
-          {{routeState.profile.firstName}} {{routeState.profile.surname}} {{connected ? '(connected)':'(disconnected)'}}
+          {{state().profile.firstName}} {{state().profile.surname}} ({{socket.connected ? 'connected':'disconnected'}})
         </span>
       </div>
 			<div class="flex-1 flex flex-col gap-3 p-6">
-				<div *ngIf="fetchState().running; else flow" class="flex flex-col flex-1 justify-center items-center">
-					<p-progressSpinner/>
-				</div>
-
-        <ng-template #flow>
-          @if(fetchState().isError){
-            <ng-container
-              *ngTemplateOutlet="error"
-            />
-          }
-          @else{
-            @if(existInMessages().length > 0){
-              <ng-container
-                *ngTemplateOutlet="__history;context:{
-                  messages:_history()|filter:this.route.snapshot.params['_id']
-                }"
-              />
-            }
-            @else{
-              <ng-container
-                *ngTemplateOutlet="next"
-              />
-            }
-          }
-        </ng-template>
-
 				<ng-template #textSent let-message="message" let-last="last">
           <div [id]="last ? 'anchor':''" class="bg-blue-500 self-end rounded-br rounded-tl-2xl rounded-bl-2xl rounded-tr-2xl flex flex-col gap-1 p-3 max-w-[50%]">
             <span class="text-white">{{message.value}}</span>
@@ -121,103 +92,6 @@ this page is under maintenance
             <span>No message</span>
           </div>
         </ng-template>
-				
-				<ng-template #error>
-          <div class="flex flex-col flex-1 justify-center items-center">
-						Reload aja dulu
-					</div>
-			  </ng-template>
-
-        <ng-template #__history let-messages="messages">
-					@for(x of messages; track x._id; let last = $last){
-						@if(x.sender.usersRef === user?._id){
-							@if(x.contentType === "text"){
-								<ng-container
-									*ngTemplateOutlet="textSent;context:{
-										message:x,last:last
-									}"
-								/>
-							}
-							@else{
-								<ng-container
-									*ngTemplateOutlet="imageSent;context:{
-									message:x,last:last
-									}"
-								/>
-							}
-						}
-						@else{
-							@if(x.contentType === "text"){
-								<ng-container
-									*ngTemplateOutlet="textMessage;context:{
-										message:x,last:last
-									}"
-								/>
-							}
-							@else{
-								<ng-container
-									*ngTemplateOutlet="imageMessage;context:{
-										message:x,last:last
-									}"
-								/>
-							}
-						}
-					}
-					@empty{
-						<ng-container
-							*ngTemplateOutlet="empty"
-						/>
-					}
-        </ng-template>
-
-        <ng-template #next>
-				  @if(fetchState().isError){
-					  <ng-container
-						  *ngTemplateOutlet="error"
-					  />
-				  }
-				  @else{
-					  @for(x of fetchState().result; track x._id; let last = $last){
-						  @if(x.sender.usersRef === user?._id){
-							  @if(x.contentType === "text"){
-								  <ng-container
-									  *ngTemplateOutlet="textSent;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-							  @else{
-								  <ng-container
-									  *ngTemplateOutlet="imageSent;context:{
-										message:x,last:last
-									  }"
-								  />
-							  }
-						  }
-						  @else{
-							  @if(x.contentType === "text"){
-								  <ng-container
-									  *ngTemplateOutlet="textMessage;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-							  @else{
-								  <ng-container
-									  *ngTemplateOutlet="imageMessage;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-						  }
-					  }
-            @empty{
-              <ng-container
-                *ngTemplateOutlet="empty"
-              />
-            }
-				  }
-        </ng-template>
 			</div>
       <form [formGroup]="messageForm" (submit)="sendMessage(messageForm,authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
         <p-inputGroup class="flex flex-row">
@@ -237,6 +111,45 @@ this page is under maintenance
           <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview)" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
+      @for(x of historyStore()|filter:currentX(); track x._id; let last = $last){
+        @if(x.sender.usersRef === user._id){
+          @if(x.contentType === "text"){
+            <ng-container
+              *ngTemplateOutlet="textSent;context:{
+                message:x,last:last
+              }"
+            />
+          }
+          @else{
+            <ng-container
+              *ngTemplateOutlet="imageSent;context:{
+                message:x,last:last
+              }"
+            />
+          }
+        }
+        @else{
+          @if(x.contentType === "text"){
+            <ng-container
+              *ngTemplateOutlet="textMessage;context:{
+                message:x,last:last
+              }"
+            />
+          }
+          @else{
+            <ng-container
+              *ngTemplateOutlet="imageMessage;context:{
+                message:x,last:last
+              }"
+            />
+          }
+        }
+      }
+      @empty{
+        <ng-container
+          *ngTemplateOutlet="empty"
+        />
+      }
     </div>
   </div>
 
@@ -266,7 +179,8 @@ this page is under maintenance
   </p-dialog>
 </div>
 
-<!-- <div class="fullscreen flex flex-col bg-slate-200">
+<!-- 
+<div class="fullscreen flex flex-col bg-slate-200">
   <div class="flex flex-1 flex-row">
     <app-history [disabled]="sendState().running" #appHistory [counterId]="snapshotParamsId()" class="xs:hidden md:flex overflow-y-scroll flex-1 flex flex-col sticky top-0 h-screen"/>
     <div class="xs:w-full lg:w-[583px] flex flex-col">
