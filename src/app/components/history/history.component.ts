@@ -569,7 +569,7 @@ export class HistoryComponent implements OnInit {
 
   ngOnDestroy(){
     if(this.preview().length < 1 && this.fetchState().result.length > 0){
-      this.storeService.store.dispatch(add({value:this.fetchState().result}))
+      //this.storeService.store.dispatch(add({value:this.fetchState().result}))
     }
   }
 }

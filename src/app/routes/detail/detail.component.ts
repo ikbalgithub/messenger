@@ -465,7 +465,7 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
             messages:this.fetchState().result
           }
 
-          this.store.dispatch(add(toAdd))
+          // this.store.dispatch(add(toAdd))
         }
         
         
