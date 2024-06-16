@@ -485,6 +485,22 @@ export class DetailComponent implements OnInit,OnDestroy,CanComponentDeactivate 
     
     this.socket.on('history/updated',(_id:string) => {
       this.history.onUpdated(_id)
+      
+      var _hId = this.route.snapshot.params['_id']
+      var _h = this._history() as Ngrx.History[]
+      var [filter] = _h.filter(m => m._id === _hId)
+      var index = _h.findIndex(m => m._id === _hId)
+
+      if(filter){
+        this.storeService.store.dispatch(
+          seen(
+            {
+              index:index,
+              _id:this.user?._id as string
+            }
+          )
+        )
+      }
     })
     
 
