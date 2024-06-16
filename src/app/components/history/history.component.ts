@@ -82,6 +82,16 @@ export class HistoryComponent {
         )
       }
     }
+    else{
+      var __message = {
+        ...newMessage,
+        unreadCounter:1
+      }
+      
+      this.storeService.store.dispatch(
+        add({value:__message})
+      )
+    }
   }
 
   onMessage(newMessage:Message.Populated){

@@ -5,7 +5,10 @@ import { add, failedSend, message, replace, resend, seen, successSend } from "..
 export const previewReducer = createReducer<Message.Last[]>(
   [],
   on(add,(state,payload) => {
-    return payload.value
+    return [
+      ...state,
+      payload.value
+    ]
   }),
   on(message,(state,payload) => {
     return [...state,payload]
