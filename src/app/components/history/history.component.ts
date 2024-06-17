@@ -85,7 +85,7 @@ export class HistoryComponent {
     else{
       var __message = {
         ...newMessage,
-        unreadCounter:1
+        unreadCounter:1000
       }
       
       this.storeService.store.dispatch(
