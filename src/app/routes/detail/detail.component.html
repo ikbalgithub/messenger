@@ -92,6 +92,45 @@
             <span>No message</span>
           </div>
         </ng-template>
+        @for(x of historyStore()|filter:currentX(); track x._id; let last = $last){
+          @if(x.sender.usersRef === user._id){
+            @if(x.contentType === "text"){
+              <ng-container
+                *ngTemplateOutlet="textSent;context:{
+                  message:x,last:last
+                }"
+              />
+            }
+            @else{
+              <ng-container
+                *ngTemplateOutlet="imageSent;context:{
+                  message:x,last:last
+                }"
+              />
+            }
+          }
+          @else{
+            @if(x.contentType === "text"){
+              <ng-container
+                *ngTemplateOutlet="textMessage;context:{
+                  message:x,last:last
+                }"
+              />
+            }
+            @else{
+              <ng-container
+                *ngTemplateOutlet="imageMessage;context:{
+                  message:x,last:last
+                }"
+              />
+            }
+          }
+        }
+        @empty{
+          <ng-container
+            *ngTemplateOutlet="empty"
+          />
+        }
 			</div>
       <form [formGroup]="messageForm" (submit)="sendMessage(messageForm,authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
         <p-inputGroup class="flex flex-row">
@@ -111,45 +150,6 @@
           <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview)" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
-      @for(x of historyStore()|filter:currentX(); track x._id; let last = $last){
-        @if(x.sender.usersRef === user._id){
-          @if(x.contentType === "text"){
-            <ng-container
-              *ngTemplateOutlet="textSent;context:{
-                message:x,last:last
-              }"
-            />
-          }
-          @else{
-            <ng-container
-              *ngTemplateOutlet="imageSent;context:{
-                message:x,last:last
-              }"
-            />
-          }
-        }
-        @else{
-          @if(x.contentType === "text"){
-            <ng-container
-              *ngTemplateOutlet="textMessage;context:{
-                message:x,last:last
-              }"
-            />
-          }
-          @else{
-            <ng-container
-              *ngTemplateOutlet="imageMessage;context:{
-                message:x,last:last
-              }"
-            />
-          }
-        }
-      }
-      @empty{
-        <ng-container
-          *ngTemplateOutlet="empty"
-        />
-      }
     </div>
   </div>
 
