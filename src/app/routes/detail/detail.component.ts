@@ -162,18 +162,6 @@ export class DetailComponent implements OnInit,OnDestroy {
       var snapshot = this.route.snapshot
       var paramsId = snapshot.params['_id']
       
-      var profiles = result.map(m => {
-        return m.sender
-      })
-
-      var [filter] = profiles.filter(p => {
-        return p.usersRef === paramsId
-      })
-
-      if(result.length > 0) this.routeState.groupId = result[0].groupId
-      
-      if(filter) this.routeState.profile = filter
-
 			this.credentialForm.patchValue({
 				...this.credentialForm.value,
 				accept:this.route.snapshot.params['_id'],
