@@ -21,9 +21,11 @@ export const authGuard = (route:ActivatedRouteSnapshot,state:RouterStateSnapshot
     router.navigate([''])
   }
 
-  return loggedIn
-    ? onLoginPage
-      ? false : true
-    : !onLoginPage
-      ? true : false
+  return onLoginPage 
+    ? loggedIn 
+      ? false 
+      : true 
+    : loggedIn 
+      ? true 
+      : false 
 };
