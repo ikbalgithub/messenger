@@ -9,6 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
+import { add, replace } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-history',
@@ -31,32 +32,36 @@ export class HistoryComponent implements OnInit {
   @Input() disabled!:boolean
 
   storeService   = inject(StoreService)
-  user           = this.storeService.user()
   requestService = inject(RequestService)
   route          = inject(ActivatedRoute)
+  user           = this.storeService.user() as Common.User
   authorization  = this.storeService.authorization()
+  history        = this.storeService.history
   
 	fetchState     = this.requestService.createInitialState<Message.Last[]>()  
 
   fetchRequest = this.requestService.get<Message.Last[]>({
     cb:result => {
-      var newResult = result.map((r) => {
-        return {
-          ...r,
-          sent:true
-        }
-      })
-
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result:newResult
+      if(this.history().length < 1){
+        var allNewMessage = result.map(
+          m => {
+            return {
+              ...m,
+              sent:true
+            }
           }
-        })
-      })
+        )
+        
+        this.storeService.store.dispatch(
+          add({v:allNewMessage})
+        )
+      }
     },
-    failedCb:err => console.log(err),
+    failedCb:err => {
+      console.log(
+        err
+      )
+    },
     state:this.fetchState
   })
 
@@ -153,11 +158,9 @@ export class HistoryComponent implements OnInit {
   }
 
   onSendMessage(newMessage:Message.One,paramsId:string,profile:Common.Profile){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
     var sender = {...this.user.profile,usersRef:this.user._id}
-
-    var [filter] = result.filter((message,index) => {
+    
+    var [filter] = this.history().filter((message,index) => {
       return (
         message.sender.usersRef
         === paramsId
@@ -167,44 +170,64 @@ export class HistoryComponent implements OnInit {
       )
     })
 
-    var index = JSONMessages.indexOf(JSON.stringify(filter))
+    var index = this.history().findIndex(message => {
+      return (
+        message.sender.usersRef
+        === paramsId
+      ) || (
+        message.accept.usersRef
+        === paramsId
+      )
+    })
 
     if(filter){
       if(filter.sender.usersRef === this.user._id){
-        result[index] = {
+        var value = {
           ...newMessage,
           sender:filter.sender,
           accept:filter.accept,
           unreadCounter:0
         }
+
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index,
+              value
+            }
+          )
+        )
       }
 
       if(filter.sender.usersRef !== this.user._id){
-        result[index] = {
+        value = {
           ...newMessage,
           sender:filter.accept,
-          accept:filter.sender,
+          accept:filter.accept,
           unreadCounter:0
         }
+
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index,
+              value
+            }
+          )
+        )
       }
     }
 		else{
-			result[result.length] = {
-				...newMessage,
-				sender:sender,
+      value = {
+        ...newMessage,
+        sender:sender,
         accept:profile,
-				unreadCounter:0
-			}
+        unreadCounter:0
+      }
+			this.storeService.store.dispatch(
+        add({v:[value]})
+      )
 		}
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
   }
 
   onSuccessSend(_id:string){

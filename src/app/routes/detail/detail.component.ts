@@ -54,7 +54,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   storeService    = inject(StoreService)
   commonService   = inject(CommonService)
   storage         = this.firebaseService.storage
-  user            = this.storeService.user()
+  user            = this.storeService.user() as Common.User
   authorization   = this.storeService.authorization()
   socket          = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
 
