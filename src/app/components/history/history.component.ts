@@ -136,27 +136,21 @@ export class HistoryComponent implements OnInit {
     }
   }
 
-  onAfterFetch(_id:string){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
-    
-    var [filter] = result.filter(m => m.sender.usersRef === _id)
-    
-    var index = JSONMessages.indexOf(JSON.stringify(filter))
-
-    result[index] = {
-      ...filter,
-      unreadCounter:0
-    }
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
+  resetCounter(_id:string){
+    var [filter] = this.history().filter(m => {
+      return m.sender.usersRef === _id
     })
+
+    
+    var index = this.history().findIndex(m => {
+      return m.sender.usersRef === _id
+    })
+
+    if(filter){
+      this.storeService.store.dispatch(
+        resetCounter({index})
+      )
+    }
   }
 
   onSendMessage(newMessage:Message.One,paramsId:string,profile:Common.Profile){

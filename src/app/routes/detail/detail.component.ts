@@ -83,7 +83,11 @@ export class DetailComponent implements OnInit,OnDestroy {
   })
 
   updateRequest = this.requestService.put<Message.Update,Message.One>({
-    cb:r => console.log(r),
+    cb:r => {
+      this.history.resetCounter(
+        this.route.snapshot.params['_id']
+      )
+    },
     failedCb:r => console.log(r),
     state:this.updateState,
     path:'message'
@@ -187,9 +191,6 @@ export class DetailComponent implements OnInit,OnDestroy {
             })
           }
         )
-				this.history.onAfterFetch(
-					this.route.snapshot.params['_id']
-				)
       }
       
       setTimeout(() => {
@@ -371,6 +372,8 @@ export class DetailComponent implements OnInit,OnDestroy {
 
   ngOnInit(){
     this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
+     
+      
       var headers = new HttpHeaders({authorization:this.authorization})
       var path = `message/all/${this.route.snapshot.params['_id']}`
 

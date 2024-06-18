@@ -7,3 +7,4 @@ export const successSend = createAction('[History Component] Success Send',props
 export const updated = createAction('[History Component] Updated',props<{index:number}>())
 export const failedSend = createAction('[History Component] Failed Send',props<{index:number}>())
 export const resend = createAction('[History Component] Resend',props<{index:number}>())
+export const resetCounter = createAction('[History Component] Reset Counter',props<{index:number}>())
