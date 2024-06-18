@@ -371,8 +371,8 @@ export class DetailComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(){
+    this.routeState = window.history.state
     this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
-     
       
       var headers = new HttpHeaders({authorization:this.authorization})
       var path = `message/all/${this.route.snapshot.params['_id']}`
