@@ -45,7 +45,6 @@ export class DetailComponent implements OnInit,OnDestroy {
   uploading       = false
 	isValid         = /^\s*$/
   internetConnected = true
-  
   routeState      = window.history.state
   scroller        = inject(ViewportScroller)
   route           = inject(ActivatedRoute)
@@ -57,6 +56,8 @@ export class DetailComponent implements OnInit,OnDestroy {
   user            = this.storeService.user() as Common.User
   authorization   = this.storeService.authorization()
   socket          = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
+  currentUser     = this.route.snapshot.params['_id']
+
 
   routeUrlSubscription !: Subscription
 
