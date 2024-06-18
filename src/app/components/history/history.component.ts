@@ -299,4 +299,8 @@ export class HistoryComponent implements OnInit {
       {headers}
     )
   }
+
+  test(){
+    alert('test')
+  }
 }
