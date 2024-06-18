@@ -9,7 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
-import { add, replace } from '../../ngrx/actions/history.actions';
+import { add, replace, successSend } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-history',
@@ -41,19 +41,19 @@ export class HistoryComponent implements OnInit {
 	fetchState     = this.requestService.createInitialState<Message.Last[]>()  
 
   fetchRequest = this.requestService.get<Message.Last[]>({
-    cb:result => {
-      if(this.history().length < 1){
-        var allNewMessage = result.map(
-          m => {
-            return {
-              ...m,
-              sent:true
-            }
-          }
-        )
-        
+    cb:r => {
+      if(this.history().length < 1){    
         this.storeService.store.dispatch(
-          add({v:allNewMessage})
+          add(
+            {
+              v:r.map(m => {
+                return {
+                  ...m,
+                  sent:true
+                }
+              })
+            }
+          )
         )
       }
     },
@@ -231,27 +231,20 @@ export class HistoryComponent implements OnInit {
   }
 
   onSuccessSend(_id:string){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
-    var [filter] = result.filter((message,index) => {
+    var [filter] = this.history().filter(message => {
       return message._id === _id
     })
-    var index = JSONMessages.indexOf(
-      JSON.stringify(filter)
-    )
-    result[index] = {
-      ...filter,
-      sent:true,
-      failed:false
-    }
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
+    var index = this.history().findIndex( message => {
+      return message._id === _id
     })
+
+    this.storeService.store.dispatch(
+      successSend(
+        {
+          index
+        }
+      )
+    )
   }
 
   onUpdated(_id:string){
