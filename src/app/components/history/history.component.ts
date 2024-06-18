@@ -9,7 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
-import { add, replace, successSend, updated } from '../../ngrx/actions/history.actions';
+import { add, failedSend, replace, successSend, updated } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-history',
@@ -268,33 +268,13 @@ export class HistoryComponent implements OnInit {
   }
 
   onFailedSend(_id:string){
-    var result = this.fetchState().result
-    var JSONResult = result.map(m => {
-      return JSON.stringify(m)
-    })
-
-    var [filter] = result.filter(m => {
+    var index = this.history().findIndex(m => {
       return m._id === _id
     })
 
-    var index = JSONResult.indexOf(
-      JSON.stringify(filter)
+    this.storeService.store.dispatch(
+      failedSend({index})
     )
-
-    result[index] = {
-      ...filter,
-      sent:false,
-      failed:true
-    }
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
   }
 
   onResend(_id:string){

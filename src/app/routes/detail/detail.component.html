@@ -158,9 +158,8 @@
             pInputText
             type="text" 
             formControlName="value"
-            class="flex-1 px-3 outline-none {{internetConnected ? '' : 'bg-slate-400'}}"
+            class="flex-1 px-3 outline-none"
             [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
-            [readonly]="!internetConnected"
           />
           <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
             <input 
@@ -169,7 +168,7 @@
               (change)="onFileChange($event,imageForm)"
             />
           </button>
-          <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview) || !internetConnected" pButton icon="pi pi-arrow-up"></button>
+          <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview)" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
     </div>
