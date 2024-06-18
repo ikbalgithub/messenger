@@ -66,72 +66,74 @@ export class HistoryComponent implements OnInit {
   })
 
   onNewMessage(newMessage:Message.One & {sender:string,accept:string}){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
-    var [filter] = result.filter(m => {
+    var [filter] = this.history().filter(m => {
       return m.sender.usersRef ===
       newMessage.sender || m.accept.usersRef
       === newMessage.sender
     })
     
     if(filter){
-      var index = JSONMessages.indexOf(
-        JSON.stringify(filter)
-      )
+      var index = this.history().findIndex(m => {
+        return m.sender.usersRef ===
+        newMessage.sender || m.accept.usersRef
+        === newMessage.sender
+      })
       if(filter.sender.usersRef === newMessage.sender){
-        result[index] = {
+        var value = {
           ...newMessage,
           sender:filter.sender,
           accept:filter.accept,
           unreadCounter:filter.unreadCounter+1
         }
+        
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index,
+              value
+            }
+          )
+        )
       }
 
       if(filter.sender.usersRef !== newMessage.sender){
-        result[index] = {
+        value = {
           ...newMessage,
           sender:filter.accept,
           accept:filter.sender,
           unreadCounter:1
         }
-      }
 
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
-          }
-        })
-      })
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index,
+              value
+            }
+          )
+        )
+      }
     }
-    
   }
 
   onMessage(newMessage:Message.Populated){
-    var result = this.fetchState().result
 
-    var [filter] = result.filter(m => {
+    var [filter] = this.history().filter(m => {
       return m.sender.usersRef ===
       newMessage.sender.usersRef || m.accept.usersRef
       === newMessage.sender.usersRef
     })
 
     if(!filter){
-      result[result.length] = {
+      var value = {
         ...newMessage,
         unreadCounter:1
       }
-    }
 
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
+      this.storeService.store.dispatch(
+        add({v:[value]})
+      )
+    }
   }
 
   onAfterFetch(_id:string){
