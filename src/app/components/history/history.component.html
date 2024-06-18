@@ -28,7 +28,7 @@
   </ng-template>
 
   <ng-template #message let-profile="profile" let-message="message">
-    <a [class]="disabled ? 'pointer-events-none':''" (click)="test()" routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId:message.groupId}">
+    <a [class]="disabled ? 'pointer-events-none':''" routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId:message.groupId}">
     <div class="flex flex-row p-3 gap-3 bg-white shadow-md rounded-md items-center">
       <p-avatar
         [image]="profile.profileImage" 
