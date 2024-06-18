@@ -158,25 +158,15 @@ export class DetailComponent implements OnInit,OnDestroy {
   fetchRequest = this.requestService.get<Message.All>({
     failedCb:r => alert(JSON.stringify(r)),
     cb: result => {
-      var authorization = this.authorization
-      var snapshot = this.route.snapshot
-      var paramsId = snapshot.params['_id']
-      
-			this.credentialForm.patchValue({
-				...this.credentialForm.value,
-				accept:this.route.snapshot.params['_id'],
-				groupId:this.routeState.groupId
-			})
-
       if(result.length > 0){
         this.updateRequest(
           {
             groupId:this.routeState.groupId,
-            _id:paramsId
+            _id:this.currentUser
           },
           {
             headers:new HttpHeaders({
-              authorization
+              authorization:this.authorization
             })
           }
         )
@@ -364,6 +354,13 @@ export class DetailComponent implements OnInit,OnDestroy {
       if(this.route.snapshot.params['_id'] !== this.currentUser){
         this.currentUser = this.route.snapshot.params['_id']
         this.routeState = window.history.state
+
+        this.credentialForm.patchValue({
+          ...this.credentialForm.value,
+          accept:this.route.snapshot.params['_id'],
+          groupId:this.routeState.groupId
+        })
+  
       }
 
 
