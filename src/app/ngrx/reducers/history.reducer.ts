@@ -1,6 +1,6 @@
 import { createReducer, on } from "@ngrx/store";
 import { Message } from "../../..";
-import { add, replace, successSend } from "../actions/history.actions";
+import { add, replace, successSend, updated } from "../actions/history.actions";
 
 export const historyReducer = createReducer<Message.Last[]>(
   [],
@@ -21,6 +21,14 @@ export const historyReducer = createReducer<Message.Last[]>(
       ...state[payload.index],
       sent:true
     }
+    return state
+  }),
+  on(updated,(state,payload) => {
+    var target = state[payload.index]
+    if(target.sent) target.read = true
+
+    state[payload.index] = {...target}
+
     return state
   })
 )
