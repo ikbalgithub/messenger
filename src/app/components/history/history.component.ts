@@ -9,7 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
-import { add, failedSend, replace, resend, successSend, updated } from '../../ngrx/actions/history.actions';
+import { add, failedSend, replace, resend, resetCounter, successSend, updated } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-history',
