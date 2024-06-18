@@ -1,6 +1,6 @@
 import { createReducer, on } from "@ngrx/store";
 import { Message } from "../../..";
-import { add, failedSend, replace, successSend, updated } from "../actions/history.actions";
+import { add, failedSend, replace, resend, successSend, updated } from "../actions/history.actions";
 
 export const historyReducer = createReducer<Message.Last[]>(
   [],
@@ -33,6 +33,13 @@ export const historyReducer = createReducer<Message.Last[]>(
     state[payload.index] = {
       ...state[payload.index],
       failed:true
+    }
+    return state
+  }),
+  on(resend,(state,payload) => {
+    state[payload.index] = {
+      ...state[payload.index],
+      failed:false
     }
     return state
   })
