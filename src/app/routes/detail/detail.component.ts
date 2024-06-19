@@ -211,7 +211,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     var _id = new Types.ObjectId().toString()
     var headers = new HttpHeaders({authorization})
     var index = this.messages().findIndex(m => {
-      return m._id === _id
+      return m._id === this.currentUser()
     })
     
 		var newMessage = {
