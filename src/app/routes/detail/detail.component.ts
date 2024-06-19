@@ -246,24 +246,6 @@ export class DetailComponent implements OnInit,OnDestroy {
       this.currentUser(),
       this.routeState().profile
     )
-    
-    setTimeout(() => {
-			this.fetchState.update(current => {
-        var result = [
-          ...current.result,
-          newMessage
-        ]
-
-        return {
-          ...current,
-          result
-        }
-      })
-
-      this.preview = false
-      setTimeout(() => this.toAnchor("anchor"))
-		})
-
 
     this.sendRequest(
       sendObject,
