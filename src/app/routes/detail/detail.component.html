@@ -110,45 +110,47 @@
 					  />
 				  }
 				  @else{
-					  @for(x of fetchState().result; track x._id; let last = $last){
-						  @if(x.sender.usersRef === user._id){
-							  @if(x.contentType === "text"){
-								  <ng-container
-									  *ngTemplateOutlet="textSent;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-							  @else{
-								  <ng-container
-									  *ngTemplateOutlet="imageSent;context:{
-										message:x,last:last
-									  }"
-								  />
-							  }
-						  }
-						  @else{
-							  @if(x.contentType === "text"){
-								  <ng-container
-									  *ngTemplateOutlet="textMessage;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-							  @else{
-								  <ng-container
-									  *ngTemplateOutlet="imageMessage;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-						  }
-					  }
-            @empty{
-              <ng-container
-                *ngTemplateOutlet="empty"
-              />
-            }
+            @if(messages() | filter:currentUser()){
+              @for(x of (messages() | filter:currentUser()).detail; track x._id; let last=$last){
+                @if(x.sender.usersRef === user._id){
+                  @if(x.contentType === "text"){
+                    <ng-container
+                      *ngTemplateOutlet="textSent;context:{
+                        message:x,last:last
+                      }"
+                    />
+                  }
+                  @else{
+                    <ng-container
+                      *ngTemplateOutlet="imageSent;context:{
+                      message:x,last:last
+                      }"
+                    />
+                  }
+                }
+                @else{
+                  @if(x.contentType === "text"){
+                    <ng-container
+                      *ngTemplateOutlet="textMessage;context:{
+                        message:x,last:last
+                      }"
+                    />
+                  }
+                  @else{
+                    <ng-container
+                      *ngTemplateOutlet="imageMessage;context:{
+                        message:x,last:last
+                      }"
+                    />
+                  }
+                }
+              }
+              @empty{
+                <ng-container
+                  *ngTemplateOutlet="empty"
+                />
+              }
+            } 
 				  }
         </ng-template>
 			</div>

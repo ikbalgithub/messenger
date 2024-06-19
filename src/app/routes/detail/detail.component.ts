@@ -20,6 +20,7 @@ import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 import { init } from '../../ngrx/actions/messages.actions';
+import { FilterPipe } from '../../pipes/filter/filter.pipe';
 
 @Component({
   selector: 'app-detail',
@@ -36,6 +37,7 @@ import { init } from '../../ngrx/actions/messages.actions';
     ButtonModule,
     ReactiveFormsModule,
     DialogModule,
+    FilterPipe
   ]
 })
 export class DetailComponent implements OnInit,OnDestroy {
@@ -177,30 +179,18 @@ export class DetailComponent implements OnInit,OnDestroy {
           init(
             {
               _id:this.currentUser(),
-              detail:result
+              detail:result.map(m => {
+                return {
+                  ...m,
+                  sent:true
+                }
+              })
             }
           )
         )
       }    
       
-      setTimeout(() => {
-        this.fetchState.update((current) => {
-          var result = current.result.map(m => {
-            return {
-              ...m,
-              sent:true
-            }
-          })
-
-          return {
-            ...current,
-            result
-          }
-        })
-
-        setTimeout(() => this.toAnchor("anchor2"))
-      })
-
+  
       if(!this.connected){
         this.socket.connect()
       }
