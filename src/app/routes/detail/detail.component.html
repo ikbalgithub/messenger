@@ -152,7 +152,7 @@
 				  }
         </ng-template>
 			</div>
-      <form [formGroup]="messageForm" (submit)="sendMessage(authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
+      <form [formGroup]="messageForm" (submit)="sendMessage(messageForm,authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
         <p-inputGroup class="flex flex-row">
           <input 
             pInputText
@@ -183,7 +183,7 @@
         alt="Image"
         class="h-72 aspect-square rounded"
       />
-      <form [formGroup]="imageForm" (submit)="sendMessage(authorization)">
+      <form [formGroup]="imageForm" (submit)="sendMessage(messageForm,authorization)">
         <p-inputGroup class="flex flex-row">
           <input 
             type="text" 

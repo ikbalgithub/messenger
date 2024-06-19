@@ -71,9 +71,6 @@ export class DetailComponent implements OnInit,OnDestroy {
     value: new FormControl<string>(''),
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('text'),
-    sender: new FormControl<string>(this.user._id),
-    accept: new FormControl<string>(''),
-    groupId: new FormControl<string>('')
   })
 
   imageForm = new FormGroup({
@@ -197,18 +194,12 @@ export class DetailComponent implements OnInit,OnDestroy {
     state:this.fetchState,
   })
 
-  sendMessage(authorization:string){
-    this.messageForm.patchValue({
-      ...this.messageForm.value,
+  sendMessage(form:FormGroup,authorization:string){
+    var message = {
+      ...form.value,
       accept:this.currentUser(),
       groupId:this.routeState().groupId
-    })
-
-    this.imageForm.patchValue({
-      ...this.imageForm.value,
-      accept:this.currentUser(),
-      groupId:this.routeState().groupId
-    })
+    }
     
     var now = Date.now()
     var sender = {usersRef:this.user._id}
@@ -217,7 +208,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     var headers = new HttpHeaders({authorization})
     
 		var newMessage = {
-      ...this.messageForm.value,
+      ...message,
       sendAt:now,
       sent:false,
       read:false,
@@ -227,7 +218,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     }
 
     var sendObject = {
-      ...this.messageForm.value,
+      ...message,
       sendAt:now,
       _id
     }
@@ -249,21 +240,6 @@ export class DetailComponent implements OnInit,OnDestroy {
       setTimeout(() => this.toAnchor("anchor"))
 		})
 
-    this.imageForm.patchValue({
-      ...this.imageForm.value,
-      value:'',
-    })
-
-    this.messageForm.patchValue({
-      ...this.messageForm.value,
-      value:''
-    })
-
-    this.history.onSendMessage(
-			newMessage,
-			this.route.snapshot.params['_id'],
-      this.routeState().profile
-	  )
 
     this.sendRequest(
       sendObject,
