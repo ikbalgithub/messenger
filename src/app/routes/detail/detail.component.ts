@@ -19,6 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
+import { init } from '../../ngrx/actions/messages.actions';
 
 @Component({
   selector: 'app-detail',
@@ -55,6 +56,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   storage         = this.firebaseService.storage
   user            = this.storeService.user() as Common.User
   authorization   = this.storeService.authorization()
+  messages        = this.storeService.messages
   socket          = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
   currentUser     = signal<string>(this.route.snapshot.params['_id'])
 
@@ -169,6 +171,17 @@ export class DetailComponent implements OnInit,OnDestroy {
           }
         )
       }
+
+      if(this.messages().filter(m => m._id === this.currentUser()).length < 1){
+        this.storeService.store.dispatch(
+          init(
+            {
+              _id:this.currentUser(),
+              detail:result
+            }
+          )
+        )
+      }    
       
       setTimeout(() => {
         this.fetchState.update((current) => {
