@@ -161,6 +161,16 @@
             class="flex-1 px-3 outline-none"
             [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
           />
+          <input
+            type="hidden"
+            formControlName="accept"
+            [value]="currentUser()"
+          />
+          <input
+            type="hidden"
+            formControlName="groupId"
+            [value]="routeState().groupId"
+          />
           <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
             <input 
               type="file" 

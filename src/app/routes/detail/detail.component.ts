@@ -72,8 +72,8 @@ export class DetailComponent implements OnInit,OnDestroy {
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('text'),
     sender: new FormControl<string>(this.user._id),
-    accept: new FormControl<string>(computed(() => this.currentUser())()),
-    groupId: new FormControl<string>(computed(() => this.routeState())().groupId)
+    accept: new FormControl<string>(''),
+    groupId: new FormControl<string>('')
   })
 
   imageForm = new FormGroup({
@@ -195,65 +195,67 @@ export class DetailComponent implements OnInit,OnDestroy {
   })
 
   sendMessage(form:FormGroup,authorization:string){
-    var now = Date.now()
-    var sender = {usersRef:this.user._id}
-    var accept = {usersRef:this.route.snapshot.params['_id']}
-    var _id = new Types.ObjectId().toString()
-    var headers = new HttpHeaders({authorization})
+    console.log(form.value)
     
-		var newMessage = {
-      ...form.value,
-      sendAt:now,
-      sent:false,
-      read:false,
-      sender,
-      accept,
-      _id,
-    }
-
-    var sendObject = {
-      ...form.value,
-      sendAt:now,
-      _id
-    }
+    // var now = Date.now()
+    // var sender = {usersRef:this.user._id}
+    // var accept = {usersRef:this.route.snapshot.params['_id']}
+    // var _id = new Types.ObjectId().toString()
+    // var headers = new HttpHeaders({authorization})
     
-    setTimeout(() => {
-			this.fetchState.update(current => {
-        var result = [
-          ...current.result,
-          newMessage
-        ]
+		// var newMessage = {
+    //   ...form.value,
+    //   sendAt:now,
+    //   sent:false,
+    //   read:false,
+    //   sender,
+    //   accept,
+    //   _id,
+    // }
 
-        return {
-          ...current,
-          result
-        }
-      })
+    // var sendObject = {
+    //   ...form.value,
+    //   sendAt:now,
+    //   _id
+    // }
+    
+    // setTimeout(() => {
+		// 	this.fetchState.update(current => {
+    //     var result = [
+    //       ...current.result,
+    //       newMessage
+    //     ]
 
-      this.preview = false
-      setTimeout(() => this.toAnchor("anchor"))
-		})
+    //     return {
+    //       ...current,
+    //       result
+    //     }
+    //   })
 
-    this.imageForm.patchValue({
-      ...this.imageForm.value,
-      value:'',
-    })
+    //   this.preview = false
+    //   setTimeout(() => this.toAnchor("anchor"))
+		// })
 
-    this.messageForm.patchValue({
-      ...this.messageForm.value,
-      value:''
-    })
+    // this.imageForm.patchValue({
+    //   ...this.imageForm.value,
+    //   value:'',
+    // })
 
-    this.history.onSendMessage(
-			newMessage,
-			this.route.snapshot.params['_id'],
-      this.routeState().profile
-	  )
+    // this.messageForm.patchValue({
+    //   ...this.messageForm.value,
+    //   value:''
+    // })
 
-    this.sendRequest(
-      sendObject,
-      {headers}
-    )
+    // this.history.onSendMessage(
+		// 	newMessage,
+		// 	this.route.snapshot.params['_id'],
+    //   this.routeState().profile
+	  // )
+
+    // this.sendRequest(
+    //   sendObject,
+    //   {headers}
+    // )
     
   }
 
