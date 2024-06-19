@@ -207,7 +207,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     
     var now = Date.now()
     var sender = {usersRef:this.user._id}
-    var accept = {usersRef:this.route.snapshot.params['_id']}
+    var accept = {usersRef:this.currentUser()}
     var _id = new Types.ObjectId().toString()
     var headers = new HttpHeaders({authorization})
     var index = this.messages().findIndex(m => {
