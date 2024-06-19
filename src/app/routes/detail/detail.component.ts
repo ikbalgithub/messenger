@@ -355,11 +355,7 @@ export class DetailComponent implements OnInit,OnDestroy {
         this.currentUser = this.route.snapshot.params['_id']
         this.routeState = window.history.state
 
-        this.credentialForm.patchValue({
-          ...this.credentialForm.value,
-          accept:this.route.snapshot.params['_id'],
-          groupId:this.routeState.groupId
-        })
+        console.log(window.history.state)
   
       }
 

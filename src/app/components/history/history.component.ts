@@ -79,6 +79,7 @@ export class HistoryComponent implements OnInit {
         === newMessage.sender
       })
       if(filter.sender.usersRef === newMessage.sender){
+        
         var value = {
           ...newMessage,
           sender:filter.sender,
