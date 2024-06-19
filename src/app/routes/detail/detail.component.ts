@@ -19,7 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
-import { init } from '../../ngrx/actions/messages.actions';
+import { add, init } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 
 @Component({
@@ -210,6 +210,9 @@ export class DetailComponent implements OnInit,OnDestroy {
     var accept = {usersRef:this.route.snapshot.params['_id']}
     var _id = new Types.ObjectId().toString()
     var headers = new HttpHeaders({authorization})
+    var index = this.messages().findIndex(m => {
+      return m._id === _id
+    })
     
 		var newMessage = {
       ...message,
@@ -225,6 +228,17 @@ export class DetailComponent implements OnInit,OnDestroy {
       ...message,
       sendAt:now,
       _id
+    }
+
+    if(index > -1){
+      this.storeService.store.dispatch(
+        add(
+          {
+           index,
+           newMessage
+          }
+        )
+      )
     }
 
     this.history.onSendMessage(

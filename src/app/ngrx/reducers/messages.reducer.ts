@@ -1,6 +1,6 @@
 import { createReducer, on } from "@ngrx/store";
 import { Ngrx } from "../../..";
-import { init } from "../actions/messages.actions";
+import { add, init } from "../actions/messages.actions";
 
 export const messagesReducer = createReducer<Ngrx.Messages[]>(
   [],
@@ -9,5 +9,23 @@ export const messagesReducer = createReducer<Ngrx.Messages[]>(
 			...state,
 			payload
 		]
+	}),
+	on(add,(state,payload) => {
+		var {_id,detail} = state[
+			payload.index
+		]
+
+		var added = [
+			...detail,
+			payload.v
+		]
+
+		state[payload.index] = {
+			_id,
+			detail:[...added]
+		}
+		
+		
+		return state
 	})
 )
