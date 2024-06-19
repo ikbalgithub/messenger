@@ -16,8 +16,8 @@ export const messagesReducer = createReducer<Ngrx.Messages[]>(
 		]
 
 		var added = [
-			...detail,
-			payload.newMessage
+      ...detail,
+		  payload.newMessage
 		]
 
 		state[payload.index] = {
