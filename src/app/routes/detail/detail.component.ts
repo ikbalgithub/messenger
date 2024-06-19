@@ -223,6 +223,12 @@ export class DetailComponent implements OnInit,OnDestroy {
       sendAt:now,
       _id
     }
+
+    this.history.onSendMessage(
+      newMessage,
+      this.currentUser(),
+      this.routeState().profile
+    )
     
     setTimeout(() => {
 			this.fetchState.update(current => {

@@ -153,7 +153,7 @@ export class HistoryComponent implements OnInit {
       )
     }
   }
-
+ 
   onSendMessage(newMessage:Message.One,paramsId:string,profile:Common.Profile){
     var sender = {...this.user.profile,usersRef:this.user._id}
     
