@@ -11,21 +11,9 @@ export const messagesReducer = createReducer<Ngrx.Messages[]>(
 		]
 	}),
 	on(add,(state,payload) => {
-		var {_id,detail} = state[
-			payload.index
-		]
-
-		var added = [
-      ...detail,
-		  payload.newMessage
-		]
-
-		state[payload.index] = {
-			_id,
-			detail:[...added]
-		}
-		
-		
+		state[payload.index].detail.push(
+			payload.newMessage
+		)
 		return state
 	})
 )
