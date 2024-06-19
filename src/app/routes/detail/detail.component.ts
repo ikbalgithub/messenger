@@ -120,24 +120,17 @@ export class DetailComponent implements OnInit,OnDestroy {
       }
     },
     cb:r => {
-      var result = this.fetchState().result
-      var JSONResult = result.map(m => {
-        return JSON.stringify(m)
-      })
-  
-      var [filter] = result.filter(f => {
-        return f._id === r. _id
-      })
-  
-      var index = JSONResult.indexOf(
-        JSON.stringify(filter)
+      var index = this.messages().findIndex(
+        m => m._id === this.currentUser()
       )
 
-      result[index] = {
-        ...filter,
-        sent:true,
-        failed:false
+      if(index > -1){
+        
       }
+
+      this.serviceStore.store.dispatch(
+
+      )
 
       this.history.onSuccessSend(
         r._id
