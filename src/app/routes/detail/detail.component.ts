@@ -69,6 +69,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 
   messageForm:FormGroup = new FormGroup({
     value: new FormControl<string>(''),
+    sender:new FormControl<string>(this.user._id),
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('text'),
   })
