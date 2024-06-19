@@ -27,7 +27,7 @@ import { add, failedSend, replace, resend, resetCounter, successSend, updated } 
 
 })
 export class HistoryComponent implements OnInit {
-  
+  @Input() connected!:boolean
   @Input() counterId!:string
   @Input() disabled!:boolean
 

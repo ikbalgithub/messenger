@@ -65,8 +65,6 @@ export class DetailComponent implements OnInit,OnDestroy {
   fetchState     = this.requestService.createInitialState<Message.All>()
 	sendState = this.requestService.createInitialState<Message.One>()
 
-
-
   messageForm:FormGroup = new FormGroup({
     value: new FormControl<string>(''),
     sender:new FormControl<string>(this.user._id),
@@ -190,7 +188,9 @@ export class DetailComponent implements OnInit,OnDestroy {
         setTimeout(() => this.toAnchor("anchor2"))
       })
 
-      this.socket.connect()
+      if(!this.connected){
+        this.socket.connect()
+      }
     },
     state:this.fetchState,
   })
