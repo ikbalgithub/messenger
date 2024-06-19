@@ -78,25 +78,29 @@ export class HistoryComponent implements OnInit {
         newMessage.sender || m.accept.usersRef
         === newMessage.sender
       })
+
+			// if indexed message sent by the same user
       if(filter.sender.usersRef === newMessage.sender){
-        
-        var value = {
-          ...newMessage,
-          sender:filter.sender,
-          accept:filter.accept,
-          unreadCounter:filter.unreadCounter+1
+        if(filter._id !== newMessage._id){
+					var value = {
+						...newMessage,
+						sender:filter.sender,
+						accept:filter.accept,
+						unreadCounter:filter.unreadCounter+1
+					}
+					
+					this.storeService.store.dispatch(
+						replace(
+							{
+								index,
+								value
+							}
+						)
+					) 
         }
-        
-        this.storeService.store.dispatch(
-          replace(
-            {
-              index,
-              value
-            }
-          )
-        )
       }
 
+			// if  indexed message sent by logged in user
       if(filter.sender.usersRef !== newMessage.sender){
         value = {
           ...newMessage,
