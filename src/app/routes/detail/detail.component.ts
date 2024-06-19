@@ -6,7 +6,7 @@ import { CommonModule,ViewportScroller } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Component,ViewChild,inject,OnInit,OnDestroy,HostListener } from '@angular/core';
+import { Component,ViewChild,inject,OnInit,OnDestroy,HostListener, signal, computed } from '@angular/core';
 import { HistoryComponent } from '../../components/history/history.component'
 import { CommonService } from '../../services/common/common.service'
 import { StoreService } from '../../services/store/store.service'
@@ -45,7 +45,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   uploading       = false
 	isValid         = /^\s*$/
   internetConnected = true
-  routeState      = window.history.state
+  routeState      = signal<{groupId:string,profile:Common.Profile}>(window.history.state)
   scroller        = inject(ViewportScroller)
   route           = inject(ActivatedRoute)
   firebaseService = inject(FirebaseService)
@@ -56,7 +56,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   user            = this.storeService.user() as Common.User
   authorization   = this.storeService.authorization()
   socket          = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
-  currentUser     = this.route.snapshot.params['_id']
+  currentUser     = signal<string>(this.route.snapshot.params['_id'])
 
 
   routeUrlSubscription !: Subscription
@@ -75,6 +75,9 @@ export class DetailComponent implements OnInit,OnDestroy {
     value: new FormControl<string>(''),
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('text'),
+    sender: new FormControl<string>(this.user._id),
+    accept: new FormControl<string>(computed(() => this.currentUser())()),
+    groupId: new FormControl<string>(computed(() => this.routeState())().groupId)
   })
 
   imageForm = new FormGroup({
@@ -161,8 +164,8 @@ export class DetailComponent implements OnInit,OnDestroy {
       if(result.length > 0){
         this.updateRequest(
           {
-            groupId:this.routeState.groupId,
-            _id:this.currentUser
+            groupId:this.routeState().groupId,
+            _id:this.currentUser()
           },
           {
             headers:new HttpHeaders({
@@ -249,7 +252,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     this.history.onSendMessage(
 			newMessage,
 			this.route.snapshot.params['_id'],
-      this.routeState.profile
+      this.routeState().profile
 	  )
 
     this.sendRequest(
@@ -332,7 +335,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       ...message,
       sender:message.sender.usersRef,
       accept:message.accept.usersRef as string,
-      groupId:this.routeState.groupId
+      groupId:this.routeState().groupId
     }
 
     this.sendRequest(
@@ -352,11 +355,12 @@ export class DetailComponent implements OnInit,OnDestroy {
   ngOnInit(){
     this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
       if(this.route.snapshot.params['_id'] !== this.currentUser){
-        this.currentUser = this.route.snapshot.params['_id']
-        this.routeState = window.history.state
-
-        console.log(window.history.state)
-  
+        this.currentUser.set(
+          this.route.snapshot.params['_id']
+        )
+        this.routeState.set(
+          window.history.state
+        )  
       }
 
 
@@ -408,7 +412,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       
       this.updateRequest(
         {
-          groupId:this.routeState.groupId,
+          groupId:this.routeState().groupId,
           _id:this.route.snapshot.params['_id']
         },
         {
@@ -464,7 +468,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       
       this.socket.emit(
         'join',
-         `${this.routeState.groupId}/${this.user._id}`
+         `${this.routeState().groupId}/${this.user._id}`
       )
     })
   }
