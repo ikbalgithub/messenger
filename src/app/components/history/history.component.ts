@@ -79,7 +79,7 @@ export class HistoryComponent implements OnInit {
         === newMessage.sender
       })
 
-			// if indexed message sent by the same user
+			// if the last message sent by the same user
       if(filter.sender.usersRef === newMessage.sender){
         if(filter._id !== newMessage._id){
 					var value = {
@@ -100,7 +100,7 @@ export class HistoryComponent implements OnInit {
         }
       }
 
-			// if  indexed message sent by logged in user
+			// if the last message sent by logged in user
       if(filter.sender.usersRef !== newMessage.sender){
         value = {
           ...newMessage,
@@ -122,7 +122,6 @@ export class HistoryComponent implements OnInit {
   }
 
   onMessage(newMessage:Message.Populated){
-
     var [filter] = this.history().filter(m => {
       return m.sender.usersRef ===
       newMessage.sender.usersRef || m.accept.usersRef
