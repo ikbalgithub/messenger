@@ -152,7 +152,7 @@
 				  }
         </ng-template>
 			</div>
-      <form [formGroup]="messageForm" (submit)="sendMessage(messageForm,authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
+      <form [formGroup]="messageForm" (submit)="sendMessage(authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
         <p-inputGroup class="flex flex-row">
           <input 
             pInputText
@@ -160,16 +160,6 @@
             formControlName="value"
             class="flex-1 px-3 outline-none"
             [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
-          />
-          <input
-            type="hidden"
-            formControlName="accept"
-            [value]="currentUser()"
-          />
-          <input
-            type="hidden"
-            formControlName="groupId"
-            [value]="routeState().groupId"
           />
           <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
             <input 
@@ -193,7 +183,7 @@
         alt="Image"
         class="h-72 aspect-square rounded"
       />
-      <form [formGroup]="imageForm" (submit)="sendMessage(imageForm,authorization)">
+      <form [formGroup]="imageForm" (submit)="sendMessage(authorization)">
         <p-inputGroup class="flex flex-row">
           <input 
             type="text" 

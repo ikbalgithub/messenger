@@ -80,6 +80,9 @@ export class DetailComponent implements OnInit,OnDestroy {
     value: new FormControl<string>(''),
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('image'),
+    sender: new FormControl<string>(this.user._id),
+    accept: new FormControl<string>(''),
+    groupId: new FormControl<string>('')
   })
 
   updateRequest = this.requestService.put<Message.Update,Message.One>({
@@ -194,68 +197,78 @@ export class DetailComponent implements OnInit,OnDestroy {
     state:this.fetchState,
   })
 
-  sendMessage(form:FormGroup,authorization:string){
-    console.log(form.value)
+  sendMessage(authorization:string){
+    this.messageForm.patchValue({
+      ...this.messageForm.value,
+      accept:this.currentUser(),
+      groupId:this.routeState().groupId
+    })
+
+    this.imageForm.patchValue({
+      ...this.imageForm.value,
+      accept:this.currentUser(),
+      groupId:this.routeState().groupId
+    })
     
-    // var now = Date.now()
-    // var sender = {usersRef:this.user._id}
-    // var accept = {usersRef:this.route.snapshot.params['_id']}
-    // var _id = new Types.ObjectId().toString()
-    // var headers = new HttpHeaders({authorization})
+    var now = Date.now()
+    var sender = {usersRef:this.user._id}
+    var accept = {usersRef:this.route.snapshot.params['_id']}
+    var _id = new Types.ObjectId().toString()
+    var headers = new HttpHeaders({authorization})
     
-		// var newMessage = {
-    //   ...form.value,
-    //   sendAt:now,
-    //   sent:false,
-    //   read:false,
-    //   sender,
-    //   accept,
-    //   _id,
-    // }
+		var newMessage = {
+      ...this.messageForm.value,
+      sendAt:now,
+      sent:false,
+      read:false,
+      sender,
+      accept,
+      _id,
+    }
 
-    // var sendObject = {
-    //   ...form.value,
-    //   sendAt:now,
-    //   _id
-    // }
+    var sendObject = {
+      ...this.messageForm.value,
+      sendAt:now,
+      _id
+    }
     
-    // setTimeout(() => {
-		// 	this.fetchState.update(current => {
-    //     var result = [
-    //       ...current.result,
-    //       newMessage
-    //     ]
+    setTimeout(() => {
+			this.fetchState.update(current => {
+        var result = [
+          ...current.result,
+          newMessage
+        ]
 
-    //     return {
-    //       ...current,
-    //       result
-    //     }
-    //   })
+        return {
+          ...current,
+          result
+        }
+      })
 
-    //   this.preview = false
-    //   setTimeout(() => this.toAnchor("anchor"))
-		// })
+      this.preview = false
+      setTimeout(() => this.toAnchor("anchor"))
+		})
 
-    // this.imageForm.patchValue({
-    //   ...this.imageForm.value,
-    //   value:'',
-    // })
+    this.imageForm.patchValue({
+      ...this.imageForm.value,
+      value:'',
+    })
 
-    // this.messageForm.patchValue({
-    //   ...this.messageForm.value,
-    //   value:''
-    // })
+    this.messageForm.patchValue({
+      ...this.messageForm.value,
+      value:''
+    })
 
-    // this.history.onSendMessage(
-		// 	newMessage,
-		// 	this.route.snapshot.params['_id'],
-    //   this.routeState().profile
-	  // )
+    this.history.onSendMessage(
+			newMessage,
+			this.route.snapshot.params['_id'],
+      this.routeState().profile
+	  )
 
-    // this.sendRequest(
-    //   sendObject,
-    //   {headers}
-    // )
+    this.sendRequest(
+      sendObject,
+      {headers}
+    )
     
   }
 
