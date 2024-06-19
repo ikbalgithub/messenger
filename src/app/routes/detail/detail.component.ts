@@ -65,11 +65,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   fetchState     = this.requestService.createInitialState<Message.All>()
 	sendState = this.requestService.createInitialState<Message.One>()
 
-  credentialForm = new FormGroup({
-    sender: new FormControl<string>(this.user._id),
-    accept: new FormControl<string>(this.route.snapshot.params['_id']),
-    groupId: new FormControl<string>(this.routeState.groupId)
-  })
+
 
   messageForm:FormGroup = new FormGroup({
     value: new FormControl<string>(''),
@@ -217,7 +213,6 @@ export class DetailComponent implements OnInit,OnDestroy {
 
     var sendObject = {
       ...form.value,
-      ...this.credentialForm.value,
       sendAt:now,
       _id
     }
