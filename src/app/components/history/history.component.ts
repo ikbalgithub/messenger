@@ -200,7 +200,7 @@ export class HistoryComponent implements OnInit {
         value = {
           ...newMessage,
           sender:filter.accept,
-          accept:filter.accept,
+          accept:filter.sender,
           unreadCounter:0
         }
 
