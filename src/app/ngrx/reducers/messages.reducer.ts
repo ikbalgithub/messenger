@@ -59,6 +59,15 @@ export const messagesReducer = createReducer<Ngrx.Messages[]>(
 		return state
 	}),
 	on(resend,(state,payload) => {
+		var target = state[payload.index]
+
+		target.detail = target.detail.map(m => {
+			if(m._id === payload._id){
+				m.failed = false
+			}
+			return m
+		})
+
 		return state
 	})
 )
