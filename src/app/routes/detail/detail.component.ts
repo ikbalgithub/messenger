@@ -59,7 +59,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   user            = this.storeService.user() as Common.User
   authorization   = this.storeService.authorization()
   messages        = this.storeService.messages
-  socket          = io(import.meta.env.NG_APP_SERVER)
+  socket          = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
   currentUser     = signal<string>(this.route.snapshot.params['_id'])
 
 
