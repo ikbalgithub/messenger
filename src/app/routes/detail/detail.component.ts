@@ -19,7 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
-import { add, init, successSend } from '../../ngrx/actions/messages.actions';
+import { add, init, successSend, updated } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 
 @Component({
@@ -368,28 +368,18 @@ export class DetailComponent implements OnInit,OnDestroy {
     
 
     this.socket.on('updated',(_id:string) => {
-      var result = this.fetchState().result
-
-      var modifiedResult = result.map(m => {
-        if(m.sender.usersRef === this.user._id){
-          return {
-            ...m,
-            read:true
-          }
-        }
-        else{
-          return m
-        }
+      var index = this.messages().findIndex(m => {
+        return m._id === this.currentUser()
       })
 
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result:modifiedResult
+      this.storeService.store.dispatch(
+        updated(
+          {
+            index,
+            _id:this.user._id
           }
-        })
-      })
+        )
+      )
 
       this.history.onUpdated(_id)
     })
