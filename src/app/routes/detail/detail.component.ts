@@ -19,7 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
-import { add, init, successSend, updated } from '../../ngrx/actions/messages.actions';
+import { add, failedSend, init, successSend, updated } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 
 @Component({
@@ -99,25 +99,23 @@ export class DetailComponent implements OnInit,OnDestroy {
 	sendRequest = this.requestService.post<Message.New,Message.One>({
     failedCb:(err,body) => {
       var postObject = body as Message.New
-      var result = this.fetchState().result
-      var JSONResult = result.map(m => {
-        return JSON.stringify(m)
-      })
 
-      var [filter] = result.filter(f => {
-        return f._id === postObject._id
-      })
-
-      var index = JSONResult.indexOf(
-        JSON.stringify(filter)
+      var index = this.messages().findIndex(
+        m => m._id === this.currentUser()
       )
 
-      this.history.onFailedSend(postObject._id)
+      this.storeService.store.dispatch(
+        failedSend(
+          {
+            index,
+            _id:postObject._id
+          }
+        )
+      )
 
-      result[index] = {
-        ...filter,
-        failed:true
-      }
+      this.history.onFailedSend(
+        postObject._id
+      )
     },
     cb:r => {
       var index = this.messages().findIndex(
