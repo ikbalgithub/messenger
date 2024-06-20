@@ -361,6 +361,14 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
     
     this.socket.on('incomingMessage',message => {      
+      var [{detail}] = this.messages().filter(
+        m => m._id === this.currentUser()
+      )
+
+      var [filter] = detail.filter(m => {
+        return m._id === message._id
+      })
+
       var index = this.messages().findIndex(
         m => m._id === this.currentUser()
       )
@@ -382,15 +390,17 @@ export class DetailComponent implements OnInit,OnDestroy {
         sent:true,
         read:true
       }
-      
-      this.storeService.store.dispatch(
-        add(
-          {
-            index,
-            newMessage
-          }
+  
+      if(!filter){
+        this.storeService.store.dispatch(
+          add(
+            {
+              index,
+              newMessage
+            }
+          )
         )
-      )
+      }
     })
     
     this.socket.on('history/message',m => {
