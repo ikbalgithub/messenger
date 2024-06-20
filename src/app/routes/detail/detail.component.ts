@@ -19,7 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
-import { add, failedSend, init, successSend, updated } from '../../ngrx/actions/messages.actions';
+import { add, failedSend, init, resend, successSend, updated } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 
 @Component({
@@ -276,34 +276,23 @@ export class DetailComponent implements OnInit,OnDestroy {
   resend({read,failed,sent,...message}:Message.One,authorization:string){
     var headers = new HttpHeaders({authorization})
 
-    var result = this.fetchState().result
-    var JSONResult = result.map(m => {
-      return JSON.stringify(m)
+    var index = this.messages().findIndex(m => {
+      return m._id === message._id
     })
 
-    var [filter] = result.filter(f => {
-      return f._id === message._id
-    })
-
-    var index = JSONResult.indexOf(
-      JSON.stringify(filter)
+    this.storeService.store.dispatch(
+      resend(
+        {
+          index,
+          _id:message._id
+        }
+      )
     )
 
-    result[index] = {
-      ...filter,
-      failed:false
-    }
+    this.history.onResend(
+      message._id
+    )
     
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-
-      this.history.onResend(message._id)
-    })
 
     var sendObject = {
       ...message,

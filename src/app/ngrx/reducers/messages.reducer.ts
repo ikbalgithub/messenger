@@ -1,6 +1,6 @@
 import { createReducer, on } from "@ngrx/store";
 import { Ngrx } from "../../..";
-import { add, failedSend, init, updated } from "../actions/messages.actions";
+import { add, failedSend, init, resend, updated } from "../actions/messages.actions";
 import { successSend } from "../actions/messages.actions";
 
 export const messagesReducer = createReducer<Ngrx.Messages[]>(
@@ -50,6 +50,20 @@ export const messagesReducer = createReducer<Ngrx.Messages[]>(
 		target.detail = target.detail.map(m => {
 			if(m._id === payload._id){
 				m.failed = true
+			}
+			return m
+		})
+    
+		state[payload.index] = target
+
+		return state
+	}),
+	on(resend,(state,payload) => {
+		var target = state[payload.index]
+
+		target.detail = target.detail.map(m => {
+			if(m._id === payload._id){
+				m.failed = false
 			}
 			return m
 		})
