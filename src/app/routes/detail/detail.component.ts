@@ -215,26 +215,15 @@ export class DetailComponent implements OnInit,OnDestroy {
       _id
     }
 
-    if(index > -1){
-      this.storeService.store.dispatch(
-        add(
-          {
-           index,
-           newMessage
-          }
-        )
+    this.storeService.store.dispatch(
+      add(
+        {
+         index,
+         newMessage
+        }
       )
-    }
-    else{
-      this.storeService.store.dispatch(
-        init(
-          {
-            _id:this.currentUser(),
-            detail:[newMessage]
-          }
-        )
-      )
-    }
+    )
+    
 
     this.history.onSendMessage(
       newMessage,
@@ -384,38 +373,37 @@ export class DetailComponent implements OnInit,OnDestroy {
       this.history.onUpdated(_id)
     })
     
-    this.socket.on('incomingMessage',m => {
-      var authorization = this.authorization
+    this.socket.on('incomingMessage',message => {      
+      var index = this.messages().findIndex(
+        m => m._id === this.currentUser()
+      )
       
       this.updateRequest(
         {
           groupId:this.routeState().groupId,
-          _id:this.route.snapshot.params['_id']
+          _id:this.currentUser()
         },
         {
           headers:new HttpHeaders({
-            authorization
+            authorization:this.authorization
           })
         }
       )
-      
-      var result = this.fetchState().result
-      
-      result[result.length] = {
-        ...m,
+
+      var newMessage = {
+        ...message,
         sent:true,
         read:true
       }
       
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
+      this.storeService.store.dispatch(
+        add(
+          {
+            index,
+            newMessage
           }
-        })
-        setTimeout(() => this.toAnchor("anchor"),2000)
-      })
+        )
+      )
     })
     
     this.socket.on('history/message',m => {
