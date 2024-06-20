@@ -68,6 +68,8 @@ export const messagesReducer = createReducer<Ngrx.Messages[]>(
 			return m
 		})
 
+		state[payload.index] = target
+
 		return state
 	})
 )
