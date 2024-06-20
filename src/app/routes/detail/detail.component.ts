@@ -277,7 +277,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     var headers = new HttpHeaders({authorization})
 
     var index = this.messages().findIndex(m => {
-      return m._id === message._id
+      return m._id === this.currentUser()
     })
 
     this.storeService.store.dispatch(
