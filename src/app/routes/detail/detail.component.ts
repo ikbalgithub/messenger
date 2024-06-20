@@ -19,7 +19,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
-import { add, init } from '../../ngrx/actions/messages.actions';
+import { add, init, successSend } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
 
 @Component({
@@ -124,26 +124,18 @@ export class DetailComponent implements OnInit,OnDestroy {
         m => m._id === this.currentUser()
       )
 
-      if(index > -1){
-        
-      }
-
-      this.serviceStore.store.dispatch(
-
+      this.storeService.store.dispatch(
+        successSend(
+          {
+            index,
+            _id:r._id
+          }
+        )
       )
 
       this.history.onSuccessSend(
         r._id
       )
-
-      setTimeout(() => {
-        this.fetchState.update(c => {
-          return {
-            ...c,
-            result
-          }
-        })
-      })
     },
     state:this.sendState,
     path:'message'
@@ -229,6 +221,16 @@ export class DetailComponent implements OnInit,OnDestroy {
           {
            index,
            newMessage
+          }
+        )
+      )
+    }
+    else{
+      this.storeService.store.dispatch(
+        init(
+          {
+            _id:this.currentUser(),
+            detail:[newMessage]
           }
         )
       )
