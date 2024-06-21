@@ -222,6 +222,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 
     setTimeout(() => this.toAnchor("anchor"))
     
+    this.preview = false
 
     this.history.onSendMessage(
       newMessage,
