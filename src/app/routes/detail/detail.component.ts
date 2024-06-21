@@ -169,6 +169,15 @@ export class DetailComponent implements OnInit,OnDestroy {
             }
           )
         )
+
+        this.toAnchor(
+          "anchor2"
+        )
+      }
+      else{
+        this.toAnchor(
+          "anchor2"
+        )
       }    
       
   
