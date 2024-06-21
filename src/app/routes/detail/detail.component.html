@@ -164,10 +164,6 @@
             [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
           />
           <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
-            <input 
-              type="file" 
-              class="opacity-0 absolute"
-            />
           </button>
           <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview)" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
