@@ -169,18 +169,10 @@ export class DetailComponent implements OnInit,OnDestroy {
             }
           )
         )
-
-        this.toAnchor(
-          "anchor2"
-        )
       }
-      else{
-        this.toAnchor(
-          "anchor2"
-        )
-      }    
-      
-  
+
+      this.toAnchor("anchor2")
+    
       if(!this.connected){
         this.socket.connect()
       }
