@@ -171,7 +171,7 @@ export class DetailComponent implements OnInit,OnDestroy {
         )
       }
 
-      setTimeout(() => this.toAnchor("anchor2"),2000)
+      setTimeout(() => this.toAnchor("anchor2"))
      
       if(!this.connected) this.socket.connect()
       
@@ -219,6 +219,8 @@ export class DetailComponent implements OnInit,OnDestroy {
         }
       )
     )
+
+    setTimeout(() => this.toAnchor("anchor"))
     
 
     this.history.onSendMessage(
@@ -399,6 +401,10 @@ export class DetailComponent implements OnInit,OnDestroy {
             }
           )
         )
+
+        setTimeout(() => {
+          this.toAnchor("anchor")
+        })
       }
     })
     
