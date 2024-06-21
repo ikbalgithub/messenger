@@ -3,8 +3,6 @@ import { Component,inject } from '@angular/core';
 import { CommonModule } from '@angular/common'
 import { StoreService } from './services/store/store.service'
 
-
-
 @Component({
   selector: 'app-root',
   standalone: true,

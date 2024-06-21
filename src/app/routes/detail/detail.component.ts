@@ -81,8 +81,6 @@ export class DetailComponent implements OnInit,OnDestroy {
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('image'),
     sender: new FormControl<string>(this.user._id),
-    accept: new FormControl<string>(''),
-    groupId: new FormControl<string>('')
   })
 
   updateRequest = this.requestService.put<Message.Update,Message.One>({
@@ -236,7 +234,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     
   }
 
-  async onFileChange(event:any,form:FormGroup){
+  async onFileChange(event:any){
     try{
       this.uploading = true
       var file = event.target.files[0]
@@ -244,9 +242,10 @@ export class DetailComponent implements OnInit,OnDestroy {
       var refs = ref(this.storage,uploadRef)
       var result = await uploadBytes(refs,file)
       var url = await getDownloadURL(result.ref)
+      var formValue = this.imageForm.value
 
       this.imageForm.patchValue({
-        ...form,
+        ...formValue,
         value:url
       })
 

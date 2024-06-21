@@ -167,7 +167,7 @@
             <input 
               type="file" 
               class="opacity-0 absolute"
-              (change)="onFileChange($event,imageForm)"
+              (change)="onFileChange($event)"
             />
           </button>
           <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview)" pButton icon="pi pi-arrow-up"></button>
@@ -185,7 +185,7 @@
         alt="Image"
         class="h-72 aspect-square rounded"
       />
-      <form [formGroup]="imageForm" (submit)="sendMessage(messageForm,authorization)">
+      <form [formGroup]="imageForm" (submit)="sendMessage(imageForm,authorization)">
         <p-inputGroup class="flex flex-row">
           <input 
             type="text" 
