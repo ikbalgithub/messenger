@@ -171,7 +171,7 @@ export class DetailComponent implements OnInit,OnDestroy {
         )
       }
 
-      setTimeout(() => this.toAnchor("anchor2"))
+      setTimeout(() => this.toAnchor("anchor2"),2000)
      
       if(!this.connected) this.socket.connect()
       
