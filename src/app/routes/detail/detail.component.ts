@@ -247,7 +247,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       var url = await getDownloadURL(result.ref)
       var formValue = this.imageForm.value
 
-      this.imageForm.patchValue({
+       this.imageForm.patchValue({
         ...formValue,
         value:url
       })
