@@ -163,7 +163,13 @@
             class="flex-1 px-3 outline-none"
             [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
           />
-          <button type="button" pButton icon="pi pi-image"></button>
+          <button type="button" pButton icon="pi pi-image">
+						<input 
+						  type="file" 
+						  class="opacity-0 absolute"
+						  (change)="onFileChange($event)"
+					  />
+					</button>
           <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview)" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
