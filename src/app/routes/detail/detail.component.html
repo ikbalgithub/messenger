@@ -163,7 +163,7 @@
             class="flex-1 px-3 outline-none"
             [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
           />
-          <button type="button" pButton icon="pi pi-image">
+          <button type="button" pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'">
 						<input 
 						  type="file" 
 						  class="opacity-0 absolute"
