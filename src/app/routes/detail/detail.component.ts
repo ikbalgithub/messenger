@@ -318,12 +318,11 @@ export class DetailComponent implements OnInit,OnDestroy {
 
   ngOnInit(){
     this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
+      var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.currentUser.set(this.route.snapshot.params['_id'])
         this.routeState.set(window.history.state)
         
-        var authorization = this.authorization
-        var headers = new HttpHeaders({authorization})
         var path = `message/all/${this.currentUser()}`
 
         this.socket.disconnect()
@@ -334,8 +333,6 @@ export class DetailComponent implements OnInit,OnDestroy {
         )
       }
       else{
-        var authorization = this.authorization
-        var headers = new HttpHeaders({authorization})
         var path = `message/all/${this.currentUser()}`
 
         this.fetchRequest(
