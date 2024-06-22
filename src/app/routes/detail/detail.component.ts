@@ -333,6 +333,15 @@ export class DetailComponent implements OnInit,OnDestroy {
           path,{headers}
         )
       }
+      else{
+        var authorization = this.authorization
+        var headers = new HttpHeaders({authorization})
+        var path = `message/all/${this.currentUser()}`
+
+        this.fetchRequest(
+          path,{headers}
+        )
+      }
     })
 
     
