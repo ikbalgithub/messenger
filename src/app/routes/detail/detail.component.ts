@@ -428,8 +428,6 @@ export class DetailComponent implements OnInit,OnDestroy {
         'join',
          `${this.routeState().groupId}/${this.user._id}`
       )
-
-      this.socketId = this.socket.id as string
     })
   }
 
