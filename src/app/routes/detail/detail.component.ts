@@ -442,6 +442,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   }
 
   ngOnDestroy(){
+    console.log('called ngOnDestroy......')
     this.routeUrlSubscription.unsubscribe()
     this.socket.disconnect()
   }
