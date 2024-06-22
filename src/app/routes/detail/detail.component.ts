@@ -42,7 +42,7 @@ import { FilterPipe } from '../../pipes/filter/filter.pipe';
 })
 export class DetailComponent implements OnInit,OnDestroy {
   @ViewChild('history') history !:HistoryComponent
-  
+  socketId        = ''
   preview         = false
   connected       = false
   uploading       = false
@@ -173,7 +173,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 
       setTimeout(() => this.toAnchor("anchor2"))
      
-      if(!this.connected) this.socket.connect()
+      if(!this.socket.connected) this.socket.connect()
       
     },
     state:this.fetchState,
@@ -332,7 +332,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       var headers = new HttpHeaders({authorization:this.authorization})
       var path = `message/all/${this.route.snapshot.params['_id']}`
 
-      if(this.connected) this.socket.disconnect()
+      if(this.socket.connected) this.socket.disconnect()
 
       this.fetchRequest(
         path,{headers}
@@ -415,15 +415,13 @@ export class DetailComponent implements OnInit,OnDestroy {
 
     this.socket.on('history/newMessage',m => {
       this.history.onNewMessage(m)
-    })
-
-    this.socket.on('disconnect',() => {
-      this.connected = false
-    })
+    }) 
 
     this.socket.on('connect',() => {      
-      this.connected = true
-
+      if(this.socketId !== '' && this.socketId === this.socket.id){
+        this.socket.emit('leave',this.socketId)
+      }
+      
       this.socket.emit(
         'join',
         `history/${this.user._id}`
@@ -438,6 +436,8 @@ export class DetailComponent implements OnInit,OnDestroy {
         'join',
          `${this.routeState().groupId}/${this.user._id}`
       )
+
+      this.socketId = this.socket.id as string
     })
   }
 

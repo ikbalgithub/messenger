@@ -15,7 +15,7 @@
           class="flex flex-col"
         />
         <span class="font-semibold text-lg">
-          {{routeState().profile.firstName}} {{routeState().profile.surname}} {{connected ? '(connected)':'(disconnected)'}}
+          {{routeState().profile.firstName}} {{routeState().profile.surname}} {{socket.connected ? '(connected)':'(disconnected)'}}
         </span>
       </div>
 			<div class="flex-1 flex flex-col gap-3 p-6">
