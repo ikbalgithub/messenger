@@ -228,12 +228,10 @@ export class DetailComponent implements OnInit,OnDestroy {
     
     this.imageForm.patchValue({
       value:'',
-      ...formulire.value,
     })
 
     this.messageForm.patchValue({
       value:'',
-      ...formulire.value,
     })
 
     this.sendRequest(
@@ -261,9 +259,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       var formValue = this.imageForm.value
 
        this.imageForm.patchValue({
-        ...formValue,
         value:url,
-        contentType:'image'
       })
 
       this.preview = true
