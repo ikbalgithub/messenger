@@ -21,6 +21,7 @@ import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 import { add, failedSend, init, resend, successSend, updated } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
+import { threadId } from 'worker_threads';
 
 @Component({
   selector: 'app-detail',
@@ -46,7 +47,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   uploading         = false
 	isValid           = /^\s*$/
   internetConnected = true
-  routeUrlSubscription !: Subscription
+  url:RSU           = Subscription | undefined
   scroller          = inject(ViewportScroller)
   route             = inject(ActivatedRoute)
   firebaseService   = inject(FirebaseService)
@@ -87,6 +88,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 
   additionalInfo = computed(() => {
     var state = this.routeState()
+    
 
     return {
       accept:this.currentUser(),
@@ -231,6 +233,11 @@ export class DetailComponent implements OnInit,OnDestroy {
       this.currentUser(),
       this.routeState().profile
     )
+    
+    this.imageForm.patchValue({
+      value:'',
+      ...formulire.value,
+    })
 
     this.messageForm.patchValue({
       value:'',
@@ -245,6 +252,10 @@ export class DetailComponent implements OnInit,OnDestroy {
     if(this.preview){
       this.preview = false
     }
+
+    setTimeout(() => {
+      this.toAnchor("anchor")
+    })
   }
 
   async onFileChange(event:any){
@@ -320,7 +331,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(){
-    this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
+    this.url = this.route.url.subscribe(c => {   
       var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.currentUser.set(this.route.snapshot.params['_id'])
@@ -442,10 +453,11 @@ export class DetailComponent implements OnInit,OnDestroy {
   }
 
   ngOnDestroy(){
-    this.routeUrlSubscription.unsubscribe()
+    (this.url as Subscription).unsubscribe()
     this.socket.disconnect()
   }
 }
+
 
 interface WHS{
   groupId:string,
@@ -453,3 +465,4 @@ interface WHS{
 }
 
 type User = Common.User
+type RSU = Subscription|undefined
