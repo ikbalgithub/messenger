@@ -202,34 +202,26 @@ export class DetailComponent implements OnInit,OnDestroy {
 
     var newMessage:Message.One = {
       ...formulire.value,
-      ...this.additionalInfo()
-    }
-    
-		var displayObject:Message.One = {
-      ...newMessage,
+      ...this.additionalInfo(),
       sendAt:Date.now(),
       sent:false,
       read:false,
       _id,
     }
-
-    var sendObject:Message.New = {
-      ...newMessage,
-      sendAt:Date.now(),
-      _id
-    }
+    
+    var {sent,read,...sentObject} = newMessage
 
     this.storeService.store.dispatch(
       add(
         {
           index,
-          newMessage:displayObject
+          newMessage
         }
       )
     )
     
     this.history.onSendMessage(
-      displayObject,
+      newMessage,
       this.currentUser(),
       this.routeState().profile
     )
@@ -245,10 +237,10 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
 
     this.sendRequest(
-      sendObject,
+      sentObject,
       {headers}
     )
-    
+
     if(this.preview){
       this.preview = false
     }
