@@ -34,7 +34,7 @@ export const messagesReducer = createReducer<Ngrx.Messages[]>(
 		var target = state[payload.index]
 
     target.detail = target.detail.map(m => {
-			if(m.sender.usersRef === payload._id){
+			if(m.sender === payload._id){
 				if(!m.failed) m.read = true
 			}
 
