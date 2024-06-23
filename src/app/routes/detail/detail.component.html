@@ -112,7 +112,7 @@
 				  @else{
             @if(messages() | filter:currentUser()){
               @for(x of (messages() | filter:currentUser()).detail; track x._id; let last=$last){
-                @if(x.sender.usersRef === user._id){
+                @if(x.sender === user._id){
                   @if(x.contentType === "text"){
                     <ng-container
                       *ngTemplateOutlet="textSent;context:{
