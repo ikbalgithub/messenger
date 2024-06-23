@@ -326,7 +326,6 @@ export class DetailComponent implements OnInit,OnDestroy {
         var path = `message/all/${this.currentUser()}`
 
         this.socket.disconnect()
-        console.log('disconnecting previous socket connection')
 
         this.fetchRequest(
           path,{headers}
