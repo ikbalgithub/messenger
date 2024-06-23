@@ -41,32 +41,36 @@ import { FilterPipe } from '../../pipes/filter/filter.pipe';
   ]
 })
 export class DetailComponent implements OnInit,OnDestroy {
-  @ViewChild('history') history !:HistoryComponent
-  preview         = false
-  connected       = false
-  uploading       = false
-	isValid         = /^\s*$/
+  preview           = false
+  connected         = false
+  uploading         = false
+	isValid           = /^\s*$/
   internetConnected = true
-  routeState      = signal<{groupId:string,profile:Common.Profile}>(window.history.state)
-  scroller        = inject(ViewportScroller)
-  route           = inject(ActivatedRoute)
-  firebaseService = inject(FirebaseService)
-  requestService  = inject(RequestService)
-  storeService    = inject(StoreService)
-  commonService   = inject(CommonService)
-  storage         = this.firebaseService.storage
-  user            = this.storeService.user() as Common.User
-  authorization   = this.storeService.authorization()
-  messages        = this.storeService.messages
-  socket          = io(import.meta.env.NG_APP_SERVER)
-  currentUser     = signal<string>(this.route.snapshot.params['_id'])
-
-
   routeUrlSubscription !: Subscription
+  scroller          = inject(ViewportScroller)
+  route             = inject(ActivatedRoute)
+  firebaseService   = inject(FirebaseService)
+  requestService    = inject(RequestService)
+  storeService      = inject(StoreService)
+  commonService     = inject(CommonService)
+  storage           = this.firebaseService.storage
+  parameterId       = this.route.snapshot.params['_id']
+  user              = this.storeService.user() as User
+  authorization     = this.storeService.authorization()
+  messages          = this.storeService.messages
+  socket            = io(import.meta.env.NG_APP_SERVER)
+  currentUser       = signal<string>(this.parameterId)
+  routeState        = signal<WHS>(window.history.state)
+  pathX             = `chat/${this.user._id}`
+  path1             = `history/${this.user._id}`
+  
+  @ViewChild('history') history !:HistoryComponent
 
+  path2          = computed(() => `${this.pathX}/${this.currentUser()}`)
   updateState    = this.requestService.createInitialState<Message.One>()
   fetchState     = this.requestService.createInitialState<Message.All>()
-	sendState = this.requestService.createInitialState<Message.One>()
+	sendState      = this.requestService.createInitialState<Message.One>()
+  path3          = `${this.routeState().groupId}/${this.user._id}`
 
   messageForm:FormGroup = new FormGroup({
     value: new FormControl<string>(''),
@@ -80,6 +84,15 @@ export class DetailComponent implements OnInit,OnDestroy {
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('image'),
     sender: new FormControl<string>(this.user._id),
+  })
+
+  additionalInfo = computed(() => {
+    var state = this.routeState()
+
+    return {
+      accept:this.currentUser(),
+      groupId:state.groupId
+    }
   })
 
   updateRequest = this.requestService.put<Message.Update,Message.One>({
@@ -178,62 +191,61 @@ export class DetailComponent implements OnInit,OnDestroy {
     state:this.fetchState,
   })
 
-  sendMessage(form:FormGroup,authorization:string){
-    var message = {
-      ...form.value,
-      accept:this.currentUser(),
-      groupId:this.routeState().groupId
-    }
-    
-    var now = Date.now()
-    var sender = {usersRef:this.user._id}
-    var accept = {usersRef:this.currentUser()}
+  sendMessage(formulire:FormGroup,authorization:string){
     var _id = new Types.ObjectId().toString()
     var headers = new HttpHeaders({authorization})
+    
     var index = this.messages().findIndex(m => {
       return m._id === this.currentUser()
     })
+
+    var newMessage:Message.One = {
+      ...formulire.value,
+      ...this.additionalInfo()
+    }
     
-		var newMessage = {
-      ...message,
-      sendAt:now,
+		var displayObject:Message.One = {
+      ...newMessage,
+      sendAt:Date.now(),
       sent:false,
       read:false,
-      sender,
-      accept,
       _id,
     }
 
-    var sendObject = {
-      ...message,
-      sendAt:now,
+    var sendObject:Message.New = {
+      ...newMessage,
+      sendAt:Date.now(),
       _id
     }
 
     this.storeService.store.dispatch(
       add(
         {
-         index,
-         newMessage
+          index,
+          newMessage:displayObject
         }
       )
     )
-
-    setTimeout(() => this.toAnchor("anchor"))
     
-    this.preview = false
-
     this.history.onSendMessage(
-      newMessage,
+      displayObject,
       this.currentUser(),
       this.routeState().profile
     )
+
+    this.messageForm.patchValue({
+      value:'',
+      ...formulire.value,
+    })
 
     this.sendRequest(
       sendObject,
       {headers}
     )
     
+    if(this.preview){
+      this.preview = false
+    }
   }
 
   async onFileChange(event:any){
@@ -294,16 +306,8 @@ export class DetailComponent implements OnInit,OnDestroy {
       message._id
     )
     
-
-    var sendObject = {
-      ...message,
-      sender:message.sender.usersRef,
-      accept:message.accept.usersRef as string,
-      groupId:this.routeState().groupId
-    }
-
     this.sendRequest(
-      sendObject,
+      {...message},
       {headers}
     )
   }
@@ -322,9 +326,11 @@ export class DetailComponent implements OnInit,OnDestroy {
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.currentUser.set(this.route.snapshot.params['_id'])
         this.routeState.set(window.history.state)
-        
         var path = `message/all/${this.currentUser()}`
-
+        var newGroupId = this.routeState().groupId
+       
+        this.path3 = `${newGroupId}/${this.user._id}`
+        
         this.socket.disconnect()
 
         this.fetchRequest(
@@ -421,17 +427,17 @@ export class DetailComponent implements OnInit,OnDestroy {
     this.socket.on('connect',() => {      
       this.socket.emit(
         'join',
-        `history/${this.user._id}`
+        this.path1
       )
       
       this.socket.emit(
         'join',
-        `chat/${this.user._id}/${this.route.snapshot.params['_id']}`
+        this.path2()
       )
       
       this.socket.emit(
         'join',
-         `${this.routeState().groupId}/${this.user._id}`
+         this.path3
       )
     })
   }
@@ -441,3 +447,10 @@ export class DetailComponent implements OnInit,OnDestroy {
     this.socket.disconnect()
   }
 }
+
+interface WHS{
+  groupId:string,
+  profile:Common.Profile
+}
+
+type User = Common.User
