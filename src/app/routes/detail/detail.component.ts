@@ -262,7 +262,8 @@ export class DetailComponent implements OnInit,OnDestroy {
 
        this.imageForm.patchValue({
         ...formValue,
-        value:url
+        value:url,
+        contentType:'image'
       })
 
       this.preview = true
