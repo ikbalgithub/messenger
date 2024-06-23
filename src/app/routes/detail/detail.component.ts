@@ -47,7 +47,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   uploading         = false
 	isValid           = /^\s*$/
   internetConnected = true
-  url:RSU           = Subscription | undefined
+  url:RSU           = undefined
   scroller          = inject(ViewportScroller)
   route             = inject(ActivatedRoute)
   firebaseService   = inject(FirebaseService)
