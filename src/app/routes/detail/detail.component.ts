@@ -58,7 +58,6 @@ export class DetailComponent implements OnInit,OnDestroy {
   user              = this.storeService.user() as User
   authorization     = this.storeService.authorization()
   messages          = this.storeService.messages
-  socket            = io(import.meta.env.NG_APP_SERVER)
   currentUser       = signal<string>(this.parameterId)
   routeState        = signal<WHS>(window.history.state)
   pathX             = `chat/${this.user._id}`
