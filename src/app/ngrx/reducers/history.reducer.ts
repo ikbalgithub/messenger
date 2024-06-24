@@ -3,7 +3,7 @@ import { Message } from "../../..";
 import { add, failedSend, replace, resend, resetCounter, successSend, updated } from "../actions/history.actions";
 
 export const historyReducer = createReducer<Message.Last[]>(
-  [],
+  JSON.parse(localStorage.getItem("ngrx") as string).history ?? [],
   on(add,(state,payload) => {
     return [
       ...state,
