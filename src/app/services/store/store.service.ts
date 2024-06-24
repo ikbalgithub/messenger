@@ -17,6 +17,8 @@ export class StoreService {
   history = toSignal(this.store.select('history')) as Signal<Ngrx.History>
 
   syncWithLocalStorage:EffectRef = effect(() => {
+    console.log('a change')
+    
     if(this.rootInit){
       var jsonState = JSON.stringify({
         authentication:this.authentication(),
