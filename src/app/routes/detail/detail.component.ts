@@ -89,7 +89,6 @@ export class DetailComponent implements OnInit,OnDestroy {
   additionalInfo = computed(() => {
     var state = this.routeState()
     
-
     return {
       accept:this.currentUser(),
       groupId:state.groupId
@@ -228,7 +227,6 @@ export class DetailComponent implements OnInit,OnDestroy {
     
     this.imageForm.patchValue({
       value:'',
-      contentType:''
     })
 
     this.messageForm.patchValue({
