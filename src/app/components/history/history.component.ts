@@ -9,6 +9,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
+import { add, failedSend, replace, resend, resetCounter, successSend, updated } from '../../ngrx/actions/history.actions';
 
 @Component({
   selector: 'app-history',
@@ -26,138 +27,140 @@ import { BadgeModule } from 'primeng/badge';
 
 })
 export class HistoryComponent implements OnInit {
-  
+  @Input() connected!:boolean
   @Input() counterId!:string
   @Input() disabled!:boolean
 
   storeService   = inject(StoreService)
-  user           = this.storeService.user()
   requestService = inject(RequestService)
   route          = inject(ActivatedRoute)
+  user           = this.storeService.user() as Common.User
   authorization  = this.storeService.authorization()
+  history        = this.storeService.history
   
 	fetchState     = this.requestService.createInitialState<Message.Last[]>()  
 
   fetchRequest = this.requestService.get<Message.Last[]>({
-    cb:result => {
-      var newResult = result.map((r) => {
-        return {
-          ...r,
-          sent:true
-        }
-      })
-
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result:newResult
-          }
-        })
-      })
+    cb:r => {
+      if(this.history().length < 1){    
+        this.storeService.store.dispatch(
+          add(
+            {
+              v:r.map(m => {
+                return {
+                  ...m,
+                  sent:true
+                }
+              })
+            }
+          )
+        )
+      }
     },
-    failedCb:err => console.log(err),
+    failedCb:err => {
+      console.log(
+        err
+      )
+    },
     state:this.fetchState
   })
 
   onNewMessage(newMessage:Message.One & {sender:string,accept:string}){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
-    var [filter] = result.filter(m => {
+    var [filter] = this.history().filter(m => {
       return m.sender.usersRef ===
       newMessage.sender || m.accept.usersRef
       === newMessage.sender
     })
     
     if(filter){
-      var index = JSONMessages.indexOf(
-        JSON.stringify(filter)
-      )
+      var index = this.history().findIndex(m => {
+        return m.sender.usersRef ===
+        newMessage.sender || m.accept.usersRef
+        === newMessage.sender
+      })
+
+			// if the last message sent by the same user
       if(filter.sender.usersRef === newMessage.sender){
-        result[index] = {
-          ...newMessage,
-          sender:filter.sender,
-          accept:filter.accept,
-          unreadCounter:filter.unreadCounter+1
+        if(filter._id !== newMessage._id){
+					var value = {
+						...newMessage,
+						sender:filter.sender,
+						accept:filter.accept,
+						unreadCounter:filter.unreadCounter+1
+					}
+					
+					this.storeService.store.dispatch(
+						replace(
+							{
+								index,
+								value
+							}
+						)
+					) 
         }
       }
 
+			// if the last message sent by logged in user
       if(filter.sender.usersRef !== newMessage.sender){
-        result[index] = {
+        value = {
           ...newMessage,
           sender:filter.accept,
           accept:filter.sender,
           unreadCounter:1
         }
-      }
 
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
-          }
-        })
-      })
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index,
+              value
+            }
+          )
+        )
+      }
     }
-    
   }
 
   onMessage(newMessage:Message.Populated){
-    var result = this.fetchState().result
-
-    var [filter] = result.filter(m => {
+    var [filter] = this.history().filter(m => {
       return m.sender.usersRef ===
       newMessage.sender.usersRef || m.accept.usersRef
       === newMessage.sender.usersRef
     })
 
     if(!filter){
-      result[result.length] = {
+      var value = {
         ...newMessage,
         unreadCounter:1
       }
-    }
 
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
+      this.storeService.store.dispatch(
+        add({v:[value]})
+      )
+    }
   }
 
-  onAfterFetch(_id:string){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
-    
-    var [filter] = result.filter(m => m.sender.usersRef === _id)
-    
-    var index = JSONMessages.indexOf(JSON.stringify(filter))
-
-    result[index] = {
-      ...filter,
-      unreadCounter:0
-    }
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
+  resetCounter(_id:string){
+    var [filter] = this.history().filter(m => {
+      return m.sender.usersRef === _id
     })
-  }
 
+    
+    var index = this.history().findIndex(m => {
+      return m.sender.usersRef === _id
+    })
+
+    if(filter){
+      this.storeService.store.dispatch(
+        resetCounter({index})
+      )
+    }
+  }
+ 
   onSendMessage(newMessage:Message.One,paramsId:string,profile:Common.Profile){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
     var sender = {...this.user.profile,usersRef:this.user._id}
-
-    var [filter] = result.filter((message,index) => {
+    
+    var [filter] = this.history().filter((message,index) => {
       return (
         message.sender.usersRef
         === paramsId
@@ -167,87 +170,89 @@ export class HistoryComponent implements OnInit {
       )
     })
 
-    var index = JSONMessages.indexOf(JSON.stringify(filter))
+    var index = this.history().findIndex(message => {
+      return (
+        message.sender.usersRef
+        === paramsId
+      ) || (
+        message.accept.usersRef
+        === paramsId
+      )
+    })
 
     if(filter){
       if(filter.sender.usersRef === this.user._id){
-        result[index] = {
+        var value = {
           ...newMessage,
           sender:filter.sender,
           accept:filter.accept,
           unreadCounter:0
         }
+
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index,
+              value
+            }
+          )
+        )
       }
 
       if(filter.sender.usersRef !== this.user._id){
-        result[index] = {
+        value = {
           ...newMessage,
           sender:filter.accept,
           accept:filter.sender,
           unreadCounter:0
         }
+
+        this.storeService.store.dispatch(
+          replace(
+            {
+              index,
+              value
+            }
+          )
+        )
       }
     }
 		else{
-			result[result.length] = {
-				...newMessage,
-				sender:sender,
+      value = {
+        ...newMessage,
+        sender:sender,
         accept:profile,
-				unreadCounter:0
-			}
+        unreadCounter:0
+      }
+			this.storeService.store.dispatch(
+        add({v:[value]})
+      )
 		}
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
   }
 
   onSuccessSend(_id:string){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
-    var [filter] = result.filter((message,index) => {
+    var index = this.history().findIndex( message => {
       return message._id === _id
     })
-    var index = JSONMessages.indexOf(
-      JSON.stringify(filter)
-    )
-    result[index] = {
-      ...filter,
-      sent:true,
-      failed:false
-    }
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
+
+    this.storeService.store.dispatch(
+      successSend(
+        {
+          index
         }
-      })
-    })
+      )
+    )
   }
 
   onUpdated(_id:string){
-    var result = this.fetchState().result
-    var JSONMessages = result.map(m => JSON.stringify(m))
-    var [filter] = result.filter(m => m.sender.usersRef === _id || m.accept.usersRef === _id)
-
-    var index = JSONMessages.indexOf(JSON.stringify(filter))
-
-    result[index] = {...filter,read:true}
-
-    setTimeout(() => {
-      this.fetchState.update((current) => {
-        return {
-          ...current,
-          result
-        }
-      })
+    var index = this.history().findIndex(m => {
+      return  m.sender.usersRef === _id 
+      || m.accept.usersRef === _id
     })
+
+    this.storeService.store.dispatch(
+      updated({index})
+    )
   }
 
   showUnreadCounter(message:Message.Last):boolean{
@@ -263,62 +268,30 @@ export class HistoryComponent implements OnInit {
   }
 
   onFailedSend(_id:string){
-    var result = this.fetchState().result
-    var JSONResult = result.map(m => {
-      return JSON.stringify(m)
-    })
-
-    var [filter] = result.filter(m => {
+    var index = this.history().findIndex(m => {
       return m._id === _id
     })
 
-    var index = JSONResult.indexOf(
-      JSON.stringify(filter)
+    this.storeService.store.dispatch(
+      failedSend({index})
     )
-
-    result[index] = {
-      ...filter,
-      sent:false,
-      failed:true
-    }
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
   }
 
   onResend(_id:string){
-    var result = this.fetchState().result
-    var JSONResult = result.map(m => {
-      return JSON.stringify(m)
-    })
 
-    var [filter] = result.filter(m => {
+    var [filter] = this.history().filter(m => {
       return m._id === _id
     })
 
-    var index = JSONResult.indexOf(
-      JSON.stringify(filter)
-    )
-
-    result[index] = {
-      ...filter,
-      failed:false
-    }
-
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
+    var index = this.history().findIndex(m => {
+      return m._id === _id
     })
+
+    if(filter){
+      this.storeService.store.dispatch(
+        resend({index})
+      )
+    }
   }
 
   ngOnInit(){
@@ -329,5 +302,9 @@ export class HistoryComponent implements OnInit {
       'message/recently',
       {headers}
     )
+  }
+
+  test(){
+    alert('test')
   }
 }

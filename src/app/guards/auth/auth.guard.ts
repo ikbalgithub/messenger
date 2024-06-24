@@ -12,10 +12,8 @@ export const authGuard = (route:ActivatedRouteSnapshot,state:RouterStateSnapshot
 
   var loggedIn = authentication.loggedIn ?? false
   var onLoginPage = state.url === '/login'
-  var onHomePage = state.url === '/'
-  var onMessagePage = state.url === '/message'
  
-  if(!loggedIn && (onHomePage || onMessagePage)){
+  if(!loggedIn && !onLoginPage){
     router.navigate(['login'])
   }
   
@@ -23,9 +21,11 @@ export const authGuard = (route:ActivatedRouteSnapshot,state:RouterStateSnapshot
     router.navigate([''])
   }
 
-  return loggedIn 
-    ? onLoginPage 
-      ? false : true 
-    : onHomePage || onMessagePage
-      ? false : true
+  return onLoginPage 
+    ? loggedIn 
+      ? false 
+      : true 
+    : loggedIn 
+      ? true 
+      : false 
 };

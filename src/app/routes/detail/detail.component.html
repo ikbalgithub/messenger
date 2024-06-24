@@ -9,13 +9,13 @@
     <div class="xs:w-full lg:w-[583px] flex flex-col">
       <div class="sticky z-10 top-0 p-6 bg-slate-200 shadow-2xl flex flex-row gap-3 items-center">
         <p-avatar
-          [image]="routeState.profile.profileImage" 
+          [image]="routeState().profile.profileImage" 
           size="large" 
           shape="circle"
           class="flex flex-col"
         />
         <span class="font-semibold text-lg">
-          {{routeState.profile.firstName}} {{routeState.profile.surname}} {{connected ? '(connected)':'(disconnected)'}}
+          {{routeState().profile.firstName}} {{routeState().profile.surname}} {{socket.connected ? '(connected)':'(disconnected)'}}
         </span>
       </div>
 			<div class="flex-1 flex flex-col gap-3 p-6">
@@ -110,45 +110,47 @@
 					  />
 				  }
 				  @else{
-					  @for(x of fetchState().result; track x._id; let last = $last){
-						  @if(x.sender.usersRef === user._id){
-							  @if(x.contentType === "text"){
-								  <ng-container
-									  *ngTemplateOutlet="textSent;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-							  @else{
-								  <ng-container
-									  *ngTemplateOutlet="imageSent;context:{
-										message:x,last:last
-									  }"
-								  />
-							  }
-						  }
-						  @else{
-							  @if(x.contentType === "text"){
-								  <ng-container
-									  *ngTemplateOutlet="textMessage;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-							  @else{
-								  <ng-container
-									  *ngTemplateOutlet="imageMessage;context:{
-										  message:x,last:last
-									  }"
-								  />
-							  }
-						  }
-					  }
-            @empty{
-              <ng-container
-                *ngTemplateOutlet="empty"
-              />
-            }
+            @if(messages() | filter:currentUser()){
+              @for(x of (messages() | filter:currentUser()).detail; track x._id; let last=$last){
+                @if(x.sender === user._id){
+                  @if(x.contentType === "text"){
+                    <ng-container
+                      *ngTemplateOutlet="textSent;context:{
+                        message:x,last:last
+                      }"
+                    />
+                  }
+                  @else{
+                    <ng-container
+                      *ngTemplateOutlet="imageSent;context:{
+                      message:x,last:last
+                      }"
+                    />
+                  }
+                }
+                @else{
+                  @if(x.contentType === "text"){
+                    <ng-container
+                      *ngTemplateOutlet="textMessage;context:{
+                        message:x,last:last
+                      }"
+                    />
+                  }
+                  @else{
+                    <ng-container
+                      *ngTemplateOutlet="imageMessage;context:{
+                        message:x,last:last
+                      }"
+                    />
+                  }
+                }
+              }
+              @empty{
+                <ng-container
+                  *ngTemplateOutlet="empty"
+                />
+              }
+            } 
 				  }
         </ng-template>
 			</div>
@@ -158,19 +160,18 @@
             pInputText
             type="text" 
             formControlName="value"
-            class="flex-1 px-3 outline-none {{internetConnected ? '' : 'bg-slate-400'}}"
+            class="flex-1 px-3 outline-none"
             [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
-            [readonly]="!internetConnected"
           />
-          <button pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'" [disabled]="!internetConnected">
-            <input 
-              type="file"
-              accept="image/*"
-              class="opacity-0 absolute"
-              (change)="onFileChange($event,imageForm)"
-            />
-          </button>
-          <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview) || !internetConnected" pButton icon="pi pi-arrow-up"></button>
+          <button type="button" pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'">
+						<input 
+						  type="file"
+							accept="image/*"
+						  class="opacity-0 absolute"
+						  (change)="onFileChange($event)"
+					  />
+					</button>
+          <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview)" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
     </div>

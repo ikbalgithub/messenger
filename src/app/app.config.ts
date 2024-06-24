@@ -13,13 +13,17 @@ import { userReducer } from './ngrx/reducers/user.reducer'
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
+import { messagesReducer } from './ngrx/reducers/messages.reducer';
+import { historyReducer } from './ngrx/reducers/history.reducer';
 
 
 
 const storage = {
   authentication:authenticationReducer,
   authorization:authorizationReducer,
-  user:userReducer
+  user:userReducer,
+  messages:messagesReducer,
+  history:historyReducer
 }
 
 export const appConfig: ApplicationConfig = {

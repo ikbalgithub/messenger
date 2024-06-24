@@ -22,8 +22,8 @@ export namespace Message{
 
   type All = {
     _id:string,
-    sender:Common.Profile,
-    accept:Common.Profile,
+    sender:string
+    accept:string,
     sendAt:number,
     read:boolean,
     contentType:string,
@@ -84,9 +84,17 @@ export namespace Common{
     uid:string,
     profile:Omit<Profile,"_id|usersRef">
   }
+
+  interface User{
+    _id:string,
+    profile:Profile,
+    username:string
+  }
 }
 
 export namespace Ngrx{
+  export type History = Message.Last[]
+  
   export interface User {
     _id:string|null,
     profile:Common.Profile|null,
@@ -100,7 +108,14 @@ export namespace Ngrx{
   export interface State {
     authentication:Authentication,
     authorization:string,
-    user:User
+    user:User,
+    messages:Messages[],
+    history:History
+  }
+  
+  interface Messages{
+    _id:string,
+    detail:Message.All
   }
 }
 

@@ -7,6 +7,7 @@ import { RequestService } from '../../services/request/request.service';
 import { Search } from '../../..';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-messages',
@@ -23,6 +24,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   user           = this.storeService.user()
   requestService = inject(RequestService)
   router         = inject(Router)
+  authService    = inject(AuthService)
   
   ngOnInit(){
     this.socket.on('connect',() => {

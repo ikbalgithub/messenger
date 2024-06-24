@@ -1,6 +1,6 @@
 <div class="p-6 flex flex-row">
   <span class="font-bold text-xl">
-    Messages
+    Messages {{connected ? '(Connected)' : ''}}
   </span>
   <div class="flex flex-row flex-1 justify-end items-center gap-3">
     <i class="pi pi-cog"></i>
@@ -84,7 +84,7 @@
       />
     }
     @else{
-      @for(x of fetchState().result; track x._id){
+      @for(x of history(); track x._id){
         <ng-container
           *ngTemplateOutlet="message; context:{
             profile:x|profile:user._id:'home',

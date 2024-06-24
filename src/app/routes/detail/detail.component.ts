@@ -6,7 +6,7 @@ import { CommonModule,ViewportScroller } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Component,ViewChild,inject,OnInit,OnDestroy,HostListener } from '@angular/core';
+import { Component,ViewChild,inject,OnInit,OnDestroy,HostListener, signal, computed } from '@angular/core';
 import { HistoryComponent } from '../../components/history/history.component'
 import { CommonService } from '../../services/common/common.service'
 import { StoreService } from '../../services/store/store.service'
@@ -19,6 +19,9 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
+import { add, failedSend, init, resend, successSend, updated } from '../../ngrx/actions/messages.actions';
+import { FilterPipe } from '../../pipes/filter/filter.pipe';
+import { threadId } from 'worker_threads';
 
 @Component({
   selector: 'app-detail',
@@ -35,43 +38,44 @@ import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
     ButtonModule,
     ReactiveFormsModule,
     DialogModule,
+    FilterPipe
   ]
 })
 export class DetailComponent implements OnInit,OnDestroy {
-  @ViewChild('history') history !:HistoryComponent
-  
-  preview         = false
-  connected       = false
-  uploading       = false
-	isValid         = /^\s*$/
+  preview           = false
+  connected         = false
+  uploading         = false
+	isValid           = /^\s*$/
   internetConnected = true
+  url:RSU           = undefined
+  scroller          = inject(ViewportScroller)
+  route             = inject(ActivatedRoute)
+  firebaseService   = inject(FirebaseService)
+  requestService    = inject(RequestService)
+  storeService      = inject(StoreService)
+  commonService     = inject(CommonService)
+  storage           = this.firebaseService.storage
+  parameterId       = this.route.snapshot.params['_id']
+  user              = this.storeService.user() as User
+  authorization     = this.storeService.authorization()
+  messages          = this.storeService.messages
+  currentUser       = signal<string>(this.parameterId)
+  routeState        = signal<WHS>(window.history.state)
+  pathX             = `chat/${this.user._id}`
+  path1             = `history/${this.user._id}`
   
-  routeState      = window.history.state
-  scroller        = inject(ViewportScroller)
-  route           = inject(ActivatedRoute)
-  firebaseService = inject(FirebaseService)
-  requestService  = inject(RequestService)
-  storeService    = inject(StoreService)
-  commonService   = inject(CommonService)
-  storage         = this.firebaseService.storage
-  user            = this.storeService.user()
-  authorization   = this.storeService.authorization()
-  socket          = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
-
-  routeUrlSubscription !: Subscription
-
+  socket         = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
+  path2          = computed(() => `${this.pathX}/${this.currentUser()}`)
   updateState    = this.requestService.createInitialState<Message.One>()
   fetchState     = this.requestService.createInitialState<Message.All>()
-	sendState = this.requestService.createInitialState<Message.One>()
+	sendState      = this.requestService.createInitialState<Message.One>()
+  path3          = `${this.routeState().groupId}/${this.user._id}`
 
-  credentialForm = new FormGroup({
-    sender: new FormControl<string>(this.user._id),
-    accept: new FormControl<string>(this.route.snapshot.params['_id']),
-    groupId: new FormControl<string>(this.routeState.groupId)
-  })
+  @ViewChild('history') history !:HistoryComponent
 
   messageForm:FormGroup = new FormGroup({
     value: new FormControl<string>(''),
+    sender:new FormControl<string>(this.user._id),
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('text'),
   })
@@ -80,10 +84,24 @@ export class DetailComponent implements OnInit,OnDestroy {
     value: new FormControl<string>(''),
     description: new FormControl<string>('none'),
     contentType: new FormControl<string>('image'),
+    sender: new FormControl<string>(this.user._id),
+  })
+
+  additionalInfo = computed(() => {
+    var state = this.routeState()
+    
+    return {
+      accept:this.currentUser(),
+      groupId:state.groupId
+    }
   })
 
   updateRequest = this.requestService.put<Message.Update,Message.One>({
-    cb:r => console.log(r),
+    cb:r => {
+      this.history.resetCounter(
+        this.route.snapshot.params['_id']
+      )
+    },
     failedCb:r => console.log(r),
     state:this.updateState,
     path:'message'
@@ -92,58 +110,41 @@ export class DetailComponent implements OnInit,OnDestroy {
 	sendRequest = this.requestService.post<Message.New,Message.One>({
     failedCb:(err,body) => {
       var postObject = body as Message.New
-      var result = this.fetchState().result
-      var JSONResult = result.map(m => {
-        return JSON.stringify(m)
-      })
 
-      var [filter] = result.filter(f => {
-        return f._id === postObject._id
-      })
-
-      var index = JSONResult.indexOf(
-        JSON.stringify(filter)
+      var index = this.messages().findIndex(
+        m => m._id === this.currentUser()
       )
 
-      this.history.onFailedSend(postObject._id)
+      this.storeService.store.dispatch(
+        failedSend(
+          {
+            index,
+            _id:postObject._id
+          }
+        )
+      )
 
-      result[index] = {
-        ...filter,
-        failed:true
-      }
+      this.history.onFailedSend(
+        postObject._id
+      )
     },
     cb:r => {
-      var result = this.fetchState().result
-      var JSONResult = result.map(m => {
-        return JSON.stringify(m)
-      })
-  
-      var [filter] = result.filter(f => {
-        return f._id === r. _id
-      })
-  
-      var index = JSONResult.indexOf(
-        JSON.stringify(filter)
+      var index = this.messages().findIndex(
+        m => m._id === this.currentUser()
       )
 
-      result[index] = {
-        ...filter,
-        sent:true,
-        failed:false
-      }
+      this.storeService.store.dispatch(
+        successSend(
+          {
+            index,
+            _id:r._id
+          }
+        )
+      )
 
       this.history.onSuccessSend(
         r._id
       )
-
-      setTimeout(() => {
-        this.fetchState.update(c => {
-          return {
-            ...c,
-            result
-          }
-        })
-      })
     },
     state:this.sendState,
     path:'message'
@@ -153,133 +154,101 @@ export class DetailComponent implements OnInit,OnDestroy {
   fetchRequest = this.requestService.get<Message.All>({
     failedCb:r => alert(JSON.stringify(r)),
     cb: result => {
-      var authorization = this.authorization
-      var snapshot = this.route.snapshot
-      var paramsId = snapshot.params['_id']
-      
-      var profiles = result.map(m => {
-        return m.sender
-      })
-
-      var [filter] = profiles.filter(p => {
-        return p.usersRef === paramsId
-      })
-
-      if(result.length > 0) this.routeState.groupId = result[0].groupId
-      
-      if(filter) this.routeState.profile = filter
-
-			this.credentialForm.patchValue({
-				...this.credentialForm.value,
-				accept:this.route.snapshot.params['_id'],
-				groupId:this.routeState.groupId
-			})
-
       if(result.length > 0){
         this.updateRequest(
           {
-            groupId:this.routeState.groupId,
-            _id:paramsId
+            groupId:this.routeState().groupId,
+            _id:this.currentUser()
           },
           {
             headers:new HttpHeaders({
-              authorization
+              authorization:this.authorization
             })
           }
         )
-				this.history.onAfterFetch(
-					this.route.snapshot.params['_id']
-				)
       }
-      
-      setTimeout(() => {
-        this.fetchState.update((current) => {
-          var result = current.result.map(m => {
-            return {
-              ...m,
-              sent:true
+
+      if(this.messages().filter(m => m._id === this.currentUser()).length < 1){
+        this.storeService.store.dispatch(
+          init(
+            {
+              _id:this.currentUser(),
+              detail:result.map(m => {
+                return {
+                  ...m,
+                  sent:true
+                }
+              })
             }
-          })
+          )
+        )
+      }
 
-          return {
-            ...current,
-            result
-          }
-        })
-
-        setTimeout(() => this.toAnchor("anchor2"))
-      })
-
-      this.socket.connect()
+      setTimeout(() => this.toAnchor("anchor2"))
+     
+      if(!this.socket.connected) this.socket.connect()
+      
     },
     state:this.fetchState,
   })
 
-  sendMessage(form:FormGroup,authorization:string){
-    var now = Date.now()
-    var sender = {usersRef:this.user._id}
-    var accept = {usersRef:this.route.snapshot.params['_id']}
+  sendMessage(formulire:FormGroup,authorization:string){
     var _id = new Types.ObjectId().toString()
     var headers = new HttpHeaders({authorization})
     
-		var newMessage = {
-      ...form.value,
-      sendAt:now,
+    var index = this.messages().findIndex(m => {
+      return m._id === this.currentUser()
+    })
+
+    var newMessage:Message.One = {
+      ...formulire.value,
+      ...this.additionalInfo(),
+      sendAt:Date.now(),
       sent:false,
       read:false,
-      sender,
-      accept,
       _id,
     }
-
-    var sendObject = {
-      ...form.value,
-      ...this.credentialForm.value,
-      sendAt:now,
-      _id
-    }
     
-    setTimeout(() => {
-			this.fetchState.update(current => {
-        var result = [
-          ...current.result,
+    var {sent,read,...sentObject} = newMessage
+
+    this.storeService.store.dispatch(
+      add(
+        {
+          index,
           newMessage
-        ]
-
-        return {
-          ...current,
-          result
         }
-      })
-
-      this.preview = false
-      setTimeout(() => this.toAnchor("anchor"))
-		})
-
+      )
+    )
+    
+    this.history.onSendMessage(
+      newMessage,
+      this.currentUser(),
+      this.routeState().profile
+    )
+    
     this.imageForm.patchValue({
-      ...this.imageForm.value,
       value:'',
     })
 
     this.messageForm.patchValue({
-      ...this.messageForm.value,
-      value:''
+      value:'',
     })
 
-    this.history.onSendMessage(
-			newMessage,
-			this.route.snapshot.params['_id'],
-      this.routeState.profile
-	  )
-
     this.sendRequest(
-      sendObject,
+      sentObject,
       {headers}
     )
-    
+
+    if(this.preview){
+      this.preview = false
+    }
+
+    setTimeout(() => {
+      this.toAnchor("anchor")
+    })
   }
 
-  async onFileChange(event:any,form:FormGroup){
+  async onFileChange(event:any){
     try{
       this.uploading = true
       var file = event.target.files[0]
@@ -287,9 +256,9 @@ export class DetailComponent implements OnInit,OnDestroy {
       var refs = ref(this.storage,uploadRef)
       var result = await uploadBytes(refs,file)
       var url = await getDownloadURL(result.ref)
+      var formValue = this.imageForm.value
 
       this.imageForm.patchValue({
-        ...form,
         value:url
       })
 
@@ -319,44 +288,25 @@ export class DetailComponent implements OnInit,OnDestroy {
   resend({read,failed,sent,...message}:Message.One,authorization:string){
     var headers = new HttpHeaders({authorization})
 
-    var result = this.fetchState().result
-    var JSONResult = result.map(m => {
-      return JSON.stringify(m)
+    var index = this.messages().findIndex(m => {
+      return m._id === this.currentUser()
     })
 
-    var [filter] = result.filter(f => {
-      return f._id === message._id
-    })
-
-    var index = JSONResult.indexOf(
-      JSON.stringify(filter)
+    this.storeService.store.dispatch(
+      resend(
+        {
+          index,
+          _id:message._id
+        }
+      )
     )
 
-    result[index] = {
-      ...filter,
-      failed:false
-    }
+    this.history.onResend(
+      message._id
+    )
     
-    setTimeout(() => {
-      this.fetchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-
-      this.history.onResend(message._id)
-    })
-
-    var sendObject = {
-      ...message,
-      sender:message.sender.usersRef,
-      accept:message.accept.usersRef as string,
-      groupId:this.routeState.groupId
-    }
-
     this.sendRequest(
-      sendObject,
+      {...message},
       {headers}
     )
   }
@@ -370,15 +320,29 @@ export class DetailComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(){
-    this.routeUrlSubscription = this.route.url.subscribe((currentUrl) => {    
+    this.url = this.route.url.subscribe(c => {   
       var headers = new HttpHeaders({authorization:this.authorization})
-      var path = `message/all/${this.route.snapshot.params['_id']}`
+      if(this.route.snapshot.params['_id'] !== this.currentUser()){
+        this.currentUser.set(this.route.snapshot.params['_id'])
+        this.routeState.set(window.history.state)
+        var path = `message/all/${this.currentUser()}`
+        var newGroupId = this.routeState().groupId
+       
+        this.path3 = `${newGroupId}/${this.user._id}`
+        
+        this.socket.disconnect()
 
-      if(this.connected) this.socket.disconnect()
+        this.fetchRequest(
+          path,{headers}
+        )
+      }
+      else{
+        var path = `message/all/${this.currentUser()}`
 
-      this.fetchRequest(
-        path,{headers}
-      )
+        this.fetchRequest(
+          path,{headers}
+        )
+      }
     })
 
     
@@ -388,64 +352,67 @@ export class DetailComponent implements OnInit,OnDestroy {
     
 
     this.socket.on('updated',(_id:string) => {
-      var result = this.fetchState().result
-
-      var modifiedResult = result.map(m => {
-        if(m.sender.usersRef === this.user._id){
-          return {
-            ...m,
-            read:true
-          }
-        }
-        else{
-          return m
-        }
+      var index = this.messages().findIndex(m => {
+        return m._id === this.currentUser()
       })
 
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result:modifiedResult
+      this.storeService.store.dispatch(
+        updated(
+          {
+            index,
+            _id:this.user._id
           }
-        })
-      })
+        )
+      )
 
       this.history.onUpdated(_id)
     })
     
-    this.socket.on('incomingMessage',m => {
-      var authorization = this.authorization
+    this.socket.on('incomingMessage',message => {      
+      var [{detail}] = this.messages().filter(
+        m => m._id === this.currentUser()
+      )
+
+      var [filter] = detail.filter(m => {
+        return m._id === message._id
+      })
+
+      var index = this.messages().findIndex(
+        m => m._id === this.currentUser()
+      )
       
       this.updateRequest(
         {
-          groupId:this.routeState.groupId,
-          _id:this.route.snapshot.params['_id']
+          groupId:this.routeState().groupId,
+          _id:this.currentUser()
         },
         {
           headers:new HttpHeaders({
-            authorization
+            authorization:this.authorization
           })
         }
       )
-      
-      var result = this.fetchState().result
-      
-      result[result.length] = {
-        ...m,
+
+      var newMessage = {
+        ...message,
         sent:true,
         read:true
       }
-      
-      setTimeout(() => {
-        this.fetchState.update(current => {
-          return {
-            ...current,
-            result
-          }
+  
+      if(!filter){
+        this.storeService.store.dispatch(
+          add(
+            {
+              index,
+              newMessage
+            }
+          )
+        )
+
+        setTimeout(() => {
+          this.toAnchor("anchor")
         })
-        setTimeout(() => this.toAnchor("anchor"),2000)
-      })
+      }
     })
     
     this.socket.on('history/message',m => {
@@ -454,444 +421,37 @@ export class DetailComponent implements OnInit,OnDestroy {
 
     this.socket.on('history/newMessage',m => {
       this.history.onNewMessage(m)
-    })
-
-    this.socket.on('disconnect',() => {
-      this.connected = false
-    })
+    }) 
 
     this.socket.on('connect',() => {      
-      this.connected = true
-
       this.socket.emit(
         'join',
-        `history/${this.user._id}`
+        this.path1
       )
       
       this.socket.emit(
         'join',
-        `chat/${this.user._id}/${this.route.snapshot.params['_id']}`
+        this.path2()
       )
       
       this.socket.emit(
         'join',
-         `${this.routeState.groupId}/${this.user._id}`
+         this.path3
       )
     })
   }
 
   ngOnDestroy(){
-    this.routeUrlSubscription.unsubscribe()
+    (this.url as Subscription).unsubscribe()
     this.socket.disconnect()
   }
-
-
-//   isValid         = /^\s*$/
-//   preview         = false
-//   uploading       = false
-//   connected       = false
-//   initialized     = true
-//   env             = import.meta.env
-//   router          = inject(Router)
-//   scroller        = inject(ViewportScroller)
-//   commonService   = inject(CommonService)
-//   storeService    = inject(StoreService)
-//   route           = inject(ActivatedRoute)
-//   requestService  = inject(RequestService)
-//   firebaseService = inject(FirebaseService)
-//   user            = this.storeService.user()
-//   routeState      = window.history.state
-//   authorization   = this.storeService.authorization()
-//   storage         = this.firebaseService.storage
-//   _id             = this.route.snapshot.params['_id']
-//   url             = toSignal(this.route.url)
-
-  
-//   socket = io(import.meta.env.NG_APP_SERVER)
-
-//   groupId = signal(window.history.state.groupId)
-//   snapshotParamsId = signal(this.route.snapshot.params['_id'])
-
-  
-//   @ViewChild('appHistory') appHistory!:HistoryComponent
-
-//   findProfileState = this.requestService.createInitialState<Common.Profile>()
-//   fetchState = this.requestService.createInitialState<Message.All>()
-//   sendState = this.requestService.createInitialState<Message.One>()
-//   updateState = this.requestService.createInitialState<Message.One>()
-
-//   findProfile = this.requestService.get<Common.Profile>({
-//     cb:r => {
-//       this.routeState.profile = r
-//     },
-//     failedCb:r => console.log(r),
-//     state:this.findProfileState
-//   })
-
-//   updateRequest = this.requestService.put<Message.Update,Message.One>({
-//     cb:r => console.log(r),
-//     failedCb:r => console.log(r),
-//     state:this.updateState,
-//     path:'message'
-//   })
-
-//   sendRequest = this.requestService.post<Message.New,Message.One>({
-//     failedCb:err => console.log(err),
-//     cb:r => this.onSuccessSend(r._id),
-//     state:this.sendState,
-//     path:'message'
-//   })
-
-//   fetchRequest = this.requestService.get<Message.All>({
-//     state:this.fetchState,
-//     cb:messages => {
-//       var headers = new HttpHeaders({authorization:this.authorization})
-//       if(this.snapshotParamsId() !== this.routeState.profile.usersRef){
-//         this.findProfile(
-//           `profile/${this.snapshotParamsId()}`
-//           ,{headers}
-//         )
-//       }
-
-//       this.groupId.set(
-//         messages[0].groupId
-//       )
-      
-//       this.updateRequest({
-//         groupId:this.groupId(),
-//         _id:this.snapshotParamsId()
-//       })
-
-//       var result = messages.map(
-//         message => ({
-//           ...message,
-//           sent:true
-//         })
-//       )
-
-//       var sortedResult = result.sort((a,b) => {
-//         return a.sendAt > b.sendAt ? 1 : -1
-//       })
-
-//       setTimeout(() => {
-//         this.fetchState.update(
-//           current => ({
-//             ...current,
-//             result
-//           })
-//         )
-//       })
-      
-//       setTimeout(() => this.toAnchor("anchor2"))
-
-//     },
-//     failedCb:err => {
-//       console.log(
-//         err
-//       )
-//     },
-//   })
-
-//   txtMessage = new FormGroup({
-//     value: new FormControl<string>(''),
-//     description: new FormControl<string>('none'),
-//     sender: new FormControl<string>(this.user._id),
-//     contentType: new FormControl<string>('text'),
-//   })
-
-//   imgMessage = new FormGroup({
-//     description:new FormControl<string>('...'),
-//     sender:new FormControl<string>(this.user._id),
-//     value:new FormControl<string>(''),
-//     contentType:new FormControl<string>('image')
-//   })
-
-//   sendTextMessage(form:FormGroup,authorization:string){
-//     var now = Date.now()
-//     var groupId = this.groupId()
-//     var accept = this.snapshotParamsId()
-//     var _id = new Types.ObjectId().toString()
-//     var headers = new HttpHeaders({authorization})
-
-//     var newMessage = {
-//       ...form.value,
-//       sendAt:now,
-//       sent:false,
-//       read:false,
-//       accept,
-//       groupId,
-//       _id,
-//     }
-
-//     var sendObject = {
-//       ...form.value,
-//       sendAt:now,
-//       groupId,
-//       accept,
-//       _id
-//     }
-
-
-//     this.fetchState.update(current => {
-//       var result = [
-//         ...current.result,
-//         newMessage
-//       ]
-
-//       return {
-//         ...current,
-//         result
-//       }
-//     })
-
-//     setTimeout(() => this.toAnchor("anchor"))
-
-//     this.appHistory.onSendMessage(newMessage,this.snapshotParamsId())
-
-
-//     this.sendRequest(
-//       sendObject,
-//       {headers}
-//     )
-//   }
-
-//   sendImage(form:FormGroup,authorization:string){
-//     var now = Date.now()
-//     var groupId = this.groupId()
-//     var accept = this.snapshotParamsId()
-//     var _id = new Types.ObjectId().toString()
-//     var headers = new HttpHeaders({authorization})
-
-//     var newMessage:Message.One = {
-//       ...form.value,
-//       sendAt:now,
-//       sent:false,
-//       read:false,
-//       accept,
-//       groupId,
-//       _id
-//     }
-
-//     var sendObject:Message.New = {
-//       ...form.value,
-//       sendAt:now,
-//       accept,
-//       groupId,
-//       _id,
-//     }
-
-//     this.fetchState.update(current => {
-//       var result = [
-//         ...current.result,
-//         newMessage
-//       ]
-
-//       return {
-//         ...current,
-//         result
-//       }
-//     })
-
-//     this.appHistory.onSendMessage(newMessage,this.snapshotParamsId())
-
-//     setTimeout(() => this.toAnchor("anchor"))
-
-//     this.sendRequest(
-//       sendObject,
-//       {headers}
-//     )
-
-//     this.preview = false
-//   }
-
-//   onSuccessSend(_id:string){
-//     var result = this.fetchState().result
-//     var JSONResult = result.map(m => {
-//       return JSON.stringify(m)
-//     })
-
-//     var [filter] = result.filter(f => {
-//       return f._id === _id
-//     })
-
-//     var index = JSONResult.indexOf(
-//       JSON.stringify(filter)
-//     )
-
-//     result[index] = {
-//       ...filter,
-//       sent:true,
-//       failed:false
-//     }
-
-//     this.appHistory.onSuccessSend(_id)
-//     setTimeout(() => this.toAnchor("anchor"))
-
-//     this.fetchState.update(
-//       current => ({
-//         ...current,
-//         result
-//       })
-//     )
-//   }
-
-//   onIncomingMessage = this.socket.on('incomingMessage',m => {
-//     this.updateRequest({
-//       groupId:this.groupId(),
-//       _id:this.snapshotParamsId()
-//     })
-    
-//     var result = this.fetchState().result
-    
-//     var newMessage = {
-//       ...m,
-//       sent:true,
-//       read:true
-//     }
-
-//     var sortedResult = [...result,newMessage].sort(
-//       (a,b) => a.sendAt > b.sendAt ? 1 : -1
-//     )
-
-//     this.fetchState.update(current => {
-//       return {
-//         ...current,
-//         result:[...sortedResult]
-//       }
-//     })
-    
-//     setTimeout(() => this.toAnchor("anchor"),2000)
-//   })
-
-
-//   onUpdated = this.socket.on('updated',(groupId:string) => {
-//     var result = this.fetchState().result
-
-//     var newResult = result.map((m) => {
-//       return {
-//         ...m,
-//         read:true
-//       }
-//     })
-
-//     setTimeout(() => this.appHistory.onUpdated(groupId))
-
-//     setTimeout(() => {
-//       this.fetchState.update((current) => {
-//         return {
-//           ...current,
-//           result:newResult
-//         }
-//       })
-//     })
-    
-//   })
-
-//   onDisconnected = this.socket.on('disconnect',() => {
-//     this.connected = false
-//   })
-
-//   onConnected = this.socket.on('connect',() => {
-//     this.connected = true
-
-//     this.socket.emit(
-//       'join',
-//       `history/${this.user._id}`
-//     )
-
-//     this.socket.emit(
-//       'join',
-//       `chat/${this.user._id}/${this.snapshotParamsId()}`
-//     )
-
-//     this.socket.emit(
-//       'join',
-//       `${this.groupId()}/${this.user._id}`
-//     )
-//   })
-
-  // async onFileChange(event:any){
-  //   try{
-  //     this.uploading = true
-  //     var file = event.target.files[0]
-  //     var uploadRef = `send/${Date.now()}`
-  //     var refs = ref(this.storage,uploadRef)
-  //     var result = await uploadBytes(refs,file)
-  //     var url = await getDownloadURL(result.ref)
-
-  //     this.imgMessage.patchValue({
-  //       ...this.imgMessage.value,
-  //       value:url
-  //     })
-
-  //     this.preview = true
-  //   }
-  //   catch(err:any){
-  //     console.log(err.message)
-  //   }
-  //   finally{
-  //     this.uploading = false
-  //   }
-  // }
-
-//   toAnchor(anchor:string){
-//     this.scroller.scrollToAnchor(
-//       anchor
-//     )
-//   }
-
-//   onUrlChange = effect(() => {
-//     /*
-//     var currentUrl = this.url()
-//     var headers = new HttpHeaders({authorization:this.authorization})
-//     this.snapshotParamsId.set(this.route.snapshot.params['_id'])
-    
-//     if(this.connected) {
-//       this.socket.disconnect()
-//     }
-
-//     if(this.groupId() !== ''){
-//       this.groupId.set('')
-//     }
-
-//     this.fetchRequest(
-//       `message/all/${this.snapshotParamsId()}`,
-//       {headers}
-//     )
-//     */
-//   },
-//   {
-//     allowSignalWrites:true
-//   }
-// )
-
-//   ngOnInit(){
-//     this.initialized = true
-    
-//     this.route.url.subscribe((url) => {
-//       var headers = new HttpHeaders({authorization:this.authorization})
-      
-//       this.snapshotParamsId.set(this.route.snapshot.params['_id'])
-
-//       if(this.connected) {
-//         this.socket.disconnect()
-//       }
-
-//       if(this.groupId() !== ''){
-//         this.groupId.set('')
-//       }
-
-//       this.fetchRequest(
-//         `message/all/${this.snapshotParamsId()}`,
-//         {headers}
-//       )
-//     })
-    
-
-//   }
-
-//   ngOnDestroy(){
-//     this.socket.disconnect()
-//   }
-
 }
+
+
+interface WHS{
+  groupId:string,
+  profile:Common.Profile
+}
+
+type User = Common.User
+type RSU = Subscription|undefined
