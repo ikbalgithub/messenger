@@ -17,21 +17,35 @@ export class StoreService {
   history = toSignal(this.store.select('history')) as Signal<Ngrx.History>
 
   syncWithLocalStorage:EffectRef = effect(() => {
-    console.log('a change')
+    var authentication = this.authentication()
+    var authorization = this.authorization()
+    var history = this.history()
+    var messages = this.messages()
+    var user = this.user()
+
+    var jsonState = JSON.stringify({
+      authentication,
+      authorization,
+      history,
+      messages,
+      user,
+    })
+
     
     if(this.rootInit){
-      var jsonState = JSON.stringify({
-        authentication:this.authentication(),
-        authorization:this.authorization(),
-        history:this.history(),
-        messages:this.messages(),
-        user:this.user()
-      })
-
-      localStorage.setItem(
-        "ngrx",
-        jsonState
-      )
+      if(JSON.parse(localStorage.getItem("ngrx") as string)){
+        localStorage.removeItem("ngrx")
+        localStorage.setItem(
+          "ngrx",
+          jsonState
+        )
+      }
+      else{
+        localStorage.setItem(
+          "ngrx",
+          jsonState
+        )
+      }
     }
   })
 
