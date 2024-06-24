@@ -228,6 +228,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     
     this.imageForm.patchValue({
       value:'',
+      contentType:''
     })
 
     this.messageForm.patchValue({
@@ -258,8 +259,8 @@ export class DetailComponent implements OnInit,OnDestroy {
       var url = await getDownloadURL(result.ref)
       var formValue = this.imageForm.value
 
-       this.imageForm.patchValue({
-        value:url,
+      this.imageForm.patchValue({
+        value:url
       })
 
       this.preview = true
