@@ -64,13 +64,14 @@ export class DetailComponent implements OnInit,OnDestroy {
   pathX             = `chat/${this.user._id}`
   path1             = `history/${this.user._id}`
   
-  @ViewChild('history') history !:HistoryComponent
   socket         = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
   path2          = computed(() => `${this.pathX}/${this.currentUser()}`)
   updateState    = this.requestService.createInitialState<Message.One>()
   fetchState     = this.requestService.createInitialState<Message.All>()
 	sendState      = this.requestService.createInitialState<Message.One>()
   path3          = `${this.routeState().groupId}/${this.user._id}`
+
+  @ViewChild('history') history !:HistoryComponent
 
   messageForm:FormGroup = new FormGroup({
     value: new FormControl<string>(''),

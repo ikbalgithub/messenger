@@ -16,11 +16,13 @@ export class StoreService {
   messages = toSignal(this.store.select('messages')) as Signal<Ngrx.Messages[]>
   history = toSignal(this.store.select('history')) as Signal<Ngrx.History>
 
-  synchWithLocalStorage = effect(() => {
+  sync = effect(() => {
     if(this.rootInit){
       var jsonState = JSON.stringify({
         authentication:this.authentication(),
         authorization:this.authorization(),
+        history:this.history(),
+        messages:this.messages(),
         user:this.user()
       })
 
