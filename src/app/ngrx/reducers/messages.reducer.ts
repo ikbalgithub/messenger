@@ -4,7 +4,7 @@ import { add, failedSend, init, resend, updated } from "../actions/messages.acti
 import { successSend } from "../actions/messages.actions";
 
 export const messagesReducer = createReducer<Ngrx.Messages[]>(
-	JSON.parse(localStorage.getItem("ngrx") as string).messages ?? [],
+	JSON.parse(localStorage.getItem("ngrx") as string)?.messages ?? [],
 	on(init,(state,payload) => {
 		return [
 			...state,
