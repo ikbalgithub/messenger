@@ -461,19 +461,19 @@ export class DetailComponent implements OnInit,OnDestroy {
       this.socket.emit(
         'join',
         this.path1,
-        (t:string) => this.path1Tag = t
+        (t:any) => alert(t)
       )
       
       this.socket.emit(
         'join',
         this.path2(),
-        (t:string) => this.path2Tag = t
+        (t:any) => alert(t)
       )
       
       this.socket.emit(
         'join',
          this.path3,
-         (t:string) => this.path3Tag = t
+         (t:any) => alert(t)
       )
     })
   }
