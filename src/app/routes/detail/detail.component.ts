@@ -48,6 +48,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 	isValid           = /^\s*$/
   internetConnected = true
   url:RSU           = undefined
+  tags:string[]     = []
   scroller          = inject(ViewportScroller)
   route             = inject(ActivatedRoute)
   firebaseService   = inject(FirebaseService)
@@ -329,6 +330,13 @@ export class DetailComponent implements OnInit,OnDestroy {
         var newGroupId = this.routeState().groupId
        
         this.path3 = `${newGroupId}/${this.user._id}`
+
+        this.tags.map(tag => {
+          this.socket.emit(
+            'leave',
+            tag
+          )
+        })
         
         this.socket.disconnect()
 
@@ -437,17 +445,29 @@ export class DetailComponent implements OnInit,OnDestroy {
     this.socket.on('connect',() => {      
       this.socket.emit(
         'join',
-        this.path1
+        this.path1,
+        (t:string) => this.tags = [
+          ...this.tags,
+          t
+        ]
       )
       
       this.socket.emit(
         'join',
-        this.path2()
+        this.path2(),
+        (t:string) => this.tags = [
+          ...this.tags,
+          t
+        ]
       )
       
       this.socket.emit(
         'join',
-         this.path3
+         this.path3,
+         (t:string) => this.tags = [
+          ...this.tags,
+          t
+        ]
       )
     })
   }
