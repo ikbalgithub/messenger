@@ -6,12 +6,18 @@ import { CanActivateFn,Router,ActivatedRouteSnapshot,RouterStateSnapshot } from 
 
 
 export const authGuard = (route:ActivatedRouteSnapshot,state:RouterStateSnapshot):boolean => {
-  const router= inject(Router)
-  const store = inject(Store<Ngrx.State>)
-  const authentication = toSignal(store.select('authentication'))()
+  var canContinue = false
+  var router = inject(Router)
+  var store = inject(Store<Ngrx.State>)
+  var authentication = toSignal(store.select('authentication'))()
 
   var loggedIn = authentication.loggedIn ?? false
   var onLoginPage = state.url === '/login'
+
+  if(!loggedIn && onLoginPage) canContinue = true
+  if(!loggedIn && !onLoginPage) canContinue = false
+  if(loggedIn && !onLoginPage) canContinue = true
+  if(loggedIn && onLoginPage) canContinue = false 
  
   if(!loggedIn && !onLoginPage){
     router.navigate(['login'])
@@ -21,11 +27,5 @@ export const authGuard = (route:ActivatedRouteSnapshot,state:RouterStateSnapshot
     router.navigate([''])
   }
 
-  return onLoginPage 
-    ? loggedIn 
-      ? false 
-      : true 
-    : loggedIn 
-      ? true 
-      : false 
+  return canContinue
 };
