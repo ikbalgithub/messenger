@@ -369,6 +369,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
     
     this.socket.on('incomingMessage',message => {      
+      alert('test')
       var [{detail}] = this.messages().filter(
         m => m._id === this.currentUser()
       )
