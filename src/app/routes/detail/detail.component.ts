@@ -416,8 +416,10 @@ export class DetailComponent implements OnInit,OnDestroy {
           this.toAnchor("anchor")
         })
       }
-
-      ack()
+      
+      if(this.currentUser() === message.sender){
+        ack()
+      }
     })
     
     this.socket.on('history/message',(m,ack:Function) => {
