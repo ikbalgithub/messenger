@@ -188,6 +188,11 @@ export class DetailComponent implements OnInit,OnDestroy {
       setTimeout(() => this.toAnchor("anchor2"))
      
       if(!this.socket.connected) this.socket.connect()
+
+      if(this.socket.connected){
+        this.socket.disconnect()
+        this.socket.connect()
+      }
       
     },
     state:this.fetchState,
@@ -338,8 +343,6 @@ export class DetailComponent implements OnInit,OnDestroy {
           )
         })
         
-        this.socket.disconnect()
-
         this.fetchRequest(
           path,{headers}
         )
