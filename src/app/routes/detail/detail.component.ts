@@ -47,7 +47,6 @@ export class DetailComponent implements OnInit,OnDestroy {
   uploading         = false
 	isValid           = /^\s*$/
   internetConnected = true
-  tags:string[]     = []
   url:RSU           = undefined
   scroller          = inject(ViewportScroller)
   route             = inject(ActivatedRoute)
@@ -335,19 +334,6 @@ export class DetailComponent implements OnInit,OnDestroy {
         var newGroupId = this.routeState().groupId
        
         this.path3 = `${newGroupId}/${this.user._id}`
-
-        this.tags.map((tag,index) => {
-          this.tags.splice(index,1)
-
-          this.tags = this.tags.filter(
-            t => t !== tag
-          )
-          
-          this.socket.emit(
-            'leave',
-            tag
-          )
-        })
         
         this.fetchRequest(
           path,{headers}
@@ -468,11 +454,9 @@ export class DetailComponent implements OnInit,OnDestroy {
       )
     })
 
-    this.socket.on('joined',tag => {
-      this.tags = [
-        ...this.tags,
-        tag
-      ]
+    this.socket.on('forceClose',() => {
+      this.socket.disconnect()
+      this.socket.connect()
     })
   }
 
