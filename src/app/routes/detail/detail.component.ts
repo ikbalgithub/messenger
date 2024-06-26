@@ -335,6 +335,15 @@ export class DetailComponent implements OnInit,OnDestroy {
         var newGroupId = this.routeState().groupId
        
         this.path3 = `${newGroupId}/${this.user._id}`
+
+        this.tags.map((tag,index) => {
+          this.tags = this.tags.splice(index,1)
+          
+          this.socket.emit(
+            'leave',
+            tag
+          )
+        })
         
         this.fetchRequest(
           path,{headers}
