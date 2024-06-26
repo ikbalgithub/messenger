@@ -337,7 +337,11 @@ export class DetailComponent implements OnInit,OnDestroy {
         this.path3 = `${newGroupId}/${this.user._id}`
 
         this.tags.map((tag,index) => {
-          this.tags = this.tags.splice(index,1)
+          this.tags.splice(index,1)
+
+          this.tags = this.tags.filter(
+            t => t !== tag
+          )
           
           this.socket.emit(
             'leave',
