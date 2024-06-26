@@ -48,8 +48,12 @@ export class MessagesComponent implements OnInit, OnDestroy {
   
     this.socket.on('history/message',(m,ack) =>{
       this.history.onMessage(m)
-
       ack()
+    })
+
+    this.socket.on('forceClose',() => {
+      this.socket.disconnect()
+      this.socket.connect()
     })
   }
 
