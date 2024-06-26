@@ -190,7 +190,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 
       if(this.socket.connected){
         this.socket.disconnect()
-        this.socket.connect()
+        this.reConnect()
       }
       
     },
@@ -463,6 +463,12 @@ export class DetailComponent implements OnInit,OnDestroy {
   ngOnDestroy(){
     (this.url as Subscription).unsubscribe()
     this.socket.disconnect()
+  }
+
+  reConnect(){
+    setTimeout(() => {
+      this.socket.connect()
+    },3000)
   }
 }
 
