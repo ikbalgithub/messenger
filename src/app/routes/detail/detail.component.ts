@@ -47,6 +47,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   uploading         = false
 	isValid           = /^\s*$/
   internetConnected = true
+  tags:string[]     = []
   url:RSU           = undefined
   scroller          = inject(ViewportScroller)
   route             = inject(ActivatedRoute)
@@ -441,20 +442,24 @@ export class DetailComponent implements OnInit,OnDestroy {
       this.socket.emit(
         'join',
         this.path1,
-        (t:any) => alert(t)
       )
       
       this.socket.emit(
         'join',
         this.path2(),
-        (t:any) => alert(t)
       )
       
       this.socket.emit(
         'join',
          this.path3,
-         (t:any) => alert(t)
       )
+    })
+
+    this.socket.on('joined',tag => {
+      this.tags = [
+        ...this.tags,
+        tag
+      ]
     })
   }
 
