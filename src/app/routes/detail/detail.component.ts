@@ -456,11 +456,6 @@ export class DetailComponent implements OnInit,OnDestroy {
          (t:any) => alert(t)
       )
     })
-
-    this.socket.on(`joined/${this.path1}`,tag => this.path1Tag = tag)
-    this.socket.on(`joined/${this.path2()}`,tag => this.path2Tag = tag)
-    this.socket.on(`joined/${this.path3}`,tag => this.path3Tag = tag)
-
   }
 
   ngOnDestroy(){
