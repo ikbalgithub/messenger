@@ -349,13 +349,12 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
 
     
-    this.socket.on('history/updated',(_id:string,ack:Function) => {
+    this.socket.on('history/updated',_id => {
       this.history.onUpdated(_id)
-      ack()
     })
     
 
-    this.socket.on('updated',(_id:string,ack:Function) => {
+    this.socket.on('updated',_id => {
       var index = this.messages().findIndex(m => {
         return m._id === this.currentUser()
       })
@@ -371,10 +370,9 @@ export class DetailComponent implements OnInit,OnDestroy {
 
       this.history.onUpdated(_id)
       
-      ack()
     })
     
-    this.socket.on('incomingMessage',(message,ack:Function) => {      
+    this.socket.on('incomingMessage',message => {      
       var [{detail}] = this.messages().filter(
         m => m._id === this.currentUser()
       )
@@ -419,22 +417,14 @@ export class DetailComponent implements OnInit,OnDestroy {
           this.toAnchor("anchor")
         })
       }
-      
-      if(this.currentUser() === message.sender){
-        ack()
-      }
     })
     
-    this.socket.on('history/message',(m,ack:Function) => {
+    this.socket.on('history/message',m => {
       this.history.onMessage(m)
-
-      ack()
     })
 
-    this.socket.on('history/newMessage',(m,ack:Function) => {
+    this.socket.on('history/newMessage',m => {
       this.history.onNewMessage(m)
-
-      ack()
     }) 
 
     this.socket.on('connect',() => {      
@@ -452,11 +442,6 @@ export class DetailComponent implements OnInit,OnDestroy {
         'join',
          this.path3,
       )
-    })
-
-    this.socket.on('forceClose',() => {
-      this.socket.disconnect()
-      this.socket.connect()
     })
   }
 
