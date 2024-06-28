@@ -34,26 +34,16 @@ export class MessagesComponent implements OnInit, OnDestroy {
       )
     })
 
-    this.socket.on('history/updated',(_id,ack) => {
+    this.socket.on('history/updated',_id => {
       this.history.onUpdated(_id)
-
-      ack()
     })
    
-    this.socket.on('history/newMessage',(data,ack) => {
+    this.socket.on('history/newMessage',data => {
       this.history.onNewMessage(data)
-
-      ack()
     })
   
-    this.socket.on('history/message',(m,ack) =>{
+    this.socket.on('history/message',m =>{
       this.history.onMessage(m)
-      ack()
-    })
-
-    this.socket.on('forceClose',() => {
-      this.socket.disconnect()
-      this.socket.connect()
     })
   }
 

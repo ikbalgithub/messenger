@@ -186,13 +186,9 @@ export class DetailComponent implements OnInit,OnDestroy {
 
       setTimeout(() => this.toAnchor("anchor2"))
      
-      if(!this.socket.connected) this.socket.connect()
-
-      if(this.socket.connected){
-        this.socket.disconnect()
-        this.reConnect()
-      }
-      
+      if(!this.socket.connected){
+        this.socket.connect()
+      }     
     },
     state:this.fetchState,
   })
@@ -330,6 +326,9 @@ export class DetailComponent implements OnInit,OnDestroy {
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.currentUser.set(this.route.snapshot.params['_id'])
         this.routeState.set(window.history.state)
+        this.socket.disconnect()
+
+
         var path = `message/all/${this.currentUser()}`
         var newGroupId = this.routeState().groupId
        
