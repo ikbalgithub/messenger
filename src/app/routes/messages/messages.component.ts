@@ -8,6 +8,7 @@ import { Search } from '../../..';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
+import { SocketService } from '../../services/socket/socket.service';
 
 @Component({
   selector: 'app-messages',
@@ -19,7 +20,7 @@ import { AuthService } from '../../services/auth/auth.service';
 export class MessagesComponent implements OnInit, OnDestroy {
   @ViewChild('history') history !:HistoryComponent
 
-  socket         = io(import.meta.env.NG_APP_SERVER)
+  socketService  = inject(SocketService)
   storeService   = inject(StoreService)
   user           = this.storeService.user()
   requestService = inject(RequestService)
@@ -27,28 +28,30 @@ export class MessagesComponent implements OnInit, OnDestroy {
   authService    = inject(AuthService)
   
   ngOnInit(){
-    this.socket.on('connect',() => {
-      this.socket.emit(
+    this.socketService.socket.on('connect',() => {
+      this.socketService.socket.emit(
         'join',
         `history/${this.user._id}`
       )
     })
 
-    this.socket.on('history/updated',_id => {
+    this.socketService.socket.on('history/updated',_id => {
       this.history.onUpdated(_id)
     })
    
-    this.socket.on('history/newMessage',data => {
-      this.history.onNewMessage(data)
+    this.socketService.socket.on('history/newMessage',m => {
+      this.history.onNewMessage(m)
     })
   
-    this.socket.on('history/message',m =>{
+    this.socketService.socket.on('history/message',m =>{
       this.history.onMessage(m)
     })
   }
 
 
   ngOnDestroy(){
-    this.socket.disconnect()
+    this.socketService.socket.emit(
+      'leave'
+    )
   }
 }

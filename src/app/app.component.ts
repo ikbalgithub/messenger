@@ -1,7 +1,8 @@
 import { RouterOutlet } from '@angular/router';
-import { Component,HostListener,inject } from '@angular/core';
+import { Component,HostListener,OnInit,effect,inject } from '@angular/core';
 import { CommonModule } from '@angular/common'
 import { StoreService } from './services/store/store.service'
+import { SocketService } from './services/socket/socket.service';
 
 @Component({
   selector: 'app-root',
@@ -11,16 +12,18 @@ import { StoreService } from './services/store/store.service'
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  store = inject(StoreService)
+  
+  storeService = inject(StoreService)
+  socketService = inject(SocketService)
   
   @HostListener('window:beforeunload',['$event']) onBeforeUnload(event:Event){
     var ngrx = localStorage.getItem("ngrx")
     
-    var authentication = this.store.authentication()
-    var authorization = this.store.authorization()
-    var history = this.store.history()
-    var messages = this.store.messages()
-    var user = this.store.user()
+    var authentication = this.storeService.authentication()
+    var authorization = this.storeService.authorization()
+    var history = this.storeService.history()
+    var messages = this.storeService.messages()
+    var user = this.storeService.user()
 
     var jsonState = JSON.stringify({
       authentication,
@@ -29,6 +32,8 @@ export class AppComponent {
       messages,
       user,
     })
+
+    this.socketService.socket.disconnect()
 
     if(ngrx as String){
       localStorage.removeItem(
@@ -45,4 +50,17 @@ export class AppComponent {
       )
     }
   }
+
+  onAuthenticationStateChange = effect(() => {
+    var authState = this.storeService.authentication()
+
+    if(authState.loggedIn){
+      this.socketService.socket.connect()
+    }
+    else{
+      this.socketService.socket.disconnect()
+    }
+  })
+
+ 
 }

@@ -21,7 +21,7 @@ import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 import { add, failedSend, init, resend, successSend, updated } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
-import { threadId } from 'worker_threads';
+import { SocketService } from '../../services/socket/socket.service';
 
 @Component({
   selector: 'app-detail',
@@ -54,6 +54,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   requestService    = inject(RequestService)
   storeService      = inject(StoreService)
   commonService     = inject(CommonService)
+  socketService     = inject(SocketService)
   storage           = this.firebaseService.storage
   parameterId       = this.route.snapshot.params['_id']
   user              = this.storeService.user() as User
@@ -64,7 +65,6 @@ export class DetailComponent implements OnInit,OnDestroy {
   pathX             = `chat/${this.user._id}`
   path1             = `history/${this.user._id}`
   
-  socket         = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
   path2          = computed(() => `${this.pathX}/${this.currentUser()}`)
   updateState    = this.requestService.createInitialState<Message.One>()
   fetchState     = this.requestService.createInitialState<Message.All>()
@@ -186,9 +186,20 @@ export class DetailComponent implements OnInit,OnDestroy {
 
       setTimeout(() => this.toAnchor("anchor2"))
      
-      if(!this.socket.connected){
-        this.socket.connect()
-      }
+      this.socketService.socket.emit(
+        'join',
+        this.path1
+      )
+
+      this.socketService.socket.emit(
+        'join',
+        this.path2()
+      )
+
+      this.socketService.socket.emit(
+        'join',
+        this.path3
+      )
     },
     state:this.fetchState,
   })
@@ -320,20 +331,13 @@ export class DetailComponent implements OnInit,OnDestroy {
   	this.internetConnected = true
   }
 
-  disconnect(c:any):Observable<null>{
-    if(this.route.snapshot.params['id'] !== this.currentUser()){
-      this.socket.disconnect()
-    }
-    
-    return of(
-      c
-    )
-  }
 
   ngOnInit(){
-    this.url = this.route.url.pipe(concatMap(c => this.disconnect(c))).subscribe(c => {   
+    this.url = this.route.url.subscribe(c => {   
       var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
+        this.socketService.socket.emit('leave')
+        
         this.currentUser.set(this.route.snapshot.params['_id'])
         this.routeState.set(window.history.state)
 
@@ -356,12 +360,12 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
 
     
-    this.socket.on('history/updated',_id => {
+    this.socketService.socket.on('history/updated',_id => {
       this.history.onUpdated(_id)
     })
     
 
-    this.socket.on('updated',_id => {
+    this.socketService.socket.on('updated',_id => {
       var index = this.messages().findIndex(m => {
         return m._id === this.currentUser()
       })
@@ -379,7 +383,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       
     })
     
-    this.socket.on('incomingMessage',message => {      
+    this.socketService.socket.on('incomingMessage',message => {      
       var [{detail}] = this.messages().filter(
         m => m._id === this.currentUser()
       )
@@ -426,41 +430,17 @@ export class DetailComponent implements OnInit,OnDestroy {
       }
     })
     
-    this.socket.on('history/message',m => {
+    this.socketService.socket.on('history/message',m => {
       this.history.onMessage(m)
     })
 
-    this.socket.on('history/newMessage',m => {
+    this.socketService.socket.on('history/newMessage',m => {
       this.history.onNewMessage(m)
     }) 
-
-    this.socket.on('connect',() => {      
-      this.socket.emit(
-        'join',
-        this.path1,
-      )
-      
-      this.socket.emit(
-        'join',
-        this.path2(),
-      )
-      
-      this.socket.emit(
-        'join',
-         this.path3,
-      )
-    })
   }
 
   ngOnDestroy(){
-    (this.url as Subscription).unsubscribe()
-    this.socket.disconnect()
-  }
-
-  reConnect(){
-    setTimeout(() => {
-      this.socket.connect()
-    },3000)
+    this.url?.unsubscribe()
   }
 }
 
