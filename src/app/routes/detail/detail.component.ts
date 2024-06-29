@@ -190,13 +190,8 @@ export class DetailComponent implements OnInit,OnDestroy {
         this.socket.connect()
       }
       else{
-        this.socket.emit(
-          'leave',[
-            this.path1,
-            this.path2(),
-            this.path3
-          ]
-        )
+        this.socket.disconnect()
+        this.socket.connect()
       }
     },
     state:this.fetchState,
