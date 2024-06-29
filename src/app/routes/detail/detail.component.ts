@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client'
 import { Types } from 'mongoose';
-import { Subscription } from 'rxjs'
+import { Observable, Subscription, concat, concatMap, of } from 'rxjs'
 import { ImageModule } from 'primeng/image';
 import { CommonModule,ViewportScroller } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
@@ -189,10 +189,6 @@ export class DetailComponent implements OnInit,OnDestroy {
       if(!this.socket.connected){
         this.socket.connect()
       }
-      else{
-        this.socket.disconnect()
-        this.socket.connect()
-      }
     },
     state:this.fetchState,
   })
@@ -324,8 +320,18 @@ export class DetailComponent implements OnInit,OnDestroy {
   	this.internetConnected = true
   }
 
+  disconnect(c:any):Observable<null>{
+    if(this.route.snapshot.params['id'] !== this.currentUser()){
+      this.socket.disconnect()
+    }
+    
+    return of(
+      null
+    )
+  }
+
   ngOnInit(){
-    this.url = this.route.url.subscribe(c => {   
+    this.url = this.route.url.pipe(concatMap(this.disconnect)).subscribe(c => {   
       var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.currentUser.set(this.route.snapshot.params['_id'])
