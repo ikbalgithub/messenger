@@ -331,7 +331,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(){
-    this.url = this.route.url.pipe(concatMap(this.disconnect.bind(this))).subscribe(c => {   
+    this.url = this.route.url.pipe(concatMap(c => this.disconnect(c))).subscribe(c => {   
       var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.currentUser.set(this.route.snapshot.params['_id'])
