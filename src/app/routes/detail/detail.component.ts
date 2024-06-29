@@ -320,13 +320,13 @@ export class DetailComponent implements OnInit,OnDestroy {
   	this.internetConnected = true
   }
 
-  disconnect(c:any):Observable<null>{
+  disconnect(c:any):Observable<any>{
     if(this.route.snapshot.params['id'] !== this.currentUser()){
       this.socket.disconnect()
     }
     
     return of(
-      null
+      c
     )
   }
 
