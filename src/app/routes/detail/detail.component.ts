@@ -320,7 +320,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   	this.internetConnected = true
   }
 
-  disconnect(c:any):Observable<any>{
+  disconnect(c:any):Observable<null>{
     if(this.route.snapshot.params['id'] !== this.currentUser()){
       this.socket.disconnect()
     }
@@ -331,7 +331,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   }
 
   ngOnInit(){
-    this.url = this.route.url.pipe(concatMap(this.disconnect)).subscribe(c => {   
+    this.url = this.route.url.pipe(concatMap(this.disconnect.bind(this))).subscribe(c => {   
       var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.currentUser.set(this.route.snapshot.params['_id'])
