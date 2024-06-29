@@ -191,7 +191,11 @@ export class DetailComponent implements OnInit,OnDestroy {
       }
       else{
         this.socket.emit(
-          'leave'
+          'leave',[
+            this.path1,
+            this.path2(),
+            this.path3
+          ]
         )
       }
     },
