@@ -188,7 +188,12 @@ export class DetailComponent implements OnInit,OnDestroy {
      
       if(!this.socket.connected){
         this.socket.connect()
-      }     
+      }
+      else{
+        this.socket.emit(
+          'leave'
+        )
+      }
     },
     state:this.fetchState,
   })
@@ -326,8 +331,6 @@ export class DetailComponent implements OnInit,OnDestroy {
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.currentUser.set(this.route.snapshot.params['_id'])
         this.routeState.set(window.history.state)
-        this.socket.disconnect()
-
 
         var path = `message/all/${this.currentUser()}`
         var newGroupId = this.routeState().groupId
