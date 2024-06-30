@@ -331,9 +331,13 @@ export class DetailComponent implements OnInit,OnDestroy {
   	this.internetConnected = true
   }
 
+  leave(c:any):Observable<null>{
+    this.socketService.socket.emit('leave')
+    return of(null)
+  }
 
   ngOnInit(){
-    this.url = this.route.url.subscribe(c => {   
+    this.url = this.route.url.pipe(concatMap(c => this.leave(c))).subscribe(c => {   
       var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         this.socketService.socket.emit('leave')
