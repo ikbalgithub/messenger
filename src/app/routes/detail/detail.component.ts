@@ -445,6 +445,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 
   ngOnDestroy(){
     this.url?.unsubscribe()
+    this.socketService.socket.emit('leave')
   }
 }
 
