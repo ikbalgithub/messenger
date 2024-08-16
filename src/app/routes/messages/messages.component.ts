@@ -20,38 +20,37 @@ import { SocketService } from '../../services/socket/socket.service';
 export class MessagesComponent implements OnInit, OnDestroy {
   @ViewChild('history') history !:HistoryComponent
 
-  socketService  = inject(SocketService)
+  
   storeService   = inject(StoreService)
   user           = this.storeService.user()
   requestService = inject(RequestService)
   router         = inject(Router)
   authService    = inject(AuthService)
+  socket         = io(import.meta.env.NG_APP_SERVER)
   
   ngOnInit(){
-    this.socketService.socket.on('connect',() => {
-      this.socketService.socket.emit(
+    this.socket.on('connect',() => {
+      this.socket.emit(
         'join',
         `history/${this.user._id}`
       )
     })
 
-    this.socketService.socket.on('history/updated',_id => {
+    this.socket.on('history/updated',(_id,cb) => {
       this.history.onUpdated(_id)
     })
    
-    this.socketService.socket.on('history/newMessage',m => {
+    this.socket.on('history/newMessage',(m,cb) => {
       this.history.onNewMessage(m)
     })
   
-    this.socketService.socket.on('history/message',m =>{
+    this.socket.on('history/message',(m,cb) =>{
       this.history.onMessage(m)
     })
   }
 
 
   ngOnDestroy(){
-    this.socketService.socket.emit(
-      'leave'
-    )
+    this.socket.disconnect()
   }
 }

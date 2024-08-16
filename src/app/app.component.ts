@@ -14,7 +14,6 @@ import { SocketService } from './services/socket/socket.service';
 export class AppComponent {
   
   storeService = inject(StoreService)
-  socketService = inject(SocketService)
   
   @HostListener('window:beforeunload',['$event']) onBeforeUnload(event:Event){
     var ngrx = localStorage.getItem("ngrx")
@@ -50,17 +49,4 @@ export class AppComponent {
       )
     }
   }
-
-  onAuthenticationStateChange = effect(() => {
-    var authState = this.storeService.authentication()
-
-    if(authState.loggedIn){
-      this.socketService.socket.connect()
-    }
-    else{
-      this.socketService.socket.disconnect()
-    }
-  })
-
- 
 }
