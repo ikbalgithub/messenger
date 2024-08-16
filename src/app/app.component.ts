@@ -14,6 +14,7 @@ import { SocketService } from './services/socket/socket.service';
 export class AppComponent {
   
   storeService = inject(StoreService)
+  socketService = inject(SocketService)
   
   @HostListener('window:beforeunload',['$event']) onBeforeUnload(event:Event){
     var ngrx = localStorage.getItem("ngrx")
@@ -31,8 +32,6 @@ export class AppComponent {
       messages,
       user,
     })
-
-    this.socketService.socket.disconnect()
 
     if(ngrx as String){
       localStorage.removeItem(
