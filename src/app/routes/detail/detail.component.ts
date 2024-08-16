@@ -21,7 +21,6 @@ import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 import { add, failedSend, init, resend, successSend, updated } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
-import { SocketService } from '../../services/socket/socket.service';
 
 @Component({
   selector: 'app-detail',
@@ -54,7 +53,6 @@ export class DetailComponent implements OnInit,OnDestroy {
   requestService    = inject(RequestService)
   storeService      = inject(StoreService)
   commonService     = inject(CommonService)
-  socketService     = inject(SocketService)
   storage           = this.firebaseService.storage
   parameterId       = this.route.snapshot.params['_id']
   user              = this.storeService.user() as User
@@ -64,12 +62,12 @@ export class DetailComponent implements OnInit,OnDestroy {
   routeState        = signal<WHS>(window.history.state)
   pathX             = `chat/${this.user._id}`
   path1             = `history/${this.user._id}`
-  
-  path2          = computed(() => `${this.pathX}/${this.currentUser()}`)
-  updateState    = this.requestService.createInitialState<Message.One>()
-  fetchState     = this.requestService.createInitialState<Message.All>()
-	sendState      = this.requestService.createInitialState<Message.One>()
-  path3          = `${this.routeState().groupId}/${this.user._id}`
+  socket            = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
+  path2             = computed(() => `${this.pathX}/${this.currentUser()}`)
+  updateState       = this.requestService.createInitialState<Message.One>()
+  fetchState        = this.requestService.createInitialState<Message.All>()
+	sendState         = this.requestService.createInitialState<Message.One>()
+  path3             = `${this.routeState().groupId}/${this.user._id}`
 
   @ViewChild('history') history !:HistoryComponent
 
@@ -185,21 +183,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       }
 
       setTimeout(() => this.toAnchor("anchor2"))
-     
-      this.socketService.socket.emit(
-        'join',
-        this.path1
-      )
-
-      this.socketService.socket.emit(
-        'join',
-        this.path2()
-      )
-
-      this.socketService.socket.emit(
-        'join',
-        this.path3
-      )
+      setTimeout(() => this.socket.connect(),1000)
     },
     state:this.fetchState,
   })
@@ -331,16 +315,12 @@ export class DetailComponent implements OnInit,OnDestroy {
   	this.internetConnected = true
   }
 
-  leave(c:any):Observable<null>{
-    this.socketService.socket.emit('leave')
-    return of(null)
-  }
+
 
   ngOnInit(){
-    this.url = this.route.url.pipe(concatMap(c => this.leave(c))).subscribe(c => {   
+    this.url = this.route.url.subscribe(c => {   
       var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
-        this.socketService.socket.emit('leave')
         
         this.currentUser.set(this.route.snapshot.params['_id'])
         this.routeState.set(window.history.state)
@@ -349,6 +329,8 @@ export class DetailComponent implements OnInit,OnDestroy {
         var newGroupId = this.routeState().groupId
        
         this.path3 = `${newGroupId}/${this.user._id}`
+
+        this.socket.disconnect()
         
         this.fetchRequest(
           path,{headers}
@@ -356,7 +338,6 @@ export class DetailComponent implements OnInit,OnDestroy {
       }
       else{
         var path = `message/all/${this.currentUser()}`
-
         this.fetchRequest(
           path,{headers}
         )
@@ -364,12 +345,12 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
 
     
-    this.socketService.socket.on('history/updated',_id => {
+    this.socket.on('history/updated',_id => {
       this.history.onUpdated(_id)
     })
     
 
-    this.socketService.socket.on('updated',_id => {
+    this.socket.on('updated',_id => {
       var index = this.messages().findIndex(m => {
         return m._id === this.currentUser()
       })
@@ -387,7 +368,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       
     })
     
-    this.socketService.socket.on('incomingMessage',message => {      
+    this.socket.on('incomingMessage',message => {      
       var [{detail}] = this.messages().filter(
         m => m._id === this.currentUser()
       )
@@ -434,18 +415,35 @@ export class DetailComponent implements OnInit,OnDestroy {
       }
     })
     
-    this.socketService.socket.on('history/message',m => {
+    this.socket.on('history/message',m => {
       this.history.onMessage(m)
     })
 
-    this.socketService.socket.on('history/newMessage',m => {
+    this.socket.on('history/newMessage',m => {
       this.history.onNewMessage(m)
-    }) 
+    })
+
+    this.socket.on('connect',() => {
+      this.socket.emit(
+        'join',
+        this.path1
+      )
+
+      this.socket.emit(
+        'join',
+        this.path2()
+      )
+
+      this.socket.emit(
+        'join',
+        this.path3
+      )
+    })
   }
 
   ngOnDestroy(){
     this.url?.unsubscribe()
-    this.socketService.socket.emit('leave')
+    this.socket.disconnect()
   }
 }
 
