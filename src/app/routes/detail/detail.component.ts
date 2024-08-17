@@ -437,12 +437,12 @@ export class DetailComponent implements OnInit,OnDestroy {
 
       this.socket.emit(
         'join',
-        this.path2()
+        'path2',
       )
 
       this.socket.emit(
         'join',
-        'xxx'
+        this.path3
       )
     })
   }
