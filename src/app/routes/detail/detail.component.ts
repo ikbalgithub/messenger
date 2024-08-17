@@ -432,7 +432,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     this.socket.on('connect',() => {
       var rooms = [
         this.path1,
-        this.path2(),
+        "xxxxxxxx",
         this.path3
       ]
       
