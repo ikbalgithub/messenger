@@ -424,11 +424,13 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
 
     this.socket.on('connect',() => {
+      var chatPath = `chat/${this.path2()}`
+      
       this.socket.emit(
         'join',[
-        this.path1,
-        this.path2(),
-        this.path3
+          this.path1,
+          chatPath,
+          this.path3
         ]
       )
       
