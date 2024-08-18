@@ -430,15 +430,17 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
 
     this.socket.on('connect',() => {
-      var rooms = [
-        this.path1,
-        "xxxxxxxx",
-        this.path3
-      ]
-      
       this.socket.emit(
         'join',
-        rooms
+        this.path1
+      )
+      this.socket.emit(
+        'join',
+        this.path2()
+      )
+      this.socket.emit(
+        'join',
+        this.path3
       )
     })
   }

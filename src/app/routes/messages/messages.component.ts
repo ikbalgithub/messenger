@@ -32,7 +32,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.socket.on('connect',() => {
       this.socket.emit(
         'join',
-       [`history/${this.user._id}`]
+       `history/${this.user._id}`
       )
     })
 
