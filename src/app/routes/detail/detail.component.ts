@@ -430,12 +430,15 @@ export class DetailComponent implements OnInit,OnDestroy {
         this.path2(),
         this.path3
       ]
+
+      var params = {
+        _id:this.user._id,
+        paths
+      }
       
       this.socket.emit(
         'join',
-        this.user._id,
-        paths,
-        
+         params
       )
       
     })
