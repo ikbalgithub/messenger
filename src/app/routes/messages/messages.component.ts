@@ -30,10 +30,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
   
   ngOnInit(){
     this.socket.on('connect',() => {
+      var params = {
+        _id:this.user._id,
+        paths:[`history/${this.user._id}`]
+      }
+      
       this.socket.emit(
         'join',
-        this.user._id,
-       [`history/${this.user._id}`]
+       params
       )
     })
 
