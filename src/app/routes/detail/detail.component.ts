@@ -369,7 +369,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       
     })
     
-    this.socket.on('incomingMessage',message => {      
+    this.socket.on('incomingMessage',(message,ack) => {      
       var [{detail}] = this.messages().filter(
         m => m._id === this.currentUser()
       )
@@ -414,6 +414,8 @@ export class DetailComponent implements OnInit,OnDestroy {
           this.toAnchor("anchor")
         })
       }
+
+      ack()
     })
     
     this.socket.on('history/message',m => {
@@ -422,6 +424,10 @@ export class DetailComponent implements OnInit,OnDestroy {
 
     this.socket.on('history/newMessage',m => {
       this.history.onNewMessage(m)
+    })
+
+    this.socket.on('inspect',(_id:string,cb:Function) => {
+
     })
 
     this.socket.on('connect',() => {
