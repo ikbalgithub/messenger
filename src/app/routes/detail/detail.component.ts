@@ -427,7 +427,11 @@ export class DetailComponent implements OnInit,OnDestroy {
       
     })
 
-
+    this.socket.on('ack',path => {
+      this.socket.emit(
+        'ack',path
+      )
+    })
 
     this.socket.on('connect',() => {
 
