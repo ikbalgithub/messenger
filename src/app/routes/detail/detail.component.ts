@@ -348,7 +348,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     
     this.socket.on('history/updated',(_id,cb) => {
       this.history.onUpdated(_id)
-      cb()
+     
     })
     
 
@@ -367,7 +367,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       )
 
       this.history.onUpdated(_id)
-      cb()
+      
     })
     
     this.socket.on('incomingMessage',(message,ack) => {      
@@ -415,18 +415,16 @@ export class DetailComponent implements OnInit,OnDestroy {
           this.toAnchor("anchor")
         })
       }
-
-      ack()
     })
     
     this.socket.on('history/message',(m,cb) => {
       this.history.onMessage(m)
-      cb()
+      
     })
 
     this.socket.on('history/newMessage',(m,cb) => {
       this.history.onNewMessage(m)
-      cb()
+      
     })
 
 
