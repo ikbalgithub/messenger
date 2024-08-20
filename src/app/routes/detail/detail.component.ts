@@ -1,8 +1,8 @@
 import { io } from 'socket.io-client'
 import { Types } from 'mongoose';
-import { Observable, Subscription, concat, concatMap, of } from 'rxjs'
+import { Subscription, } from 'rxjs'
 import { ImageModule } from 'primeng/image';
-import { CommonModule,ViewportScroller } from '@angular/common';
+import { CommonModule,ViewportScroller,Location } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -47,6 +47,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 	isValid           = /^\s*$/
   internetConnected = true
   url:RSU           = undefined
+  location          = inject(Location)
   scroller          = inject(ViewportScroller)
   route             = inject(ActivatedRoute)
   firebaseService   = inject(FirebaseService)
