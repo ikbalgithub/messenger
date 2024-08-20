@@ -346,12 +346,13 @@ export class DetailComponent implements OnInit,OnDestroy {
     })
 
     
-    this.socket.on('history/updated',_id => {
+    this.socket.on('history/updated',(_id,cb) => {
       this.history.onUpdated(_id)
+      cb()
     })
     
 
-    this.socket.on('updated',_id => {
+    this.socket.on('updated',(_id,cb) => {
       var index = this.messages().findIndex(m => {
         return m._id === this.currentUser()
       })
@@ -366,7 +367,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       )
 
       this.history.onUpdated(_id)
-      
+      cb()
     })
     
     this.socket.on('incomingMessage',(message,ack) => {      
@@ -418,17 +419,17 @@ export class DetailComponent implements OnInit,OnDestroy {
       ack()
     })
     
-    this.socket.on('history/message',m => {
+    this.socket.on('history/message',(m,cb) => {
       this.history.onMessage(m)
+      cb()
     })
 
-    this.socket.on('history/newMessage',m => {
+    this.socket.on('history/newMessage',(m,cb) => {
       this.history.onNewMessage(m)
+      cb()
     })
 
-    this.socket.on('inspect',(_id:string,cb:Function) => {
 
-    })
 
     this.socket.on('connect',() => {
 
