@@ -25,8 +25,18 @@
     </ng-template>
 
     
-    <ng-template #message let-message="message" let-profile="profile" let-counter="unreadCounter" let-showCounter="showCounter" let-groupId="groupId">
-    <a routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId}">
+    <ng-template #content let-friendship="friendship" let-message="message" let-profile="profile" let-counter="unreadCounter" let-showCounter="showCounter" let-groupId="groupId">
+      @if(friendship){
+
+      }
+      @else{
+        <ng-container
+          *ngTemplateOutlet="nonFriendship;context:{profile}"
+        />
+      }
+    
+      <!-- 
+      <a routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId}">
       <div class="bg-white p-3 shadow-lg rounded flex flex-row items-center gap-3 w-full">
         <p-avatar
           [image]="profile.profileImage" 
@@ -51,7 +61,27 @@
           </div>
         </div>
       </div>
-    </a>
+    </a> 
+    -->
+    </ng-template>
+
+
+    <ng-template #nonFriendship let-profile="profile">
+      <div class="bg-white p-3 shadow-lg rounded flex flex-row w-full">
+        <p-avatar
+          [image]="profile.profileImage" 
+          size="xlarge" 
+          shape="circle"
+          class="flex"
+        />
+        <div class="flex-1 border-2 border-red-900 flex flex-row">
+          <div class="items-center">
+            <span>
+              {{profile.firstName}} {{profile.surname}}
+            </span>
+          </div>
+        </div>
+      </div>
     </ng-template>
 
     <ng-template #empty>
@@ -72,12 +102,13 @@
       @else{
         @for(x of searchState().result; track x){
           <ng-container
-						*ngTemplateOutlet="message;context:{
-							profile:x | profile:'':'search',
-              unreadCounter:x?.message?.unreadCounter,
-              showCounter:x?.message?.sender?.usersRef === x.usersRef,
-              groupId:x?.message?.groupId ?? _altId,
-              message:x
+						*ngTemplateOutlet="content;context:{
+							profile:x.profile,
+              unreadCounter:x.message ? x.message.unreadCounter : 0,
+              showCounter:x.message ? x.message.sender.usersRef === x.profile.usersRef ?? false : false,
+              groupId: x.message ? x.message.groupId: _altId,
+              message:x.message,
+              friendship:x.friendship,
 						}"
 					/>
         }

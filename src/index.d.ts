@@ -58,11 +58,12 @@ export namespace Message{
 }
 
 export namespace Search{
-  type Result = Common.Profile & {
+  interface Result{
+    profile:Common.Profile,
+    friendship:boolean,
     message?:Message.Last
   }
 }
-
 
 export namespace Common{
   interface Profile{
