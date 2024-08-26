@@ -16,6 +16,7 @@ import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { Types } from 'mongoose';
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-search',
@@ -33,7 +34,8 @@ import { BadgeModule } from 'primeng/badge';
     RouterLink,
     RouterOutlet,
     AvatarModule,
-    BadgeModule
+    BadgeModule,
+    ButtonModule
   ],
 
 })
