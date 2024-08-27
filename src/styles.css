@@ -58,7 +58,7 @@
     @apply rounded-full;
     @apply hover:bg-slate-600;
     @apply hover:text-white;
-    @apply active:bg-slate-700
-
+    @apply active:bg-slate-900
+    @apply active:border-none;
   }
 }
