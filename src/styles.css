@@ -50,7 +50,7 @@
     @apply w-full p-3;
     @apply rounded-md;
   }
-  .searcj-result-button{
+  .search-result-button{
     @apply p-3;
     @apply border-none;
     @apply bg-white;
