@@ -52,16 +52,22 @@
   }
   .friend-button{
     @apply p-3;
-    @apply text-white;
+    @apply bg-white;
+    @apply text-black;
     @apply rounded-full;
-    @apply bg-blue-600;
-    @apply active:bg-blue-900
+    @apply hover:bg-slate-600;
+    @apply hover:active:bg-blue-900;
+    @apply hover:text-white;
+    @apply active:border-none;
   }
   .message-button{
     @apply p-3;
-    @apply text-white;
+    @apply bg-white;
+    @apply text-black;
     @apply rounded-full;
-    @apply bg-red-600;
-    @apply active:bg-red-900
+    @apply hover:bg-slate-600;
+    @apply hover:active:bg-blue-900;
+    @apply hover:text-white;
+    @apply active:border-none;
   }
 }
