@@ -25,15 +25,35 @@
     </ng-template>
 
     
-    <ng-template #content let-friendship="friendship" let-message="message" let-profile="profile" let-counter="unreadCounter" let-showCounter="showCounter" let-groupId="groupId">
-      @if(friendship){
-
-      }
-      @else{
-        <ng-container
-          *ngTemplateOutlet="nonFriendship;context:{profile}"
+    <ng-template #person let-friendship="friendship" let-message="message" let-profile="profile" let-counter="unreadCounter" let-showCounter="showCounter" let-groupId="groupId">
+      <div class="bg-white p-3 shadow-lg rounded flex flex-row w-full">
+        <p-avatar
+          [image]="profile.profileImage" 
+          size="xlarge" 
+          shape="circle"
+          class="flex"
         />
-      }
+        <div class="flex-1 flex flex-row px-3 pr-3">
+          <div class="flex flex-col justify-center gap-3">
+            <span class="font-bold text-lg">
+              {{profile.firstName}} {{profile.surname}}
+            </span>
+            <span *ngIf="message">
+              {{message.value}}
+            </span>
+          </div>
+          <div class="flex-1 flex flex-row justify-end">
+            <div class="flex flex-row items-center">
+              <button *ngIf="!friendship" pButton class="search-result-button" icon="pi pi-plus">
+                <!-- add friend button -->
+              </button>
+              <button pButton class="search-result-button" icon="pi pi-envelope">
+                <!-- messages button -->
+              </button> 
+            </div>
+          </div>
+        </div>
+      </div>
     
       <!-- 
       <a routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId}">
@@ -112,7 +132,7 @@
       @else{
         @for(x of searchState().result; track x){
           <ng-container
-						*ngTemplateOutlet="content;context:{
+						*ngTemplateOutlet="person;context:{
 							profile:x.profile,
               unreadCounter:x.message ? x.message.unreadCounter : 0,
               showCounter:x.message ? x.message.sender.usersRef === x.profile.usersRef ?? false : false,
