@@ -60,6 +60,6 @@
     @apply active:bg-slate-900;
     @apply hover:text-white;
     @apply active:outline-white;
-    @apply shadow-2xl;
+    @apply shadow-xl;
   }
 }
