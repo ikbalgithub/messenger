@@ -50,4 +50,10 @@
     @apply w-full p-3;
     @apply rounded-md;
   }
+  .search-bar-button{
+    @apply p-3;
+    @apply text-black;
+    @apply border-none;
+    @apply bg-white;
+  }
 }
