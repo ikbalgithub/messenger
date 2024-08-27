@@ -59,6 +59,6 @@
     @apply hover:bg-slate-600;
     @apply active:bg-slate-900;
     @apply hover:text-white;
-    @apply active:outline-none;
+    @apply active:outline-white;
   }
 }
