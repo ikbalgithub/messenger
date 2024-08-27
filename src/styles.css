@@ -55,5 +55,6 @@
     @apply text-black;
     @apply border-none;
     @apply bg-white;
+    @apply rounded-full
   }
 }
