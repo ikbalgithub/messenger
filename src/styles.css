@@ -50,15 +50,18 @@
     @apply w-full p-3;
     @apply rounded-md;
   }
-  .search-bar-button{
+  .friend-button{
     @apply p-3;
-    @apply text-black;
-    @apply border-none;
-    @apply bg-white;
+    @apply text-white;
     @apply rounded-full;
-    @apply hover:bg-slate-600;
-    @apply hover:text-white;
-    @apply active:bg-slate-900
-    @apply active:border-none;
+    @apply bg-blue-600;
+    @apply active:bg-blue-900
+  }
+  .message-button{
+    @apply p-3;
+    @apply text-white;
+    @apply rounded-full;
+    @apply bg-red-600;
+    @apply active:bg-red-900
   }
 }
