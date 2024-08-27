@@ -55,7 +55,7 @@
     @apply text-black;
     @apply border-none;
     @apply bg-white;
-    @apply rounded-full
+    @apply rounded-full;
     @apply hover:bg-slate-900;
     @apply hover:text-white;
   }
