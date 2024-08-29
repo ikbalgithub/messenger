@@ -44,7 +44,7 @@
           </div>
           <div class="flex-1 flex flex-row justify-end">
             <div class="flex flex-row items-center gap-3">
-              <button (click)="requestFriendship(profile.usersRef)" *ngIf="!friendship || friendship === 'pending'" pButton class="search-result-button" [icon]="friendship === 'pending' ? 'pi pi-clock':'pi pi-plus'">
+              <button [disabled]="friendship === 'pending'" (click)="requestFriendship(profile.usersRef)" *ngIf="!friendship || friendship === 'pending'" pButton class="search-result-button" [icon]="friendship === 'pending' ? 'pi pi-clock':'pi pi-plus'">
                 <!-- add friend button -->
               </button>
               <button pButton class="search-result-button" icon="pi pi-envelope">
