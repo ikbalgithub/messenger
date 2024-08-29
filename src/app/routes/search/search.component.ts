@@ -53,6 +53,13 @@ export class SearchComponent {
   _altId = new Types.ObjectId().toString()
 
   searchState = this.requestService.createInitialState<Search.Result[]>()
+  friendshipRequestState = this.requestService.createInitialState<any>()
+  requestFn = this.requestService.post<{to:string},any>({
+    cb:r => console.log(r),
+    failedCb:e=> console.log(e),
+    path:'friend/message',
+    state:this.friendshipRequestState
+  })
   searchFn = this.requestService.get<Search.Result[]>({
     cb:r => console.log(r),
     failedCb:r => console.log(r),
@@ -69,5 +76,16 @@ export class SearchComponent {
         headers
       }
     ) 
+  }
+
+  requestFriendship(to:string){
+    var headers = new HttpHeaders({
+      authorization:this.hAuth()
+    })
+    
+    this.requestFn(
+      {to},
+      {headers}
+    )
   }
 }
