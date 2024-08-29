@@ -57,7 +57,7 @@ export class SearchComponent {
   requestFn = this.requestService.post<{to:string},any>({
     cb:r => console.log(r),
     failedCb:e=> console.log(e),
-    path:'friend/message',
+    path:'friend/request',
     state:this.friendshipRequestState
   })
   searchFn = this.requestService.get<Search.Result[]>({
