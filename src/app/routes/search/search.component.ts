@@ -101,13 +101,15 @@ export class SearchComponent {
       return to ? pendingState : e
     })
 
-    this.searchState.update(current => {
-      return {
-        ...current,
-        result
-      }
+    setTimeout(() => {
+      this.searchState.update(current => {
+        return {
+          ...current,
+          result
+        }
+      })
     })
-    
+
     this.requestFn(
       {to},
       {headers}
