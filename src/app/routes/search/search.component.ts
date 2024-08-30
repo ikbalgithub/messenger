@@ -52,6 +52,24 @@ export class SearchComponent {
 
   _altId = new Types.ObjectId().toString()
 
+  friendshipIcon = (status:string):string => {
+    var icon = ''
+    
+    switch(status){
+      case 'pending':
+        icon = 'pi pi-clock'
+        break;
+      case 'requested':
+        icon = 'pi pi-users'
+        break;
+      case 'accepted':
+        icon = 'pi pi-check'
+        break
+    }
+
+    return icon
+  }
+
   searchState = this.requestService.createInitialState<Search.Result[]>()
   friendshipRequestState = this.requestService.createInitialState<any>()
   requestFn = this.requestService.post<{to:string},any>({
