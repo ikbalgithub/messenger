@@ -52,7 +52,7 @@ export class SearchComponent {
 
   _altId = new Types.ObjectId().toString()
 
-  friendshipIcon = (status:string):string => {
+  friendshipIcon = (status:string|boolean):string => {
     var icon = ''
     
     switch(status){
@@ -63,7 +63,10 @@ export class SearchComponent {
         icon = 'pi pi-users'
         break;
       case 'accepted':
-        icon = 'pi pi-check'
+        icon = 'pi pi-message'
+        break
+      case false:
+        icon = 'pi pi-plus'
         break
     }
 
@@ -103,7 +106,7 @@ export class SearchComponent {
     ) 
   }
 
-  friendshipAction(friendship:string,user:string){
+  actions(friendship:string,user:string){
     if(!friendship) this.requestFriendship(user)
     if(friendship === 'requested') this.accept(
       user
