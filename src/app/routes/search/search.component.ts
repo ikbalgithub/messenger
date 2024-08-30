@@ -85,20 +85,20 @@ export class SearchComponent {
     })
 
     var result = result.map(({profile,...rest}) => {
-      var e = {
+      var modifiedOne = {
         profile,
         ...rest,
         friendship:'pending'
       }
 
-      var pendingState = {
+      var notThisOne = {
         profile,
         ...rest,
       }
 
-      var bool = profile.usersRef === to
-      
-      return to ? pendingState : e
+      return profile.usersRef === to
+        ? modifiedOne
+        : notThisOne
     })
 
     setTimeout(() => {
