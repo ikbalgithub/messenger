@@ -60,7 +60,7 @@ export namespace Message{
 export namespace Search{
   interface Result{
     profile:Common.Profile,
-    friendship:boolean,
+    friendship:string|boolean,
     message?:Message.Last
   }
 }

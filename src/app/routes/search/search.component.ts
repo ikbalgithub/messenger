@@ -79,8 +79,33 @@ export class SearchComponent {
   }
 
   requestFriendship(to:string){
+    var result = this.searchState().result
     var headers = new HttpHeaders({
       authorization:this.hAuth()
+    })
+
+    var result = result.map(({profile,...rest}) => {
+      var e = {
+        profile,
+        ...rest,
+        friendship:'pending'
+      }
+
+      var pendingState = {
+        profile,
+        ...rest,
+      }
+
+      var bool = profile.usersRef === to
+      
+      return to ? pendingState : e
+    })
+
+    this.searchState.update(current => {
+      return {
+        ...current,
+        result
+      }
     })
     
     this.requestFn(
