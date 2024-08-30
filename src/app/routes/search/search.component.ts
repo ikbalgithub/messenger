@@ -149,8 +149,35 @@ export class SearchComponent {
   }
 
   accept(_id:string){
+    var result = this.searchState().result
     var headers = new HttpHeaders({
       authorization:this.hAuth()
+    })
+
+    var result = result.map(({profile,...rest}) => {
+      var modifiedOne = {
+        profile,
+        ...rest,
+        friendship:'accepted'
+      }
+
+      var notThisOne = {
+        profile,
+        ...rest,
+      }
+
+      return profile.usersRef === _id
+        ? modifiedOne
+        : notThisOne
+    })
+
+    setTimeout(() => {
+      this.searchState.update(current => {
+        return {
+          ...current,
+          result
+        }
+      })
     })
 
     this.acceptFn(
