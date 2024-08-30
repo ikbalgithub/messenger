@@ -71,12 +71,19 @@ export class SearchComponent {
   }
 
   searchState = this.requestService.createInitialState<Search.Result[]>()
+  friendshipAcceptanceState = this.requestService.createInitialState<any>()
   friendshipRequestState = this.requestService.createInitialState<any>()
   requestFn = this.requestService.post<{to:string},any>({
     cb:r => console.log(r),
     failedCb:e=> console.log(e),
     path:'friend/request',
     state:this.friendshipRequestState
+  })
+  acceptFn = this.requestService.post<{_id:string},any>({
+    cb:r => console.log(r),
+    failedCb:e=> console.log(e),
+    path:'friend/accept',
+    state:this.friendshipAcceptanceState
   })
   searchFn = this.requestService.get<Search.Result[]>({
     cb:r => console.log(r),
@@ -94,6 +101,13 @@ export class SearchComponent {
         headers
       }
     ) 
+  }
+
+  friendshipAction(friendship:string,user:string){
+    if(!friendship) this.requestFriendship(user)
+    if(friendship === 'requested') this.accept(
+      user
+    )
   }
 
   requestFriendship(to:string){
@@ -130,6 +144,17 @@ export class SearchComponent {
 
     this.requestFn(
       {to},
+      {headers}
+    )
+  }
+
+  accept(_id:string){
+    var headers = new HttpHeaders({
+      authorization:this.hAuth()
+    })
+
+    this.acceptFn(
+      {_id},
       {headers}
     )
   }
