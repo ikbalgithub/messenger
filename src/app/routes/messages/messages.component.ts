@@ -8,7 +8,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { ButtonModule } from 'primeng/button';
-
+import { AvatarModule } from 'primeng/avatar';
+import { AvatarGroupModule } from 'primeng/avatargroup';
 @Component({
   selector: 'app-messages',
   standalone: true,
@@ -18,7 +19,9 @@ import { ButtonModule } from 'primeng/button';
     HistoryComponent,
     CommonModule,
     FormsModule,
-    ButtonModule
+    ButtonModule,
+    AvatarModule,
+    AvatarGroupModule
   ],
 })
 export class MessagesComponent implements OnInit, OnDestroy {
