@@ -26,6 +26,7 @@
     "@ngrx/store-devtools": "^17.0.1",
     "@ngx-env/builder": "^17.1.1",
     "@types/node": "^20.11.5",
+    "@types/react": "^18.3.5",
     "angular-apollo": "^4.1.4",
     "apollo-angular": "^7.1.2",
     "apollo-client": "^2.6.10",

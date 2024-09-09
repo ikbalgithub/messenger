@@ -1,4 +1,4 @@
-import { ApolloClient,gql } from '@apollo/client/core'
+import { gql } from '@apollo/client'
 import { Search } from '../..'
 
 export const FIND_BY_USERNAME = gql`
