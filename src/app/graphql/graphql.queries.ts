@@ -1,7 +1,7 @@
-import { gql } from 'apollo-angular'
+import { ApolloClient,gql } from '@apollo/client/core'
 import { Search } from '../..'
 
-export const FIND_BY_USERNAME = gql<Search.Result,{u:string}>`
+export const FIND_BY_USERNAME = gql`
   fragment profile on Profile{
     _id
     profileImage
