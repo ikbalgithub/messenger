@@ -1,0 +1,34 @@
+<div class="w-[80px] flex flex-col">
+  <div class="flex-1 flex gap-5 flex-col items-center pt-5">
+    <p-button
+      size="large"
+      icon="pi pi-comment"
+      severity="secondary"
+      [text]="true"
+      [rounded]="true"
+    />
+    <p-button
+      size="large"
+      icon="pi pi-users"
+      severity="secondary"
+      [text]="true"
+      [rounded]="true"
+      (click)="router.navigate(['friends'])"
+    />
+    <p-button
+      size="large"
+      icon="pi pi-search"
+      severity="secondary"
+      [text]="true"
+      [rounded]="true"
+    />
+  </div>
+  <div class="flex p-3 flex-col items-center">
+    <p-avatar 
+      [image]="user.profile?.profileImage"
+      alt="profile image"
+      size="large" 
+      shape="circle" 
+    />
+  </div>
+</div>

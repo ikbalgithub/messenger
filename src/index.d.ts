@@ -6,7 +6,7 @@ import { WritableSignal } from '@angular/core';
 
 export namespace Message{
   interface Last{
-    _id?:string,
+    _id:string,
     sender:Common.Profile,
     accept:Common.Profile,
     sendAt:number,
@@ -59,9 +59,9 @@ export namespace Message{
 
 export namespace Search{
   interface Result{
+    _id:string,
     profile:Common.Profile,
-    friendship:string|boolean,
-    message?:Message.Last
+    message:Message.Last | null
   }
 }
 
@@ -70,8 +70,8 @@ export namespace Common{
     surname:string,
     profileImage:string,
     firstName:string,
-    usersRef?:string,
-    _id?:string,
+    usersRef:string,
+    _id:string,
   }
 
   interface Authenticated{

@@ -1,23 +1,6 @@
 <div class="fullscreen flex-1 flex flex-col bg-slate-200">
 <div class="flex flex-row flex-1 divide-x divide-slate-300">
-	<div class="w-[80px] flex flex-col border-2 border-slate-300">
-    <div class="flex flex-row justify-center border-2 w-full p-3">
-		  <span class="font-black text-3xl" style="font-family:Dancing Script">
-		    M
-		  </span>
-	  </div>
-	  <div class="flex-1 items-center justify-center flex flex-col gap-3">
-		  <button pButton pRipple icon="pi pi-comment" class="bg-transparent border-none"></button>
-	  </div>
-	  <div class="flex p-3 flex-col items-center">
-			<p-avatar 
-        [image]="user.profile?.profileImage"
-				alt="profile image"
-        size="large" 
-        shape="circle" 
-			/>
-		</div>
-	</div>
+	<app-sidebar/>
 	<app-history #history counterId="" [connected]="socket.connected" class="flex-1 flex flex-col p-6"/>
 	<div class="xs:hidden md:flex flex-1 flex flex-col justify-center px-12 gap-6">
 		<div class="flex flex-col gap-2">

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MessageAcceptComponent } from './message-accept.component';
+import { FriendsComponent } from './friends.component';
 
-describe('MessageAcceptComponent', () => {
-  let component: MessageAcceptComponent;
-  let fixture: ComponentFixture<MessageAcceptComponent>;
+describe('FriendsComponent', () => {
+  let component: FriendsComponent;
+  let fixture: ComponentFixture<FriendsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MessageAcceptComponent]
+      imports: [FriendsComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(MessageAcceptComponent);
+    fixture = TestBed.createComponent(FriendsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

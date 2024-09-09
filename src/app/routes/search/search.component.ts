@@ -5,18 +5,18 @@ import { Location,CommonModule } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router'
 import { Search } from '../../../index.d'
 import { RequestService } from '../../services/request/request.service'
-import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { CommonService } from '../../services/common/common.service'
 import { StoreService } from '../../services/store/store.service'
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { LastMessageComponent } from '../../components/last-message/last-message.component'
 import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { ToStringPipe } from '../../pipes/toString/to-string.pipe'
 import { Types } from 'mongoose';
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
+import { Apollo } from 'apollo-angular';
+import { FIND_BY_USERNAME } from '../../graphql/graphql.queries';
 
 @Component({
   selector: 'app-search',
@@ -25,7 +25,6 @@ import { ButtonModule } from 'primeng/button';
   styleUrl: './search.component.css',
   imports: [
     ProgressSpinnerModule,
-    LastMessageComponent,
     InputTextModule,
     CommonModule,
     FormsModule,
@@ -42,6 +41,7 @@ import { ButtonModule } from 'primeng/button';
 export class SearchComponent {
   query = ''
 
+  apolloService = inject(Apollo)
   location = inject(Location)
   requestService = inject(RequestService)
   storeService = inject(StoreService)
@@ -99,11 +99,25 @@ export class SearchComponent {
       authorization:this.hAuth()
     })
 
-    if(value.length > 0) this.searchFn(
-      `user/search/${value}`,{
-        headers
+    if(value.length > 0) this.apolloService.watchQuery(
+      {
+        query:FIND_BY_USERNAME,
+        variables:{
+          u:value
+        },
+        context:{
+          headers
+        }
       }
-    ) 
+    )
+    .valueChanges.subscribe(
+      ({data,error}) => {
+        console.log({
+          data,
+          error
+        })
+      }
+    )
   }
 
   actions(friendship:string,user:string){

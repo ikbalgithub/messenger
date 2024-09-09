@@ -1,8 +1,5 @@
 import { computed, inject,Signal } from '@angular/core';
-import { Ngrx } from '../../../index.d'
-import { Store } from '@ngrx/store'
-import { toSignal } from '@angular/core/rxjs-interop';
-import { CanActivateFn,Router,ActivatedRouteSnapshot,RouterStateSnapshot } from '@angular/router';
+import { Router,ActivatedRouteSnapshot,RouterStateSnapshot } from '@angular/router';
 import { StoreService } from '../../services/store/store.service';
 
 

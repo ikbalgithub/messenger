@@ -6,6 +6,7 @@ import { ErrorComponent } from './routes/error/error.component'
 import { SearchComponent } from './routes/search/search.component'
 import { RegisterComponent } from './routes/register/register.component'
 import { authGuard } from './guards/auth/auth.guard'
+import { FriendsComponent } from './routes/friends/friends.component';
 
 export const routes: Routes = [
   {
@@ -29,6 +30,11 @@ export const routes: Routes = [
   {
     path:'messages/:_id',
     component:DetailComponent,
+    canActivate:[authGuard]
+  },
+  {
+    path:'friends',
+    component:FriendsComponent,
     canActivate:[authGuard]
   },
   {

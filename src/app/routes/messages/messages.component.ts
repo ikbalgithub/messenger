@@ -10,6 +10,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarGroupModule } from 'primeng/avatargroup';
+import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 @Component({
   selector: 'app-messages',
   standalone: true,
@@ -17,11 +18,12 @@ import { AvatarGroupModule } from 'primeng/avatargroup';
   styleUrl: './messages.component.css',
   imports:[
     HistoryComponent,
+    SidebarComponent,
     CommonModule,
     FormsModule,
     ButtonModule,
     AvatarModule,
-    AvatarGroupModule
+    AvatarGroupModule,
   ],
 })
 export class MessagesComponent implements OnInit, OnDestroy {

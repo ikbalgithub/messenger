@@ -26,7 +26,7 @@
 
     
     <ng-template #person let-friendship="friendship" let-message="message" let-profile="profile" let-counter="unreadCounter" let-showCounter="showCounter" let-groupId="groupId">
-      <div class="bg-white p-3 shadow-lg rounded flex flex-row w-full">
+      <div class="bg-white p-3 shadow-lg rounded flex items-center flex-row w-full">
         <p-avatar
           [image]="profile.profileImage" 
           size="xlarge" 
@@ -35,18 +35,16 @@
         />
         <div class="flex-1 flex flex-row px-3 pr-3">
           <div class="flex flex-col justify-center gap-1">
-            <span class="font-bold text-lg">
+            <span class="font-extrabold text-xl">
               {{profile.firstName}} {{profile.surname}}
             </span>
-            <span *ngIf="message">
+            <span *ngIf="message" class="text-gray-500 text-lg">
               {{message.value}}
             </span>
+
           </div>
           <div class="flex-1 flex flex-row justify-end">
             <div class="flex flex-row items-center gap-3">
-              <button [disabled]="friendship === 'pending'" (click)="requestFriendship(profile.usersRef)" *ngIf="!friendship && friendship === 'pending'" pButton class="search-result-button" [icon]="friendshipIcon(friendship)">
-                <!-- add friend button -->
-              </button>
               <button pButton class="search-result-button" icon="pi pi-envelope">
                 <!-- messages button -->
               </button> 
@@ -138,7 +136,6 @@
               showCounter:x.message ? x.message.sender.usersRef === x.profile.usersRef ?? false : false,
               groupId: x.message ? x.message.groupId: _altId,
               message:x.message,
-              friendship:x.friendship,
 						}"
 					/>
         }
