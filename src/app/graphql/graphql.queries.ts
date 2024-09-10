@@ -22,9 +22,9 @@ export const FIND_BY_USERNAME = gql`
     description
     unreadCounter
   }
-  
-  query{
-    findByUsername($u:string){
+
+  query findByUsername($u:String!){
+    findByUsername(u:$u){
       profile{
         ...profile
       }
