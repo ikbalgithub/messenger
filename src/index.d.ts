@@ -1,8 +1,36 @@
+import { WritableSignal } from '@angular/core';
 import { ActionReducer,Reducer,Action,ReducerTypes,ActionCreator,TypedAction,FunctionWithParametersType,ActionCreatorProps } from '@ngrx/store';
 import { HttpErrorResponse,HttpEvent,HttpHeaders } from '@angular/common/http';
-import { WritableSignal } from '@angular/core';
+import { User } from './app/ngrx/actions/user.actions';
  
-// export type Authorization = string | HttpHeaders
+// export type Authorization = string | 
+
+export namespace Model{
+  interface Message<Sender,Accept>{
+    _id:Types.ObjectId
+    sender:Sender
+    value:string
+    groupId:string
+    accept:Accept
+    sendAt:number
+    read:boolean
+    contentType:string
+    description:string
+  }
+  interface User{
+    _id:string
+    oauthReference?:string
+    username?:string
+    password?:string
+  }
+  interface Profile{
+    _id:string
+    profileImage:string
+    surname:string
+    firstName:string
+    usersRef:Types.ObjectId
+  }
+}
 
 export namespace Message{
   interface Last{
@@ -78,7 +106,6 @@ export namespace Common{
     _id:string,
     profile:Profile,
     authorization:string,
-    username:string
   }
 
   interface Oauth{
@@ -96,11 +123,11 @@ export namespace Common{
 export namespace Ngrx{
   export type History = Message.Last[]
   
-  export interface User {
-    _id:string|null,
-    profile:Common.Profile|null,
-    username:string|null
-  }
+  // export interface User {
+  //   _id:string|null,
+  //   profile:Common.Profile|null,
+  //   username:string|null
+  // }
 
   export interface Authentication{
     loggedIn:boolean

@@ -6,5 +6,5 @@ export const setAuthorization = createAction(
 );
 
 export const reset = createAction(
-  '[Navbar Component] Reset',
+  '[Any Component] Reset',
 );

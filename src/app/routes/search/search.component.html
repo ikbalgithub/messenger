@@ -2,7 +2,7 @@
   <div class="bg-slate-300 p-3 fixed shadow-inner w-full">
     <span class="p-input-icon-right p-input-icon-left w-full">
       <i class="pi pi-arrow-left" (click)="location.back()"></i>
-      <i class="{{searchState().running ? 'pi pi-spin pi-spinner':'pi pi-search'}}"></i>
+      <i class="{{process ? 'pi pi-spin pi-spinner':'pi pi-search'}}"></i>
       <input 
         type="text" 
         pInputText 
@@ -13,8 +13,8 @@
       />
     </span>
   </div>
-  <div class="mt-[78px] flex flex-col flex-1 gap-3 p-3 shadow-inner {{searchState().isError ? 'center':''}}">
-    <div class="flex-1 flex flex-col center" *ngIf="searchState().running; else next">
+  <div class="mt-[78px] flex flex-col flex-1 gap-3 p-3 shadow-inner {{process ? 'center':''}}">
+    <div class="flex-1 flex flex-col center" *ngIf="process; else next">
       <p-progressSpinner/>
     </div> 
 
@@ -25,7 +25,7 @@
     </ng-template>
 
     
-    <ng-template #person let-friendship="friendship" let-message="message" let-profile="profile" let-counter="unreadCounter" let-showCounter="showCounter" let-groupId="groupId">
+    <ng-template #person  let-message="message" let-profile="profile" let-groupId="groupId">
       <div class="bg-white p-3 shadow-lg rounded flex items-center flex-row w-full">
         <p-avatar
           [image]="profile.profileImage" 
@@ -52,64 +52,6 @@
           </div>
         </div>
       </div>
-    
-      <!-- 
-      <a routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId}">
-      <div class="bg-white p-3 shadow-lg rounded flex flex-row items-center gap-3 w-full">
-        <p-avatar
-          [image]="profile.profileImage" 
-          size="xlarge" 
-          shape="circle"
-          class="flex"
-        />
-        <div class="overflow-hidden flex flex-col">
-          <div class="flex flex-row items-center gap-2">
-            <span class="font-bold text-lg">
-              {{ profile.firstName }} {{groupId}}
-            </span>
-            <p-badge 
-              [value]="counter" 
-              *ngIf="showCounter && counter > 0"
-            />
-          </div>
-          <p class="truncate" *ngIf="message.contentType === 'text'">{{message.value}}</p>
-          <div class="flex flex-row items-center gap-2" *ngIf="message.contentType === 'image'">
-            <i class="pi pi-image text-[1rem]"></i>
-            <span class="text-slate-600">photo</span>
-          </div>
-        </div>
-      </div>
-    </a> 
-    -->
-    </ng-template>
-
-
-    <ng-template #nonFriendship let-profile="profile">
-      <div class="bg-white p-3 shadow-lg rounded flex flex-row w-full">
-        <p-avatar
-          [image]="profile.profileImage" 
-          size="xlarge" 
-          shape="circle"
-          class="flex"
-        />
-        <div class="flex-1 flex flex-row px-3 pr-3">
-          <div class="flex flex-row items-center">
-            <span>
-              {{profile.firstName}} {{profile.surname}}
-            </span>
-          </div>
-          <div class="flex-1 flex flex-row justify-end">
-            <div class="flex flex-row items-center">
-              <button pButton class="search-result-button" icon="pi pi-plus">
-                <!-- add friend button -->
-              </button>
-              <button pButton class="search-result-button" icon="pi pi-envelope">
-                <!-- messages button -->
-              </button> 
-            </div>
-          </div>
-        </div>
-      </div>
     </ng-template>
 
     <ng-template #empty>
@@ -122,21 +64,22 @@
     </ng-template>
     
     <ng-template #next>
-      @if(searchState().isError){
+      @if(isError){
         <ng-container
            *ngTemplateOutlet="error"
         />
       }
       @else{
-        @for(x of searchState().result; track x){
+        @for(x of result; track x){
           <ng-container
-						*ngTemplateOutlet="person;context:{
-							profile:x.profile,
-              unreadCounter:x.message ? x.message.unreadCounter : 0,
-              showCounter:x.message ? x.message.sender.usersRef === x.profile.usersRef ?? false : false,
-              groupId: x.message ? x.message.groupId: _altId,
-              message:x.message,
-						}"
+						*ngTemplateOutlet="
+              person;
+              context:{
+                profile:x.profile,
+                groupId:x.message ? x.message.groupId: _altId,
+                message:x.message
+              }
+            "
 					/>
         }
         @empty{

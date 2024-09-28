@@ -1,75 +1,120 @@
+import { findIndex } from 'lodash'
 import { createReducer, on } from "@ngrx/store";
-import { Ngrx } from "../../..";
-import { add, failedSend, init, resend, updated } from "../actions/messages.actions";
+import { Cache, add, failedSend, init, resend, resetMessages, updated } from "../actions/messages.actions";
 import { successSend } from "../actions/messages.actions";
 
-export const messagesReducer = createReducer<Ngrx.Messages[]>(
+export const messagesReducer = createReducer<Cache[]>(
 	JSON.parse(localStorage.getItem("ngrx") as string)?.messages ?? [],
 	on(init,(state,payload) => {
 		return [
-			...state,
 			payload
 		]
 	}),
-	on(add,(state,payload) => {
-		state[payload.index].detail.push(
+	on(add,(state,payload) => {		
+		var updatedState = [...state]
+		var [filter] = state.filter(s => {
+		  return s._id === payload._id
+		})
+
+		var index = findIndex(state,filter)
+
+
+		var messages = [
+		  ...filter.messages,
 			payload.newMessage
-		)
-		return state
+		]
+
+		updatedState[index] = {
+		  ...filter,
+			messages
+		}
+
+		return updatedState
 	}),
 	on(successSend,(state,payload) => {
-		var target = state[payload.index]
+    var updatedState = [...state]
+    var target = updatedState[payload.index]
+		var messages = [...target.messages]
 
-		target.detail = target.detail.map(m => {
+    messages = messages.map(m => {
+		  var modified = {...m}
+			
 			if(m._id === payload._id){
-				m.failed = false
-				m.sent = true
+			  modified.failed = false
+				modified.sent = true
 			}
-			return m
+
+			return modified
 		})
-    state[payload.index] = target
-		return state
+
+		updatedState[payload.index] = {
+		  ...target,
+			messages
+		}
+
+		return updatedState
 	}),
 	on(updated,(state,payload) => {
-		var target = state[payload.index]
+	  var updatedState = [...state]
+		var target = updatedState[payload.index]
+    var messages = [...target.messages]
 
-    target.detail = target.detail.map(m => {
-			if(m.sender === payload._id){
-				if(!m.failed) m.read = true
+		messages = messages.map(message => {
+		  var modified = {...message}
+
+			if(message.sender === payload._id){
+			  if(!message.failed){
+				  modified.read = true
+				} 
 			}
 
-			return m
+			return modified
 		})
 
-		state[payload.index] = target
-		return state
+		updatedState[payload.index] = {
+		  ...target,
+			messages
+		}
+
+		return updatedState
 	}),
 	on(failedSend,(state,payload) => {
-		var target = state[payload.index]
+		var updatedState = [...state]
+		var target = updatedState[payload.index]
+    var messages = [...target.messages]
 
-		target.detail = target.detail.map(m => {
-			if(m._id === payload._id){
-				m.failed = true
+		messages = messages.map(message => {
+		  var modified = {...message}
+
+			if(message._id === payload._id){
+			  modified.failed = true
 			}
-			return m
+
+			return modified
 		})
-    
-		state[payload.index] = target
+
+		updatedState[payload.index] = {
+		  ...target,
+			messages
+		}
+
+		return updatedState
+	}),
+	on(resend,(state,payload) => {
+		// var target = state[payload.index]
+
+		// target.messages = target.messages.map(m => {
+		// 	if(m._id === payload._id){
+		// 		m.failed = false
+		// 	}
+		// 	return m
+		// })
+
+		// state[payload.index] = target
 
 		return state
 	}),
-	on(resend,(state,payload) => {
-		var target = state[payload.index]
-
-		target.detail = target.detail.map(m => {
-			if(m._id === payload._id){
-				m.failed = false
-			}
-			return m
-		})
-
-		state[payload.index] = target
-
-		return state
+	on(resetMessages,(state) => {
+	  return []
 	})
 )

@@ -1,27 +1,27 @@
 import { createReducer,on } from '@ngrx/store';
-import { Ngrx } from '../../../index.d'
-import { setUser,setNull } from '../actions/user.actions';
+import { Model, Ngrx } from '../../../index.d'
+import { login,logout } from '../actions/user.actions';
 
-var state = JSON.parse(localStorage.getItem("ngrx") as string)
+var ngrx = localStorage.getItem("ngrx")
 
+var state = parse<{user:Model.User}>(ngrx as string)
 
-export const userReducer = createReducer<Ngrx.User>(
+export const userReducer = createReducer<Model.User>(
   state?.user ?? {
-    _id:null,
-    profile:null,
-    username:null
+    _id:false
   },
 
-  on(setUser,(state:Ngrx.User,payload:Ngrx.User) => {
+  on(login,(state:Model.User,payload:Model.User) => {
     return payload
   }),
 
-  on(setNull,(state:Ngrx.User) => {
+  on(logout,(state:Model.User) => {
     return {
-      _id:null,
-      profile:null,
-      username:null
+      _id:''
     }
   })
-
 );
+
+function parse<T>(jsonString:string):T{
+  return JSON.parse(jsonString) as T
+}

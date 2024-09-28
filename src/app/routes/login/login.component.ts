@@ -5,8 +5,8 @@ import { FormControl,FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Component,inject,effect,OnInit,signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RequestService } from '../../services/request/request.service'
-import { AuthService } from '../../services/auth/auth.service'
-import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService, Payload } from '../../services/auth/auth.service'
+import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { signInWithPopup,GoogleAuthProvider,getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { RouterLink } from '@angular/router'
@@ -39,7 +39,7 @@ export class LoginComponent {
 
   loginState = this.requestService.createInitialState<any>()
 
-  findOrCreate = this.requestService.post<any,any>({
+  findOrCreate = this.requestService.post<any,Payload>({
     state:this.loginState,
     path:'oauth',
     cb:r => this.authService.next(r),
@@ -59,11 +59,19 @@ export class LoginComponent {
       var surname = fullName?.split(" ")[1]
       var profileImage = account.user.photoURL
       var profile = {firstName,surname,profileImage}
+
+      var headers = new HttpHeaders({
+        'bypass-tunnel-reminder':'true'
+      })
     
       this.findOrCreate({
         profile,
         uid
-      })
+      },
+      {
+        headers
+      }
+      )
     }
     catch(e:any){
       console.log(e.message)

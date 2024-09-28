@@ -7,6 +7,7 @@
     "build": "ng build",
     "start:network": "ng serve --host 0.0.0.0",
     "watch": "ng build --watch --configuration development",
+    "dev": "ng serve --configuration development",
     "test": "ng test"
   },
   "private": true,
@@ -33,6 +34,7 @@
     "dotenv": "^16.3.2",
     "firebase": "^10.7.2",
     "graphql": "^16.9.0",
+    "lodash": "^4.17.21",
     "mongoose": "^8.0.4",
     "primeicons": "^6.0.1",
     "primeng": "^17.3.2",
@@ -49,6 +51,7 @@
     "@angular/cli": "^17.0.9",
     "@angular/compiler-cli": "^17.0.0",
     "@types/jasmine": "~5.1.0",
+    "@types/lodash": "^4.17.9",
     "autoprefixer": "^10.4.16",
     "dotenv-webpack": "^8.0.1",
     "jasmine-core": "~5.1.0",

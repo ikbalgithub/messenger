@@ -28,7 +28,7 @@ const storage = {
   history:historyReducer
 }
 
-const uri = 'https://api-production-bdf9.up.railway.app'
+const uri = 'https://localhost.loca.lt/graphql'
 
 const graphQLConfig = {
   deps:[HttpLink],

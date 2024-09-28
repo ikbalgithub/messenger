@@ -12,7 +12,7 @@ import { CommonService } from '../../services/common/common.service'
 import { StoreService } from '../../services/store/store.service'
 import { FirebaseService } from '../../services/firebase/firebase.service'
 import { RequestService } from '../../services/request/request.service'
-import { Message,Common } from '../../../index.d'
+import { Message,Common,Model } from '../../../index.d'
 import { ActivatedRoute,Router,Params } from '@angular/router'
 import { InputGroupModule } from 'primeng/inputgroup';
 import { ButtonModule } from 'primeng/button';
@@ -21,6 +21,9 @@ import { FormControl,FormGroup,ReactiveFormsModule } from '@angular/forms';
 import { ref,uploadBytes,getDownloadURL } from 'firebase/storage'
 import { add, failedSend, init, resend, successSend, updated } from '../../ngrx/actions/messages.actions';
 import { FilterPipe } from '../../pipes/filter/filter.pipe';
+import { GraphqlService } from '../../graphql/graphql.service';
+import { FETCH_DETAIL } from '../../graphql/graphql.queries';
+import { ApolloError } from '@apollo/client';
 
 @Component({
   selector: 'app-detail',
@@ -48,6 +51,7 @@ export class DetailComponent implements OnInit,OnDestroy {
   internetConnected = true
   url:RSU           = undefined
   location          = inject(Location)
+  graphql           = inject(GraphqlService)
   scroller          = inject(ViewportScroller)
   route             = inject(ActivatedRoute)
   firebaseService   = inject(FirebaseService)
@@ -97,9 +101,7 @@ export class DetailComponent implements OnInit,OnDestroy {
 
   updateRequest = this.requestService.put<Message.Update,Message.One>({
     cb:r => {
-      this.history.resetCounter(
-        this.route.snapshot.params['_id']
-      )
+      
     },
     failedCb:r => console.log(r),
     state:this.updateState,
@@ -149,6 +151,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     path:'message'
   })
 
+  
 
   fetchRequest = this.requestService.get<Message.All>({
     failedCb:r => alert(JSON.stringify(r)),
@@ -172,7 +175,7 @@ export class DetailComponent implements OnInit,OnDestroy {
           init(
             {
               _id:this.currentUser(),
-              detail:result.map(m => {
+              messages:result.map(m => {
                 return {
                   ...m,
                   sent:true
@@ -191,10 +194,11 @@ export class DetailComponent implements OnInit,OnDestroy {
 
   sendMessage(formulire:FormGroup,authorization:string){
     var _id = new Types.ObjectId().toString()
-    var headers = new HttpHeaders({authorization})
     
-    var index = this.messages().findIndex(m => {
-      return m._id === this.currentUser()
+    var headers = new HttpHeaders({
+      'authorization':this.authorization,
+      'bypass-tunnel-reminder':'true',
+      'credentials':'include'
     })
 
     var newMessage:Message.One = {
@@ -211,7 +215,7 @@ export class DetailComponent implements OnInit,OnDestroy {
     this.storeService.store.dispatch(
       add(
         {
-          index,
+          _id:this.currentUser(),
           newMessage
         }
       )
@@ -316,11 +320,17 @@ export class DetailComponent implements OnInit,OnDestroy {
   	this.internetConnected = true
   }
 
-
+  handleFetchResponse(result:Model.Message<string,string>[],error:ApolloError|undefined){
+    if(error){
+      
+    }
+    else{
+      console.log(result)
+    }
+  }
 
   ngOnInit(){
     this.url = this.route.url.subscribe(c => {   
-      var headers = new HttpHeaders({authorization:this.authorization})
       if(this.route.snapshot.params['_id'] !== this.currentUser()){
         
         this.currentUser.set(this.route.snapshot.params['_id'])
@@ -331,14 +341,35 @@ export class DetailComponent implements OnInit,OnDestroy {
        
         this.path3 = `${newGroupId}/${this.user._id}`
 
+        var headers = new HttpHeaders({
+          'authorization':this.authorization,
+          'bypass-tunnel-reminder':'true',
+          'credentials':'includes'
+        })
+
         this.socket.disconnect()
         
-        this.fetchRequest(
-          path,{headers}
+        this.graphql.query<{_:Model.Message<string,string>[]},{_id:string}>(
+          {
+            context:{headers},
+            query:FETCH_DETAIL,
+            variables:{_id:this.currentUser()},
+          }
         )
+        .subscribe(r => {
+          this.handleFetchResponse(
+            r.data._,
+            r.error
+          )
+        })
       }
       else{
         var path = `message/all/${this.currentUser()}`
+        var headers = new HttpHeaders({
+          'authorization':this.authorization,
+          'bypass-tunnel-reminder':'truex',
+          'credentials':'includes'
+        })
         this.fetchRequest(
           path,{headers}
         )
@@ -370,52 +401,52 @@ export class DetailComponent implements OnInit,OnDestroy {
       
     })
     
-    this.socket.on('incomingMessage',(message,ack) => {      
-      var [{detail}] = this.messages().filter(
-        m => m._id === this.currentUser()
-      )
+    // this.socket.on('incomingMessage',(message,ack) => {      
+    //   var [{detail}] = this.messages().filter(
+    //     m => m._id === this.currentUser()
+    //   )
 
-      var [filter] = detail.filter(m => {
-        return m._id === message._id
-      })
+    //   var [filter] = detail.filter(m => {
+    //     return m._id === message._id
+    //   })
 
-      var index = this.messages().findIndex(
-        m => m._id === this.currentUser()
-      )
+    //   var index = this.messages().findIndex(
+    //     m => m._id === this.currentUser()
+    //   )
       
-      this.updateRequest(
-        {
-          groupId:this.routeState().groupId,
-          _id:this.currentUser()
-        },
-        {
-          headers:new HttpHeaders({
-            authorization:this.authorization
-          })
-        }
-      )
+    //   this.updateRequest(
+    //     {
+    //       groupId:this.routeState().groupId,
+    //       _id:this.currentUser()
+    //     },
+    //     {
+    //       headers:new HttpHeaders({
+    //         authorization:this.authorization
+    //       })
+    //     }
+    //   )
 
-      var newMessage = {
-        ...message,
-        sent:true,
-        read:true
-      }
+    //   var newMessage = {
+    //     ...message,
+    //     sent:true,
+    //     read:true
+    //   }
   
-      if(!filter){
-        this.storeService.store.dispatch(
-          add(
-            {
-              index,
-              newMessage
-            }
-          )
-        )
+    //   if(!filter){
+    //     // this.storeService.store.dispatch(
+    //     //   add(
+    //     //     {
+    //     //       index,
+    //     //       newMessage
+    //     //     }
+    //     //   )
+    //     // )
 
-        setTimeout(() => {
-          this.toAnchor("anchor")
-        })
-      }
-    })
+    //     setTimeout(() => {
+    //       this.toAnchor("anchor")
+    //     })
+    //   }
+    // })
     
     this.socket.on('history/message',(m,cb) => {
       this.history.onMessage(m)

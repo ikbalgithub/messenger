@@ -1,4 +1,4 @@
 import { createAction } from '@ngrx/store';
 
-export const login = createAction('[Login Component] Login');
-export const logout  = createAction('[Navbar Component] Logout');
+export const setLogin = createAction('[Login Component] Set Login');
+export const setLogout = createAction('[Any Component] Set Logout');

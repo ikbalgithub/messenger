@@ -15,8 +15,14 @@ import { Types } from 'mongoose';
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
-import { Apollo } from 'apollo-angular';
+import { Apollo, ApolloModule } from 'apollo-angular';
 import { FIND_BY_USERNAME } from '../../graphql/graphql.queries';
+import { Model } from '../../../index.d'
+import { DocumentNode } from 'graphql';
+import { OperationVariables } from 'apollo-client';
+import { GraphqlModule } from '../../graphql/graphql.module';
+import { GraphqlService } from '../../graphql/graphql.service';
+import { ApolloError } from '@apollo/client';
 
 @Component({
   selector: 'app-search',
@@ -34,172 +40,74 @@ import { FIND_BY_USERNAME } from '../../graphql/graphql.queries';
     RouterOutlet,
     AvatarModule,
     BadgeModule,
-    ButtonModule
+    ButtonModule,
+    GraphqlModule
   ],
 
 })
 export class SearchComponent {
   query = ''
-
-  apolloService = inject(Apollo)
+  process = false
+  isError = false
+  errorMessage = ''
+  result = new Array<User>()
+  graphqlService = inject(GraphqlService)
   location = inject(Location)
   requestService = inject(RequestService)
   storeService = inject(StoreService)
   commonService = inject(CommonService)
     
   user = this.storeService.user
-  hAuth = this.storeService.authorization
+  authToken = this.storeService.authorization()
 
   _altId = new Types.ObjectId().toString()
 
-  friendshipIcon = (status:string|boolean):string => {
-    var icon = ''
-    
-    switch(status){
-      case 'pending':
-        icon = 'pi pi-clock'
-        break;
-      case 'requested':
-        icon = 'pi pi-users'
-        break;
-      case 'accepted':
-        icon = 'pi pi-message'
-        break
-      case false:
-        icon = 'pi pi-plus'
-        break
-    }
 
-    return icon
+  
+  reset(){
+    this.process = true
+    this.isError = false
+    this.errorMessage = ''
   }
-
-  searchState = this.requestService.createInitialState<Search.Result[]>()
-  friendshipAcceptanceState = this.requestService.createInitialState<any>()
-  friendshipRequestState = this.requestService.createInitialState<any>()
-  requestFn = this.requestService.post<{to:string},any>({
-    cb:r => console.log(r),
-    failedCb:e=> console.log(e),
-    path:'friend/request',
-    state:this.friendshipRequestState
-  })
-  acceptFn = this.requestService.post<{_id:string},any>({
-    cb:r => console.log(r),
-    failedCb:e=> console.log(e),
-    path:'friend/accept',
-    state:this.friendshipAcceptanceState
-  })
-  searchFn = this.requestService.get<Search.Result[]>({
-    cb:r => console.log(r),
-    failedCb:r => console.log(r),
-    state:this.searchState
-  })
-
+ 
   onChange(value:string){
-    var headers = new HttpHeaders({
-      authorization:this.hAuth()
-    })
-
-    if(value.length > 0) this.apolloService.watchQuery(
+    var variables = {u:value}
+    var authorization = this.authToken
+    var context = {headers:new HttpHeaders({authorization})}
+    if(value.length > 0) this.graphqlService.query<Result,Var>(
       {
         query:FIND_BY_USERNAME,
-        variables:{
-          u:value
-        },
-        context:{
-          headers
-        }
+        variables,
+        context
       }
     )
-    .valueChanges.subscribe(
-      ({data,error}) => {
-        console.log({
-          data,
-          error
-        })
-      }
+    .subscribe(
+      r => this.handleSearchResponse(
+        r.data,
+        r.error
+      )
     )
+    if(value.length > 0 ){
+      this.reset()
+    }
   }
 
-  actions(friendship:string,user:string){
-    if(!friendship) this.requestFriendship(user)
-    if(friendship === 'requested') this.accept(
-      user
-    )
+  handleSearchResponse(data:Result,error:ApolloError|undefined){
+    if(error){
+
+    }
+    else{
+      this.process = false
+      this.result = data._
+    }
   }
 
-  requestFriendship(to:string){
-    var result = this.searchState().result
-    var headers = new HttpHeaders({
-      authorization:this.hAuth()
-    })
+}
 
-    var result = result.map(({profile,...rest}) => {
-      var modifiedOne = {
-        profile,
-        ...rest,
-        friendship:'pending'
-      }
+type Var = {u:string}
+type Result = {_:User[]}
 
-      var notThisOne = {
-        profile,
-        ...rest,
-      }
-
-      return profile.usersRef === to
-        ? modifiedOne
-        : notThisOne
-    })
-
-    setTimeout(() => {
-      this.searchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
-
-    this.requestFn(
-      {to},
-      {headers}
-    )
-  }
-
-  accept(_id:string){
-    var result = this.searchState().result
-    var headers = new HttpHeaders({
-      authorization:this.hAuth()
-    })
-
-    var result = result.map(({profile,...rest}) => {
-      var modifiedOne = {
-        profile,
-        ...rest,
-        friendship:'accepted'
-      }
-
-      var notThisOne = {
-        profile,
-        ...rest,
-      }
-
-      return profile.usersRef === _id
-        ? modifiedOne
-        : notThisOne
-    })
-
-    setTimeout(() => {
-      this.searchState.update(current => {
-        return {
-          ...current,
-          result
-        }
-      })
-    })
-
-    this.acceptFn(
-      {_id},
-      {headers}
-    )
-  }
+type User = Pick<Model.User,"_id"> & {
+  profile:Omit<Model.Profile,"usersRef"|"_id">,
+  message:Model.Message<string,string>,
 }

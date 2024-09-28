@@ -1,15 +1,19 @@
 import { RouterLink,ActivatedRoute } from '@angular/router'
-import { CommonModule } from '@angular/common';
+import { CommonModule,JsonPipe } from '@angular/common';
 import { Component,OnInit,inject,Input } from '@angular/core';
-import { RequestService } from '../../services/request/request.service'
 import { StoreService } from '../../services/store/store.service'
-import { Common, Message,Ngrx, } from '../../../index.d'
+import { Common, Message,Model, } from '../../../index.d'
 import { HttpHeaders } from '@angular/common/http';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { ProfilePipe } from '../../pipes/profile/profile.pipe'
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
 import { add, failedSend, replace, resend, resetCounter, successSend, updated } from '../../ngrx/actions/history.actions';
+import { GraphqlModule } from '../../graphql/graphql.module';
+import { GraphqlService } from '../../graphql/graphql.service';
+import { FETCH_HISTORY } from '../../graphql/graphql.queries';
+import { ApolloError } from 'apollo-client';
+import { DocumentNode } from 'graphql';
+import { SentByOwnPipe } from '../../pipes/sentByOwn/sent-by-own.pipe';
 
 @Component({
   selector: 'app-history',
@@ -17,12 +21,14 @@ import { add, failedSend, replace, resend, resetCounter, successSend, updated } 
   templateUrl: './history.component.html',
   styleUrl: './history.component.css',
   imports: [
-    ProfilePipe,
+    GraphqlModule,
+    SentByOwnPipe,
     ProgressSpinnerModule,
     CommonModule,
     AvatarModule,
     BadgeModule,
-    RouterLink
+    RouterLink,
+    JsonPipe
   ],
 
 })
@@ -31,280 +37,134 @@ export class HistoryComponent implements OnInit {
   @Input() counterId!:string
   @Input() disabled!:boolean
 
+  process = false
+  isError = false
+  errorMessage = ''
+  graphqlService = inject(GraphqlService)
   storeService   = inject(StoreService)
-  requestService = inject(RequestService)
   route          = inject(ActivatedRoute)
-  user           = this.storeService.user() as Common.User
+  user           = this.storeService.user()
   authorization  = this.storeService.authorization()
   history        = this.storeService.history
-  
-	fetchState     = this.requestService.createInitialState<Message.Last[]>()  
-
-  fetchRequest = this.requestService.get<Message.Last[]>({
-    cb:r => {
-      if(this.history().length < 1){    
-        this.storeService.store.dispatch(
-          add(
-            {
-              v:r.map(m => {
-                return {
-                  ...m,
-                  sent:true
-                }
-              })
-            }
-          )
-        )
-      }
-    },
-    failedCb:err => {
-      console.log(
-        err
-      )
-    },
-    state:this.fetchState
-  })
 
   onNewMessage(newMessage:Message.One & {sender:string,accept:string}){
-    var [filter] = this.history().filter(m => {
-      return m.sender.usersRef ===
-      newMessage.sender || m.accept.usersRef
-      === newMessage.sender
-    })
-    
-    if(filter){
-      var index = this.history().findIndex(m => {
-        return m.sender.usersRef ===
-        newMessage.sender || m.accept.usersRef
-        === newMessage.sender
-      })
-
-			// if the last message sent by the same user
-      if(filter.sender.usersRef === newMessage.sender){
-        if(filter._id !== newMessage._id){
-					var value = {
-						...newMessage,
-						sender:filter.sender,
-						accept:filter.accept,
-						unreadCounter:filter.unreadCounter+1
-					}
-					
-					this.storeService.store.dispatch(
-						replace(
-							{
-								index,
-								value
-							}
-						)
-					) 
-        }
-      }
-
-			// if the last message sent by logged in user
-      if(filter.sender.usersRef !== newMessage.sender){
-        value = {
-          ...newMessage,
-          sender:filter.accept,
-          accept:filter.sender,
-          unreadCounter:1
-        }
-
-        this.storeService.store.dispatch(
-          replace(
-            {
-              index,
-              value
-            }
-          )
-        )
-      }
-    }
+   
+   
   }
 
   onMessage(newMessage:Message.Populated){
-    var [filter] = this.history().filter(m => {
-      return m.sender.usersRef ===
-      newMessage.sender.usersRef || m.accept.usersRef
-      === newMessage.sender.usersRef
-    })
-
-    if(!filter){
-      var value = {
-        ...newMessage,
-        unreadCounter:1
-      }
-
-      this.storeService.store.dispatch(
-        add({v:[value]})
-      )
-    }
+   
   }
 
-  resetCounter(_id:string){
-    var [filter] = this.history().filter(m => {
-      return m.sender.usersRef === _id
-    })
-
-    
-    var index = this.history().findIndex(m => {
-      return m.sender.usersRef === _id
-    })
-
-    if(filter){
-      this.storeService.store.dispatch(
-        resetCounter({index})
-      )
-    }
-  }
  
   onSendMessage(newMessage:Message.One,paramsId:string,profile:Common.Profile){
-    var sender = {...this.user.profile,usersRef:this.user._id}
     
-    var [filter] = this.history().filter((message,index) => {
-      return (
-        message.sender.usersRef
-        === paramsId
-      ) || (
-        message.accept.usersRef
-        === paramsId
-      )
-    })
-
-    var index = this.history().findIndex(message => {
-      return (
-        message.sender.usersRef
-        === paramsId
-      ) || (
-        message.accept.usersRef
-        === paramsId
-      )
-    })
-
-    if(filter){
-      if(filter.sender.usersRef === this.user._id){
-        var value = {
-          ...newMessage,
-          sender:filter.sender,
-          accept:filter.accept,
-          unreadCounter:0
-        }
-
-        this.storeService.store.dispatch(
-          replace(
-            {
-              index,
-              value
-            }
-          )
-        )
-      }
-
-      if(filter.sender.usersRef !== this.user._id){
-        value = {
-          ...newMessage,
-          sender:filter.accept,
-          accept:filter.sender,
-          unreadCounter:0
-        }
-
-        this.storeService.store.dispatch(
-          replace(
-            {
-              index,
-              value
-            }
-          )
-        )
-      }
-    }
-		else{
-      value = {
-        ...newMessage,
-        sender:sender,
-        accept:profile,
-        unreadCounter:0
-      }
-			this.storeService.store.dispatch(
-        add({v:[value]})
-      )
-		}
   }
 
   onSuccessSend(_id:string){
-    var index = this.history().findIndex( message => {
-      return message._id === _id
-    })
-
-    this.storeService.store.dispatch(
-      successSend(
-        {
-          index
-        }
-      )
-    )
+   
   }
 
   onUpdated(_id:string){
-    var index = this.history().findIndex(m => {
-      return  m.sender.usersRef === _id 
-      || m.accept.usersRef === _id
-    })
-
-    this.storeService.store.dispatch(
-      updated({index})
-    )
+    
   }
 
-  showUnreadCounter(message:Message.Last):boolean{
-    return (
-      message.sender.usersRef !== this.user._id 
-        ? message.sender.usersRef !== this.counterId 
-            ? message.unreadCounter > 0 
-              ? true 
-              : false
-            : false 
-        : false
-    )
-  }
+  
 
   onFailedSend(_id:string){
-    var index = this.history().findIndex(m => {
-      return m._id === _id
-    })
-
-    this.storeService.store.dispatch(
-      failedSend({index})
-    )
+    
   }
 
   onResend(_id:string){
 
-    var [filter] = this.history().filter(m => {
-      return m._id === _id
-    })
+  }
 
-    var index = this.history().findIndex(m => {
-      return m._id === _id
-    })
+  handleFetchResponse(data:History,error:string|undefined){
+    if(error){
+      this.complete(
+        true,error
+      )
+    }
+    else{
+      var result = data.map(m => {
+        var filter = m.sender._id === this.user._id
+        var modified = {status:{sent:true},detail:m}
 
-    if(filter){
-      this.storeService.store.dispatch(
-        resend({index})
+        return filter ? modified : {
+          status:{},
+          detail:m
+        }
+      })
+
+      if(this.history().length < 1){
+        this.storeService.store.dispatch(
+          add({v:result})
+        )
+      }
+
+      this.complete(
+        false,''
       )
     }
   }
 
-  ngOnInit(){
-    var authorization = this.authorization
-    var headers = new HttpHeaders({authorization})
+  reset(){
+    this.isError = false
+    this.process = true
+    this.errorMessage = ''
+  }
 
-    this.fetchRequest(
-      'message/recently',
-      {headers}
+  complete(isError:boolean,errorMessage:string){
+    if(isError){
+      this.process = false
+      this.isError = true
+      this.errorMessage = errorMessage
+    }
+    else{
+      this.process = false
+    }
+  }
+
+  runFetch(query:DocumentNode,headers:HttpHeaders){
+    this.graphqlService.query<{_:History},{}>(
+      {
+        query,
+        context:{headers}
+      }
     )
+    .subscribe(
+      r => this.handleFetchResponse(
+        r.data._,
+        r.error?.message ?? undefined
+      )
+    )
+  }
+
+  preFetch(){
+    this.reset()
+    var query = FETCH_HISTORY
+    var headers = new HttpHeaders({
+      'authorization':this.authorization,
+      'bypass-tunnel-reminder':'true',
+      'credentials':'include'
+    })
+    this.runFetch(
+      query,
+      headers
+    )
+  }
+  
+  ngOnInit(){
+    this.preFetch()
   }
 
   test(){
     alert('test')
   }
 }
+
+type History = Model.Message<Sender,Accept>[]
+type Status  = {sent?:boolean,failed?:boolean}
+type Sender = {_id:string,profile:Omit<Model.Profile,"usersRef"|"_id">}
+type Accept = {_id:string,profile:Omit<Model.Profile,"usersRef"|"_id">}
+export type Modified  = {status:Status,detail:History[number]}
