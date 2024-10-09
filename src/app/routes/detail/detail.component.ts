@@ -1,5 +1,4 @@
 import { io } from 'socket.io-client'
-import { Types } from 'mongoose';
 import { Subscription, } from 'rxjs'
 import { ImageModule } from 'primeng/image';
 import { CommonModule,ViewportScroller,Location } from '@angular/common';
@@ -47,9 +46,11 @@ export class DetailComponent implements OnInit,OnDestroy {
   preview           = false
   connected         = false
   uploading         = false
+  process           = false
+  isError           = false
+  errorMessage      = ''
 	isValid           = /^\s*$/
-  internetConnected = true
-  url:RSU           = undefined
+  url:Tmp<Subscription>  = undefined
   location          = inject(Location)
   graphql           = inject(GraphqlService)
   scroller          = inject(ViewportScroller)
@@ -59,45 +60,16 @@ export class DetailComponent implements OnInit,OnDestroy {
   storeService      = inject(StoreService)
   commonService     = inject(CommonService)
   storage           = this.firebaseService.storage
-  parameterId       = this.route.snapshot.params['_id']
   user              = this.storeService.user() as User
   authorization     = this.storeService.authorization()
   messages          = this.storeService.messages
-  currentUser       = signal<string>(this.parameterId)
-  routeState        = signal<WHS>(window.history.state)
-  pathX             = `chat/${this.user._id}`
-  path1             = `history/${this.user._id}`
+  routeState        = window.history.state
+  currentUser       = this.route.snapshot.params['_id']
   socket            = io(import.meta.env.NG_APP_SERVER,{autoConnect:false})
-  path2             = computed(() => `${this.pathX}/${this.currentUser()}`)
   updateState       = this.requestService.createInitialState<Message.One>()
   fetchState        = this.requestService.createInitialState<Message.All>()
-	sendState         = this.requestService.createInitialState<Message.One>()
-  path3             = `${this.routeState().groupId}/${this.user._id}`
 
   @ViewChild('history') history !:HistoryComponent
-
-  messageForm:FormGroup = new FormGroup({
-    value: new FormControl<string>(''),
-    sender:new FormControl<string>(this.user._id),
-    description: new FormControl<string>('none'),
-    contentType: new FormControl<string>('text'),
-  })
-
-  imageForm = new FormGroup({
-    value: new FormControl<string>(''),
-    description: new FormControl<string>('none'),
-    contentType: new FormControl<string>('image'),
-    sender: new FormControl<string>(this.user._id),
-  })
-
-  additionalInfo = computed(() => {
-    var state = this.routeState()
-    
-    return {
-      accept:this.currentUser(),
-      groupId:state.groupId
-    }
-  })
 
   updateRequest = this.requestService.put<Message.Update,Message.One>({
     cb:r => {
@@ -107,51 +79,6 @@ export class DetailComponent implements OnInit,OnDestroy {
     state:this.updateState,
     path:'message'
   })
-
-	sendRequest = this.requestService.post<Message.New,Message.One>({
-    failedCb:(err,body) => {
-      var postObject = body as Message.New
-
-      var index = this.messages().findIndex(
-        m => m._id === this.currentUser()
-      )
-
-      this.storeService.store.dispatch(
-        failedSend(
-          {
-            index,
-            _id:postObject._id
-          }
-        )
-      )
-
-      this.history.onFailedSend(
-        postObject._id
-      )
-    },
-    cb:r => {
-      var index = this.messages().findIndex(
-        m => m._id === this.currentUser()
-      )
-
-      this.storeService.store.dispatch(
-        successSend(
-          {
-            index,
-            _id:r._id
-          }
-        )
-      )
-
-      this.history.onSuccessSend(
-        r._id
-      )
-    },
-    state:this.sendState,
-    path:'message'
-  })
-
-  
 
   fetchRequest = this.requestService.get<Message.All>({
     failedCb:r => alert(JSON.stringify(r)),
@@ -171,19 +98,7 @@ export class DetailComponent implements OnInit,OnDestroy {
       }
 
       if(this.messages().filter(m => m._id === this.currentUser()).length < 1){
-        this.storeService.store.dispatch(
-          init(
-            {
-              _id:this.currentUser(),
-              messages:result.map(m => {
-                return {
-                  ...m,
-                  sent:true
-                }
-              })
-            }
-          )
-        )
+        
       }
 
       setTimeout(() => this.toAnchor("anchor2"))
@@ -192,154 +107,49 @@ export class DetailComponent implements OnInit,OnDestroy {
     state:this.fetchState,
   })
 
-  sendMessage(formulire:FormGroup,authorization:string){
-    var _id = new Types.ObjectId().toString()
-    
-    var headers = new HttpHeaders({
-      'authorization':this.authorization,
-      'bypass-tunnel-reminder':'true',
-      'credentials':'include'
-    })
-
-    var newMessage:Message.One = {
-      ...formulire.value,
-      ...this.additionalInfo(),
-      sendAt:Date.now(),
-      sent:false,
-      read:false,
-      _id,
-    }
-    
-    var {sent,read,...sentObject} = newMessage
-
-    this.storeService.store.dispatch(
-      add(
-        {
-          _id:this.currentUser(),
-          newMessage
-        }
-      )
-    )
-    
-    this.history.onSendMessage(
-      newMessage,
-      this.currentUser(),
-      this.routeState().profile
-    )
-    
-    this.imageForm.patchValue({
-      value:'',
-    })
-
-    this.messageForm.patchValue({
-      value:'',
-    })
-
-    this.sendRequest(
-      sentObject,
-      {headers}
-    )
-
-    if(this.preview){
-      this.preview = false
-    }
-
-    setTimeout(() => {
-      this.toAnchor("anchor")
-    })
-  }
-
-  async onFileChange(event:any){
-    try{
-      this.uploading = true
-      var file = event.target.files[0]
-      var uploadRef = `send/${Date.now()}`
-      var refs = ref(this.storage,uploadRef)
-      var result = await uploadBytes(refs,file)
-      var url = await getDownloadURL(result.ref)
-      var formValue = this.imageForm.value
-
-      this.imageForm.patchValue({
-        value:url
-      })
-
-      this.preview = true
-    }
-    catch(err:any){
-      console.log(err.message)
-    }
-    finally{
-      this.uploading = false
-    }
-  }
 
   toAnchor(anchor:string){
     this.scroller.scrollToAnchor(anchor)
   }
 
-  reset(){
-    this.messageForm.patchValue(
-      {
-        ...this.messageForm.value,
-        value:''
-      }
-    )
-  }
-
-  resend({read,failed,sent,...message}:Message.One,authorization:string){
-    var headers = new HttpHeaders({authorization})
-
-    var index = this.messages().findIndex(m => {
-      return m._id === this.currentUser()
-    })
-
-    this.storeService.store.dispatch(
-      resend(
-        {
-          index,
-          _id:message._id
-        }
-      )
-    )
-
-    this.history.onResend(
-      message._id
-    )
-    
-    this.sendRequest(
-      {...message},
-      {headers}
-    )
-  }
-
-  @HostListener('window:offline',['$event']) onDisconnect(event:Event){
-  	this.internetConnected = false
-  }
-
-  @HostListener('window:online',['$event']) onConnected(event:Event){
-  	this.internetConnected = true
-  }
-
+ 
   handleFetchResponse(result:Model.Message<string,string>[],error:ApolloError|undefined){
     if(error){
-      
+      this.process = false
+      this.isError = true
+      this.errorMessage = error.message
     }
     else{
-      console.log(result)
+     // run update
+     this.process = false
+     var messages = result.map(message => {
+       var received = message.sender === this.user._id
+       
+       return {
+         ...message,
+         older:true,
+         received
+        }
+      
+     })
+     var filtered = this.messages().filter(m => m._id === this.currentUser)
+     if(filtered.length < 1) this.storeService.store.dispatch(
+       init(
+        {
+          _id:this.currentUser,
+          messages:messages
+        }
+       )
+     )
     }
   }
 
   ngOnInit(){
     this.url = this.route.url.subscribe(c => {   
-      if(this.route.snapshot.params['_id'] !== this.currentUser()){
+      if(this.route.snapshot.params['_id'] !== this.currentUser){
+        this.currentUser = this.route.snapshot.params['_id']
         
-        this.currentUser.set(this.route.snapshot.params['_id'])
-        this.routeState.set(window.history.state)
-
-        var path = `message/all/${this.currentUser()}`
-        var newGroupId = this.routeState().groupId
-       
-        this.path3 = `${newGroupId}/${this.user._id}`
+        this.routeState = window.history.state     
 
         var headers = new HttpHeaders({
           'authorization':this.authorization,
@@ -349,11 +159,12 @@ export class DetailComponent implements OnInit,OnDestroy {
 
         this.socket.disconnect()
         
+        this.process = true
         this.graphql.query<{_:Model.Message<string,string>[]},{_id:string}>(
           {
             context:{headers},
             query:FETCH_DETAIL,
-            variables:{_id:this.currentUser()},
+            variables:{_id:this.currentUser},
           }
         )
         .subscribe(r => {
@@ -364,124 +175,30 @@ export class DetailComponent implements OnInit,OnDestroy {
         })
       }
       else{
-        var path = `message/all/${this.currentUser()}`
+        this.process = true
         var headers = new HttpHeaders({
           'authorization':this.authorization,
-          'bypass-tunnel-reminder':'truex',
+          'bypass-tunnel-reminder':'true',
           'credentials':'includes'
         })
-        this.fetchRequest(
-          path,{headers}
-        )
-      }
-    })
-
-    
-    this.socket.on('history/updated',(_id,cb) => {
-      this.history.onUpdated(_id)
-     
-    })
-    
-
-    this.socket.on('updated',(_id,cb) => {
-      var index = this.messages().findIndex(m => {
-        return m._id === this.currentUser()
-      })
-
-      this.storeService.store.dispatch(
-        updated(
+        this.graphql.query<{_:Model.Message<string,string>[]},{_id:string}>(
           {
-            index,
-            _id:this.user._id
+            context:{headers},
+            query:FETCH_DETAIL,
+            variables:{_id:this.currentUser},
           }
         )
-      )
-
-      this.history.onUpdated(_id)
-      
-    })
-    
-    // this.socket.on('incomingMessage',(message,ack) => {      
-    //   var [{detail}] = this.messages().filter(
-    //     m => m._id === this.currentUser()
-    //   )
-
-    //   var [filter] = detail.filter(m => {
-    //     return m._id === message._id
-    //   })
-
-    //   var index = this.messages().findIndex(
-    //     m => m._id === this.currentUser()
-    //   )
-      
-    //   this.updateRequest(
-    //     {
-    //       groupId:this.routeState().groupId,
-    //       _id:this.currentUser()
-    //     },
-    //     {
-    //       headers:new HttpHeaders({
-    //         authorization:this.authorization
-    //       })
-    //     }
-    //   )
-
-    //   var newMessage = {
-    //     ...message,
-    //     sent:true,
-    //     read:true
-    //   }
-  
-    //   if(!filter){
-    //     // this.storeService.store.dispatch(
-    //     //   add(
-    //     //     {
-    //     //       index,
-    //     //       newMessage
-    //     //     }
-    //     //   )
-    //     // )
-
-    //     setTimeout(() => {
-    //       this.toAnchor("anchor")
-    //     })
-    //   }
-    // })
-    
-    this.socket.on('history/message',(m,cb) => {
-      this.history.onMessage(m)
-      
-    })
-
-    this.socket.on('history/newMessage',(m,cb) => {
-      this.history.onNewMessage(m)
-      
-    })
-
-    this.socket.on('ack',path => {
-      this.socket.emit(
-        'ack',path
-      )
+        .subscribe(r => {
+          this.handleFetchResponse(
+            r.data._,
+            r.error
+          )
+        })
+      }
     })
 
     this.socket.on('connect',() => {
 
-      var paths = [
-        this.path1,
-        this.path2(),
-        this.path3
-      ]
-
-      var params = {
-        _id:this.user._id,
-        paths
-      }
-      
-      this.socket.emit(
-        'join',
-         params
-      )
-      
     })
   }
 
@@ -498,4 +215,5 @@ interface WHS{
 }
 
 type User = Common.User
-type RSU = Subscription|undefined
+
+type Tmp<T> = T | undefined

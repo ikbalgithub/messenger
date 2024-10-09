@@ -11,25 +11,8 @@ export const messagesReducer = createReducer<Cache[]>(
 		]
 	}),
 	on(add,(state,payload) => {		
-		var updatedState = [...state]
-		var [filter] = state.filter(s => {
-		  return s._id === payload._id
-		})
 
-		var index = findIndex(state,filter)
-
-
-		var messages = [
-		  ...filter.messages,
-			payload.newMessage
-		]
-
-		updatedState[index] = {
-		  ...filter,
-			messages
-		}
-
-		return updatedState
+		return state
 	}),
 	on(successSend,(state,payload) => {
     var updatedState = [...state]

@@ -9,7 +9,8 @@ export const failedSend = createAction('[Detail Component] Failed Send',props<{i
 export const resend = createAction('[Detail Component] Resend',props<{index:number,_id:string}>())
 export const resetMessages = createAction('[Detail Component] Reset')
 
-type Messages = (Model.Message<string,string> & {sent?:boolean,failed?:boolean})[]
+type Status = {older:boolean,received:boolean,sent?:boolean,failed?:boolean}
+type Messages = (Model.Message<string,string> & Status)[]
 
 
 export type Cache = {

@@ -2,7 +2,7 @@
   <div class="flex-1 flex flex-row">
     <app-history
       #history
-      [disabled]="sendState().running" 
+      [disabled]="false" 
       [counterId]="route.snapshot.params['_id']" 
       class="xs:hidden md:flex overflow-y-scroll flex-1 flex flex-col sticky top-0 h-screen"
     />
@@ -12,17 +12,17 @@
           <i (click)="location.back()" class="pi pi-arrow-left font-bold text-lg cursor-pointer"></i>
         </span>
         <p-avatar
-          [image]="routeState().profile.profileImage" 
+          [image]="routeState.profile.profileImage" 
           size="large" 
           shape="circle"
           class="flex flex-col"
         />
         <span class="font-semibold text-lg">
-          {{routeState().profile.firstName}} {{routeState().profile.surname}}
+          {{routeState.profile.firstName}} {{routeState.profile.surname}}
         </span>
       </div>
 			<div class="flex-1 flex flex-col gap-3 p-6">
-				<div *ngIf="fetchState().running; else next" class="flex flex-col flex-1 justify-center items-center">
+				<div *ngIf="process; else next" class="flex flex-col flex-1 justify-center items-center">
 					<p-progressSpinner/>
 				</div>
 
@@ -38,7 +38,7 @@
                 <i *ngIf="message?.sent && !message.read" class="pi pi-check text-white text-[1rem]"></i>
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
-                <i *ngIf="message?.failed" (click)="resend(message,authorization)" class="pi pi-replay text-white text-[1rem] cursor-pointer"></i>
+                <i *ngIf="message?.failed" class="pi pi-replay text-white text-[1rem] cursor-pointer"></i>
               </span>
             </div>
           </div>
@@ -61,7 +61,7 @@
                 <i *ngIf="message?.sent && !message.read" class="pi pi-check text-white text-[1rem]"></i>
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
                 <i *ngIf="message?.sent && message?.read" class="pi pi-check text-white text-[1rem]"></i> 
-                <i *ngIf="message?.failed" (click)="resend(message,authorization)" class="pi pi-replay text-white text-[1rem] cursor-pointer"></i>
+                <i *ngIf="message?.failed" class="pi pi-replay text-white text-[1rem] cursor-pointer"></i>
               </span>
             </div>
           </div>
@@ -102,19 +102,18 @@
 				
 				<ng-template #error>
           <div class="flex flex-col flex-1 justify-center items-center">
-						Reload aja dulu
+						{{errorMessage}
 					</div>
 			  </ng-template>
 
         <ng-template #next>
-				  @if(fetchState().isError){
+				  @if(isError){
 					  <ng-container
 						  *ngTemplateOutlet="error"
 					  />
 				  }
 				  @else{
-            @if(messages() | filter:currentUser()){
-              @for(x of (messages() | filter:currentUser()).messages; track x._id; let last=$last){
+              @for(x of (messages() | filter:currentUser).messages; track x._id; let last=$last){
                 @if(x.sender === user._id){
                   @if(x.contentType === "text"){
                     <ng-container
@@ -153,28 +152,26 @@
                   *ngTemplateOutlet="empty"
                 />
               }
-            } 
+            
 				  }
         </ng-template>
 			</div>
-      <form [formGroup]="messageForm" (submit)="sendMessage(messageForm,authorization)" class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
+      <form class="lg:rounded bg-slate-200 sticky bottom-0 w-full p-3 shadow-inner">
         <p-inputGroup class="flex flex-row">
           <input 
             pInputText
             type="text" 
-            formControlName="value"
             class="flex-1 px-3 outline-none"
-            [placeholder]="internetConnected ? 'Keyword' : 'Please connect to chat'"
+            placeholder="new message"
           />
           <button type="button" pButton [icon]="uploading ? 'pi pi-spin pi-spinner':'pi pi-image'">
 						<input 
 						  type="file"
 							accept="image/*"
 						  class="opacity-0 absolute"
-						  (change)="onFileChange($event)"
 					  />
 					</button>
-          <button type="submit" [disabled]="(isValid.test(messageForm.value.value) || sendState().running || uploading || preview)" pButton icon="pi pi-arrow-up"></button>
+          <button type="submit" pButton icon="pi pi-arrow-up"></button>
         </p-inputGroup>
       </form>
     </div>
@@ -185,18 +182,17 @@
   <p-dialog header="Send" [(visible)]="preview" [modal]="true">
     <div class="flex flex-col gap-3">
       <img
-        [src]="imageForm.value.value" 
+        [src]="" 
         alt="Image"
         class="h-72 aspect-square rounded"
       />
-      <form [formGroup]="imageForm" (submit)="sendMessage(imageForm,authorization)">
+      <form>
         <p-inputGroup class="flex flex-row">
           <input 
             type="text" 
             pInputText 
             placeholder="Description"
             class="flex-1 px-3 outline-none"
-            formControlName="description"
           />
           <button type="submit" pButton icon="pi pi-send">
           </button>

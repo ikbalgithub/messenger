@@ -79,38 +79,41 @@ export class HistoryComponent implements OnInit {
 
   }
 
-  handleFetchResponse(data:History,error:string|undefined){
+  handleFetchResponse(data:Result,error:string|undefined){
     if(error){
       this.complete(
         true,error
       )
     }
     else{
-      var result = data.map(m => {
-        var c = m.sender._id === this.user._id
+      console.log({data})
+      // var result = data.map(m => {
+      //   var c = m.sender._id === this.user._id
 
-        var modified1 = {
-          ...m,
-          older:true,
-          received:false
-        }
+      //   var modified1 = {
+      //     ...m,
+      //     older:true,
+      //     received:false
+      //   }
 
-        var modified2 = {
-          ...m,
-          older:true,
-          received:true
-        }
+      //   var modified2 = {
+      //     ...m,
+      //     older:true,
+      //     received:true
+      //   }
         
-        return c ? modified2 : modified2
-      })
-
-      this.storeService.store.dispatch(
-        add({v:result})
-      )
+      //   return c ? modified2 : modified2
+      // })
       
-      this.complete(
-        false,''
-      )
+      // if(this.history().length < 1){
+      //   this.storeService.store.dispatch(
+      //     add({v:result})
+      //   )
+      // }
+    
+      // this.complete(
+      //   false,''
+      // )
     }
   }
 
@@ -131,10 +134,11 @@ export class HistoryComponent implements OnInit {
     }
   }
 
-  runFetch(query:DocumentNode,headers:HttpHeaders){
-    this.graphqlService.query<{_:History},{}>(
+  runFetch(query:DocumentNode,headers:HttpHeaders,v:any){
+    this.graphqlService.query<{_:Result},any>(
       {
         query,
+        variables:v,
         context:{headers}
       }
     )
@@ -149,21 +153,17 @@ export class HistoryComponent implements OnInit {
   preFetch(){
     this.reset()
     var query = FETCH_HISTORY
+    var vars = {_id:this.user._id}
     var headers = new HttpHeaders({
       'authorization':this.authorization,
       'bypass-tunnel-reminder':'true',
       'credentials':'include'
     })
-    if(this.history().length < 1){
-      this.runFetch(
-        query,
-        headers
-      )
-    }
-    else{
-      this.process = true
-      this.process = false
-    }
+    this.runFetch(
+      query,
+      headers,
+      vars
+    )
   }
   
   ngOnInit(){
@@ -179,3 +179,4 @@ export type History = (Model.Message<Sender,Accept> & Status)[]
 type Sender = {_id:string,profile:Omit<Model.Profile,"usersRef"|"_id">}
 type Accept = {_id:string,profile:Omit<Model.Profile,"usersRef"|"_id">}
 type Status  = {older:boolean,received:boolean,sent?:boolean,failed?:boolean}
+type Result = {_id:string,result:any}

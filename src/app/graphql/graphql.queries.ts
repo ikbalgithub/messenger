@@ -2,8 +2,8 @@ import { gql } from '@apollo/client'
 import { Search } from '../..'
 
 export const FETCH_DETAIL = gql`
-  query fetchDetail($id:String!){
-    _:fetchDetail(_id:$id){
+  query fetchDetail($_id:String!){
+    _:fetchDetail(_id:$_id){
        _id
       sender
       value
@@ -37,23 +37,29 @@ export const FETCH_HISTORY = gql`
       ...profile
     }
   }
- 
-  query{
-    _:fetchHistory{
-      _id
-      sender{
-        ...sender
-      }
-      value
-      groupId
-      accept{
-        ...accept
-      }
-      sendAt
-      read
-      contentType
-      description
 
+  fragment result on M {
+    _id
+    value
+    groupId
+    contentType
+    sendAt
+    read
+    description
+    sender{
+      ...sender
+    }
+    accept{
+      ...accept
+    }
+  }
+ 
+  query fetchHistory($_id:String!){
+    _:fetchHistory(_id:$_id){
+      _id
+      result{
+        ...result
+      }
     }
   }
 `
