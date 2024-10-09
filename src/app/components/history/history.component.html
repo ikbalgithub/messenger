@@ -27,8 +27,8 @@
     </div>
   </ng-template>
 
-  <ng-template #message let-sentByOwn="sentByOwn" let-message="message" let-status="status">
-    <div *ngIf="sentByOwn" class="flex flex-row p-3 gap-3 bg-white shadow-md rounded-md items-center">
+  <ng-template #message let-message="i" >
+    <div class="flex flex-row p-3 gap-3 bg-white shadow-md rounded-md items-center">
       <p-avatar
         [image]="message.accept.profile.profileImage" 
         size="large" 
@@ -40,100 +40,28 @@
           <span class="font-bold text-lg">
             {{ message.accept.profile.firstName }}
           </span>
-
         </div>
-        <span class="truncate flex flex-row gap-2" *ngIf="message.contentType === 'text'">
-          <a class="hover:underline" routerLink="/messages/{{message.accept._id}}" [state]="{profile:message.accept.profile,groupId:message.groupId}">
-            {{message.value}}</a>
-          <span>
-            <i *ngIf="!status?.sent && !status?.failed" class="pi pi-check text-[1rem]"></i>
-            <i *ngIf="status?.sent && !status.read" class="pi pi-check text-red-900 text-[1rem]"></i>
-            <i *ngIf="status?.sent && status?.read" class="pi pi-check text-blue-900 text-[1rem]"></i> 
-            <i *ngIf="status?.sent && status?.read" class="pi pi-check text-blue-900 text-[1rem]"></i> 
-            <i *ngIf="status?.failed" class="pi pi-exclamation-circle text-red-900 text-[1rem]"></i> 
+        <div class="truncate flex flex-row items-center gap-2">
+          <div *ngIf="message.contentType === 'text'" routerLink="/messages/{{message.accept._id}}" [state]="{profile:message.accept.profile,groupId:message.groupId}">
+            <a class="hover:underline">{{message.value}}</a>
+          </div>
+          <div *ngIf="message.contentType === 'image'" routerLink="/messages/{{message.accept._id}}" [state]="{profile:message.accept.profile,groupId:message.groupId}">
+            <a class="flex flex-row gap-2 items-center hover:underline">
+              <i class="pi pi-image text-[1rem]"></i>
+              <span class="text-slate-600">photo</span>
+            </a>
+          </div>
+          <span *ngIf="!message.received">
+            <i *ngIf="(!message.older && !message?.sent) && !message?.failed" class="pi pi-check text-[1rem]"></i>
+            <i *ngIf="(message.older || message?.sent) && !message.read" class="pi pi-check text-red-900 text-[1rem]"></i>
+            <i *ngIf="(message.older || message?.sent) && message?.read" class="pi pi-check text-blue-900 text-[1rem]"></i> 
+            <i *ngIf="(message.older || message?.sent) && message?.read" class="pi pi-check text-blue-900 text-[1rem]"></i> 
+            <i *ngIf="message?.failed" class="pi pi-exclamation-circle text-red-900 text-[1rem]"></i> 
           </span>
-        </span>
-        <div class="flex flex-row items-center gap-2" *ngIf="message.contentType === 'image'">
-          <i class="pi pi-image text-[1rem]"></i>
-          <span class="text-slate-600">photo</span>
-          <span>
-            <i *ngIf="!status?.sent && !status?.failed" class="pi pi-check text-[1rem]"></i>
-            <i *ngIf="status?.sent && !status.read" class="pi pi-check text-red-900 text-[1rem]"></i>
-            <i *ngIf="status?.sent && status?.read" class="pi pi-check text-yellow-900 text-[1rem]"></i> 
-            <i *ngIf="status?.sent && status?.read" class="pi pi-check text-blue-900 text-[1rem]"></i>
-            <i *ngIf="status?.failed" class="pi pi-exclamation-circle text-red-900 text-[1rem]"></i> 
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="!sentByOwn" class="flex flex-row p-3 gap-3 bg-white shadow-md rounded-md items-center">
-      <p-avatar
-        [image]="message.sender.profile.profileImage" 
-        size="large" 
-        shape="circle"
-        class="flex"
-      />
-      <div class="flex flex-col">
-        <div class="flex flex-row items-center gap-2">
-          <span class="font-bold text-lg">
-            {{ message.sender.profile.firstName }}
-          </span>
-        </div>
-        <span class="truncate flex flex-row gap-2" *ngIf="message.contentType === 'text'">
-          <a class="hover:underline" routerLink="/messages/{{message.sender._id}}" [state]="{profile:message.sender.profile,groupId:message.groupId}">
-            {{message.value}}</a>
-        </span>
-        <div class="flex flex-row items-center gap-2" *ngIf="message.contentType === 'image'">
-          <i class="pi pi-image text-[1rem]"></i>
-          <span class="text-slate-600">photo</span>
         </div>
       </div>
     </div>
   </ng-template>
-
-  <!-- 
-  <ng-template #message let-profile="profile" let-message="message">
-    <a [class]="disabled ? 'pointer-events-none':''" routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId:message.groupId}">
-    <div class="flex flex-row p-3 gap-3 bg-white shadow-md rounded-md items-center">
-      <p-avatar
-        [image]="profile.profileImage" 
-        size="large" 
-        shape="circle"
-        class="flex"
-      />
-      <div class="flex flex-col">
-        <div class="flex flex-row items-center gap-2">
-          <span class="font-bold text-lg">
-            {{ profile.firstName }}
-          </span>
-
-        </div>
-        <span class="truncate flex flex-row gap-2" *ngIf="message.contentType === 'text'">
-          {{message.value}}
-          <span *ngIf="message.sender.usersRef === user._id">
-            <i *ngIf="!message?.sent && !message?.failed" class="pi pi-check text-[1rem]"></i>
-            <i *ngIf="message?.sent && !message.read" class="pi pi-check text-red-900 text-[1rem]"></i>
-            <i *ngIf="message?.sent && message?.read" class="pi pi-check text-yellow-900 text-[1rem]"></i> 
-            <i *ngIf="message?.sent && message?.read" class="pi pi-check text-blue-900 text-[1rem]"></i> 
-            <i *ngIf="message?.failed" class="pi pi-exclamation-circle text-red-900 text-[1rem]"></i> 
-          </span>
-        </span>
-        <div class="flex flex-row items-center gap-2" *ngIf="message.contentType === 'image'">
-          <i class="pi pi-image text-[1rem]"></i>
-          <span class="text-slate-600">photo</span>
-          <span *ngIf="message.sender.usersRef === user._id">
-            <i *ngIf="!message?.sent && !message?.failed" class="pi pi-check text-[1rem]"></i>
-            <i *ngIf="message?.sent && !message.read" class="pi pi-check text-red-900 text-[1rem]"></i>
-            <i *ngIf="message?.sent && message?.read" class="pi pi-check text-yellow-900 text-[1rem]"></i> 
-            <i *ngIf="message?.sent && message?.read" class="pi pi-check text-blue-900 text-[1rem]"></i> 
-          </span>
-        </div>
-      </div>
-    </div>
-    </a>
-  </ng-template> 
-  -->
   
   <ng-template #error>
     <div class="flex-1 flex flex-col items-center justify-center">
@@ -144,27 +72,14 @@
 
   <ng-template #next>
     @if(isError){
-      <ng-container 
-        *ngTemplateOutlet="error"
-      />
+      <ng-container *ngTemplateOutlet="error"/>
     }
     @else{
-      @for(x of history(); track x.detail._id){
-        <ng-container
-          *ngTemplateOutlet="
-            message;
-            context:{
-              sentByOwn:x.detail.sender._id|sentByOwn:user._id,
-              status:x.status,
-              message:x.detail
-            }
-          "
-        />
+      @for(i of history(); track i._id){
+        <ng-container *ngTemplateOutlet="message;context:{i}"/>
       }
       @empty{
-        <ng-container 
-          *ngTemplateOutlet="empty"
-        />
+        <ng-container *ngTemplateOutlet="empty"/>
       }
     }
   </ng-template>
@@ -175,75 +90,3 @@
 
 
 
-<!-- 
-
-  <div *ngIf="fetchState().running" class="flex flex-col flex-1 justify-center items-center">
-    <p-progressSpinner/>
-  </div>
-
-  <ng-template #message let-profile="profile" let-message="message">
-    <a [class]="disabled ? 'pointer-events-none':''" routerLink="/messages/{{profile.usersRef}}" [state]="{profile,groupId:message.groupId}">
-    <div class="flex flex-row p-3 gap-3 bg-white shadow-md rounded-md items-center">
-      <p-avatar
-        [image]="profile.profileImage" 
-        size="large" 
-        shape="circle"
-        class="flex"
-      />
-      <div class="flex flex-col">
-        <div class="flex flex-row items-center gap-2">
-          <span class="font-bold text-lg">
-            {{ profile.firstName }}
-          </span>
-          <p-badge 
-             [value]="message.unreadCounter" 
-             *ngIf="showUnreadCounter(message)"
-          />
-        </div>
-        <span class="truncate flex flex-row gap-2" *ngIf="message.contentType === 'text'">
-          {{message.value}}
-          <span *ngIf="message.sender.usersRef === user._id">
-            <i *ngIf="!message?.sent && !message?.failed" class="pi pi-check text-[1rem]"></i>
-            <i *ngIf="message?.sent && !message.read" class="pi pi-check text-red-900 text-[1rem]"></i>
-            <i *ngIf="message?.sent && message?.read" class="pi pi-check text-yellow-900 text-[1rem]"></i> 
-            <i *ngIf="message?.sent && message?.read" class="pi pi-check text-blue-900 text-[1rem]"></i> 
-          </span>
-        </span>
-        <div class="flex flex-row items-center gap-2" *ngIf="message.contentType === 'image'">
-          <i class="pi pi-image text-[1rem]"></i>
-          <span class="text-slate-600">photo</span>
-        </div>
-      </div>
-    </div>
-    </a>
-  </ng-template>
-
-  <ng-template #error>
-    <div class="flex-1 flex flex-col items-center justify-center">
-      <span>reload aja dulu...</span>
-    </div>
-  </ng-template>
-
-  <ng-template #success>
-    @for(x of fetchState().result; track x){
-      <ng-container
-        *ngTemplateOutlet="message; context:{
-          profile:x|profile:user._id:'home',
-          message:x
-        }"
-      />
-    }
-  </ng-template>
-  
-  @if(fetchState().isError){
-    <ng-container 
-      *ngTemplateOutlet="error"
-    />
-  }
-  @else{
-    <ng-container 
-      *ngTemplateOutlet="success"
-    />
-  }
-
--->

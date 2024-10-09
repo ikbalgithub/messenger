@@ -7,7 +7,7 @@ import { HttpHeaders } from '@angular/common/http';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AvatarModule } from 'primeng/avatar';
 import { BadgeModule } from 'primeng/badge';
-import { add, failedSend, replace, resend, resetCounter, successSend, updated } from '../../ngrx/actions/history.actions';
+import { add } from '../../ngrx/actions/history.actions';
 import { GraphqlModule } from '../../graphql/graphql.module';
 import { GraphqlService } from '../../graphql/graphql.service';
 import { FETCH_HISTORY } from '../../graphql/graphql.queries';
@@ -87,21 +87,27 @@ export class HistoryComponent implements OnInit {
     }
     else{
       var result = data.map(m => {
-        var filter = m.sender._id === this.user._id
-        var modified = {status:{sent:true},detail:m}
+        var c = m.sender._id === this.user._id
 
-        return filter ? modified : {
-          status:{},
-          detail:m
+        var modified1 = {
+          ...m,
+          older:true,
+          received:false
         }
+
+        var modified2 = {
+          ...m,
+          older:true,
+          received:true
+        }
+        
+        return c ? modified2 : modified2
       })
 
-      if(this.history().length < 1){
-        this.storeService.store.dispatch(
-          add({v:result})
-        )
-      }
-
+      this.storeService.store.dispatch(
+        add({v:result})
+      )
+      
       this.complete(
         false,''
       )
@@ -148,10 +154,16 @@ export class HistoryComponent implements OnInit {
       'bypass-tunnel-reminder':'true',
       'credentials':'include'
     })
-    this.runFetch(
-      query,
-      headers
-    )
+    if(this.history().length < 1){
+      this.runFetch(
+        query,
+        headers
+      )
+    }
+    else{
+      this.process = true
+      this.process = false
+    }
   }
   
   ngOnInit(){
@@ -163,8 +175,7 @@ export class HistoryComponent implements OnInit {
   }
 }
 
-type History = Model.Message<Sender,Accept>[]
-type Status  = {sent?:boolean,failed?:boolean}
+export type History = (Model.Message<Sender,Accept> & Status)[]
 type Sender = {_id:string,profile:Omit<Model.Profile,"usersRef"|"_id">}
 type Accept = {_id:string,profile:Omit<Model.Profile,"usersRef"|"_id">}
-export type Modified  = {status:Status,detail:History[number]}
+type Status  = {older:boolean,received:boolean,sent?:boolean,failed?:boolean}

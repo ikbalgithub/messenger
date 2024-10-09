@@ -28,7 +28,7 @@ const storage = {
   history:historyReducer
 }
 
-const uri = 'https://localhost.loca.lt/graphql'
+const uri = 'https://nest.loca.lt/graphql'
 
 const graphQLConfig = {
   deps:[HttpLink],
